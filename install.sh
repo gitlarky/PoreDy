@@ -1,0 +1,1 @@
+c++ -o T204_Better -std=c++11 -I /usr/home/zhenyuxu/PhD/Runs/Eigen324 -O3 T204_Better.cpp BoundaryCondition.cpp CalculateEvaporation.cpp CalculateFlowfield.cpp CalculationDomain.cpp FiniteVolume.cpp Geometry.cpp Meshing.cpp Physics.cpp PoreThroat.cpp Testing.cpp
