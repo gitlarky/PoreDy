@@ -4,9 +4,9 @@ project (PoreDy)
 
 # Version number ----------------------------------------------------------------------------------
 
-set (PoreDy_VERSION_MAJOR 0)
+set (PoreDy_VERSION_MAJOR 1)
 
-set (PoreDy_VERSION_MINOR 6)
+set (PoreDy_VERSION_MINOR 0)
 
 # CMake version minimum required ------------------------------------------------------------------
 
