@@ -1,0 +1,26 @@
+Physics: isothermalEvaporation     1 0     Air 0.02897 1.204 1.813e-5     Water 0.01802 998.2 1.002e-3 2.119e-5 0 7.266e-2 0.9592     0 5e-6     0.02 0.0010595e1 0 0.67144      SIMPLE Hybrid Implicit NonOperatorSplitting Hybrid Implicit 5000 4000 1e-3 1e-4 1e-4     3     2000 600    0 0 0     1 3 0
+Point: 0        0
+Point: 0.24     0
+Point: 0.245    0
+Point: 0.8      0
+Point: 0        0.24
+Point: 0.24     0.24
+Point: 0.245    0.24
+Point: 0.8      0.24
+Point: 0        0.32
+Point: 0.24     0.32
+Point: 0.245    0.32
+Point: 0.8      0.32
+Point: 0        0.56
+Point: 0.24     0.56
+Point: 0.245    0.56
+Point: 0.8      0.56
+Block:  5  4  0  1 flowfield   NoBC       NoBC       Inlet 0.0010595e1 0 0 0.67144 Wall 0 0   27  27     1.4 1.4 1   1
+Block:  6  5  1  2 flowfield   NoBC       PorousOpen NoBC                         Wall 0 0   23  27     1   1.4 1   1
+Block:  7  6  2  3 flowfield   Outlet     NoBC       NoBC                         Wall 0 0   30  27     1   1.4 1.4 1
+Block:  9  8  4  5 flowfield   PorousOpen NoBC       Inlet 0.0010595e1 0 0 0.67144 NoBC       27  323     1.4 1   1   1
+Block: 10  9  5  6 porousmedia PorousOpen PorousOpen PorousOpen                   PorousOpen singlePorosity 10 160     1 0     5e-4 0     4 5e-6 0.1     5     0 2
+Block: 11 10  6  7 flowfield   Outlet     NoBC       PorousOpen                   NoBC       30  323     1   1   1.4 1
+Block: 13 12  8  9 flowfield   NoBC       Wall 0 0   Inlet 0.0010595e1 0 0 0.67144 NoBC       27  27     1.4 1   1   1.4
+Block: 14 13  9 10 flowfield   NoBC       Wall 0 0   NoBC                         PorousOpen 23  27     1   1   1   1.4
+Block: 15 14 10 11 flowfield   Outlet     Wall 0 0   NoBC                         NoBC       30  27     1   1   1.4 1.4
