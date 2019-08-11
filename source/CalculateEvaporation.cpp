@@ -19,7 +19,6 @@ vector<size_t>  examinedP;
 vector<size_t> unknownP;
 
 bool initializeNetwork();
-bool initializeExternalField();
 bool checkNetwork();
 bool clusterLabeling();
 bool calculateConcentration(const bool & cal, const bool & update);
@@ -34,7 +33,6 @@ bool plotSaturation(ofstream & ofs);
 bool plotAllField(ofstream & ofs);
 bool plotExtField(ofstream & ofs);
 
-bool solveExternalConcentrationEq(const size_t & cli, const std::bitset<EqComponent> & ec, const size_t & clo, const size_t & rp);
 bool solveConcentrationEq(const size_t & cli, const std::bitset<EqComponent> & ec, const size_t & clo);
 bool solvePhiEq(const size_t & cli, const std::bitset<EqComponent> & ec, const size_t & clo);
 
@@ -67,8 +65,6 @@ bool calculateEvaporation() {
 	ofstream ofeh(seh.c_str());
 
 	initializeNetwork();
-	initializeExternalField();
-
     do {
     	clusterLabeling();
 //    	checkNetwork();
@@ -298,119 +294,7 @@ bool initializeNetwork() {
 
 	return true;
 }
-/*----------------------------------------------------------------------------------------------------
 
-                                        Function initializeExternalField
-
-----------------------------------------------------------------------------------------------------*/
-bool initializeExternalField() {
-	cout<<"Start initialize the external field..."<<endl;
-
-	size_t iterCount(0);
-	numeric_t avgCError(0), avgCErr0r(0);
-	size_t cLevelIn(0), cLevelOut(1);//C values, which to use and where to put the results
-	bool FilmEffectTurnedOff(false);
-	size_t RelatedPores(0);
-
-	cout<<"Prepare boundary conditions......"<<endl;
-	if(cd_c::phy.filmEffect) {
-		cd_c::phy.filmEffect=false;
-		FilmEffectTurnedOff=true;
-	}
-
-	for(size_t i=0; i<P.size(); ++i) {
-		if(P[i].CI.size()) {
-			RelatedPores++;
-		}
-	}
-	cout<<"RelatedPores"<<RelatedPores<<endl;
-
-	cout<<"Start iterating......"<<endl;
-	do {
-		solveExternalConcentrationEq(cLevelIn, 3,cLevelOut, RelatedPores);//3=1+2: Calculate Convection+Diffusion
-
-		avgCError=0;
-		for(size_t i=0; i<C.size(); ++i) {
-			avgCError+=abs(C[i].p[cLevelOut]-C[i].p[cLevelIn]);
-		}
-		avgCError/=C.size();
-
-		if(iterCount==0) {
-			avgCErr0r=avgCError;
-			cout<<"Initial Average Concentration Error="<<avgCErr0r<<endl;
-		}
-		avgCError/=avgCErr0r;
-
-		if(iterCount%10==0) cout<<"Iteration #"<<"\tavgCError"<<endl;
-		iterCount++;
-		cout<<iterCount<<"\t"<<avgCError<<endl;
-
-		for(size_t i=0; i<C.size(); ++i) {
-			C[i].p[cLevelIn]=C[i].p[cLevelOut];
-		}
-
-	} while(avgCError>cd_c::phy.FlowCriteria && iterCount<cd_c::phy.FlowfieldMaxStep);
-	if(avgCError<=cd_c::phy.FlowCriteria) {
-		cout<<"External Concentration Field Calculation Converged!"<<endl;
-	} else {
-		cout<<"External Concentration Calculation Reached Max Steps!"<<endl;
-	}
-
-	cout<<"Restore boundary conditions......"<<endl;
-	if(FilmEffectTurnedOff) cd_c::phy.filmEffect=true;
-
-	return true;
-}
-
-//---------------------------------------------------------------------------------------------------------------
-bool solveExternalConcentrationEq(const size_t & cli, const std::bitset<EqComponent> & ec, const size_t & clo, const size_t & rp) {
-	if(cell_c::phy.ImplicitEvaporation) {
-		size_t newcp(C.size()+rp);
-		VectorXd X(newcp), B(newcp);
-
-		int EachSize(0);
-		if(cd_c::phy.SchemeEvaporation==Hybrid     ) EachSize=5;
-		if(cd_c::phy.SchemeEvaporation==HayaseQUICK) EachSize=9;
-		typedef Eigen::Triplet<double> Tri;
-		vector<Tri> TripletList;
-		TripletList.reserve(newcp*EachSize);
-
-		size_t rpcount(0);
-
-		for(size_t i=0; i<C.size(); ++i) {
-			C[i].calculateCoefficient(0, cli, ec);//uvli=0
-			B(i)=C[i].b;
-			TripletList.push_back(Tri(i, i, C[i].aP));
-			for(size_t j=0; j<C[i].CI.size(); ++j) {
-				TripletList.push_back(Tri(i, C[i].CI[j], C[i].a[j]));
-			}
-			for(size_t j=0; j<C[i].PI.size(); ++j) {
-				TripletList.push_back(Tri(i, rpcount   +C.size(), C[i].ap[j]));
-				rpcount++;
-			}
-		}
-
-		for(size_t i=0, I=C.size(); i<rp      ; ++i, ++I) {
-
-			B(I)=cd_c::phy.SaturatedConcentration;
-			TripletList.push_back(Tri(I, I, 1.));
-		}
-		SparseMatrix<double, Eigen::ColMajor> A(newcp, newcp);
-		A.setFromTriplets(TripletList.begin(), TripletList.end());
-		SparseLU<SparseMatrix<double>> solver;
-		solver.analyzePattern(A);
-		solver.factorize(A);
-		X= solver.solve(B);
-
-		for(size_t i=0; i<C.size(); ++i) {
-			C[i].p[clo]=X[i];
-		}
-	} else {
-
-	}
-
-	return true;
-}
 /*----------------------------------------------------------------------------------------------------
 
                                         Function checkNetwork

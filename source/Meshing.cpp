@@ -103,7 +103,6 @@ bool meshing() {
 			WholeAvgThroatLength+=Bk[i].avgTLength;
 		}
 		cd_c::dz=WholeAvgThroatLength/porousBlocks;
-//		cd_c::dz=WholeAvgThroatLength/porousBlocks*2;
 
 //		numeric_t WholeAvgThroatDiameter(0);
 //		size_t WholeDifferentThroat(0);
@@ -1606,9 +1605,7 @@ bool meshing() {
 					C[Bk[k].CI[i-1][j]        ].PI.push_back(  Ln[Bk[k].LnI[d]].B  [j].PI    );
 					P[Ln[Bk[k].LnI[d]].B[j].PI].CI.push_back(U[Ln[Bk[k].LnI[d]].SCI[j]].FI[w]);
 //					P[Ln[Bk[k].LnI[d]].B[j].PI].CD.push_back(C[U[Ln[Bk[k].LnI[d]].SCI[j]].FI[w]].d[e]);
-//					P[Ln[Bk[k].LnI[d]].B[j].PI].CD.push_back(C[U[Ln[Bk[k].LnI[d]].SCI[j]].FI[w]].d[e]*2);
 					P[Ln[Bk[k].LnI[d]].B[j].PI].CD.push_back(cd_c::dz/8);
-//					P[Ln[Bk[k].LnI[d]].B[j].PI].CD.push_back(cd_c::dz/16);
 					if(Bk[Bk[k].NI[d]].NinDiameter!=0 && Bk[Bk[k].NI[d]].NinLength==0) {
 						P[Ln[Bk[k].LnI[d]].B[j].PI].CA.push_back(T[P[Ln[Bk[k].LnI[d]].B[j].PI].TI[0]].A/Bk[Bk[k].NI[d]].NinDiameter);
 					} else if(Bk[Bk[k].NI[d]].NinDiameter==0 && Bk[Bk[k].NI[d]].NinLength!=0) {
@@ -1634,9 +1631,7 @@ bool meshing() {
 					C[Bk[k].CI[i][j]          ].PI.push_back(  Ln[Bk[k].LnI[d]].B  [j].PI    );
 					P[Ln[Bk[k].LnI[d]].B[j].PI].CI.push_back(U[Ln[Bk[k].LnI[d]].SCI[j]].FI[e]);
 //					P[Ln[Bk[k].LnI[d]].B[j].PI].CD.push_back(C[U[Ln[Bk[k].LnI[d]].SCI[j]].FI[e]].d[w]);
-//					P[Ln[Bk[k].LnI[d]].B[j].PI].CD.push_back(C[U[Ln[Bk[k].LnI[d]].SCI[j]].FI[e]].d[w]*2);
 					P[Ln[Bk[k].LnI[d]].B[j].PI].CD.push_back(cd_c::dz/8);
-//					P[Ln[Bk[k].LnI[d]].B[j].PI].CD.push_back(cd_c::dz/16);
 					if(Bk[Bk[k].NI[d]].NinDiameter!=0 && Bk[Bk[k].NI[d]].NinLength==0) {
 						P[Ln[Bk[k].LnI[d]].B[j].PI].CA.push_back(T[P[Ln[Bk[k].LnI[d]].B[j].PI].TI[0]].A/Bk[Bk[k].NI[d]].NinDiameter);
 					} else if(Bk[Bk[k].NI[d]].NinDiameter==0 && Bk[Bk[k].NI[d]].NinLength!=0) {
@@ -1662,9 +1657,7 @@ bool meshing() {
 					C[Bk[k].CI[i][j-1]        ].PI.push_back(  Ln[Bk[k].LnI[d]].B  [i].PI    );
 					P[Ln[Bk[k].LnI[d]].B[i].PI].CI.push_back(V[Ln[Bk[k].LnI[d]].SCI[i]].FI[s]);
 //					P[Ln[Bk[k].LnI[d]].B[i].PI].CD.push_back(C[V[Ln[Bk[k].LnI[d]].SCI[i]].FI[s]].d[n]);
-//					P[Ln[Bk[k].LnI[d]].B[i].PI].CD.push_back(C[V[Ln[Bk[k].LnI[d]].SCI[i]].FI[s]].d[n]*2);
 					P[Ln[Bk[k].LnI[d]].B[i].PI].CD.push_back(cd_c::dz/8);
-//					P[Ln[Bk[k].LnI[d]].B[i].PI].CD.push_back(cd_c::dz/16);
 					if(Bk[Bk[k].NI[d]].NinDiameter!=0 && Bk[Bk[k].NI[d]].NinLength==0) {
 						P[Ln[Bk[k].LnI[d]].B[i].PI].CA.push_back(T[P[Ln[Bk[k].LnI[d]].B[i].PI].TI[0]].A/Bk[Bk[k].NI[d]].NinDiameter);
 					} else if(Bk[Bk[k].NI[d]].NinDiameter==0 && Bk[Bk[k].NI[d]].NinLength!=0) {
@@ -1690,9 +1683,7 @@ bool meshing() {
 					C[Bk[k].CI[i][j]          ].PI.push_back(  Ln[Bk[k].LnI[d]].B  [i].PI    );
 					P[Ln[Bk[k].LnI[d]].B[i].PI].CI.push_back(V[Ln[Bk[k].LnI[d]].SCI[i]].FI[n]);
 //					P[Ln[Bk[k].LnI[d]].B[i].PI].CD.push_back(C[V[Ln[Bk[k].LnI[d]].SCI[i]].FI[n]].d[s]);
-//					P[Ln[Bk[k].LnI[d]].B[i].PI].CD.push_back(C[V[Ln[Bk[k].LnI[d]].SCI[i]].FI[n]].d[s]*2);
 					P[Ln[Bk[k].LnI[d]].B[i].PI].CD.push_back(cd_c::dz/8);
-//					P[Ln[Bk[k].LnI[d]].B[i].PI].CD.push_back(cd_c::dz/16);
 					if(Bk[Bk[k].NI[d]].NinDiameter!=0 && Bk[Bk[k].NI[d]].NinLength==0) {
 						P[Ln[Bk[k].LnI[d]].B[i].PI].CA.push_back(T[P[Ln[Bk[k].LnI[d]].B[i].PI].TI[0]].A/Bk[Bk[k].NI[d]].NinDiameter);
 					} else if(Bk[Bk[k].NI[d]].NinDiameter==0 && Bk[Bk[k].NI[d]].NinLength!=0) {

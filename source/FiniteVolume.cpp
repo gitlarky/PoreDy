@@ -533,8 +533,7 @@ void cCell_c::calculateCoefficient(const size_t & uvli, const size_t & cli, cons
 	resetCoefficient();
 
 	if(EB.T==NoBC) {
-//		if(cd_c::EDT!=0) {
-		if(true) {
+		if(cd_c::EDT!=0) {
 			calculateFD(uvli);
 
 			if(ecbs[convectionItem]) {
