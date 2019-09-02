@@ -1,0 +1,3 @@
+/home/xu/gitlarky/PoreDy/build/CMakeFiles/rebuild_cache.dir
+/home/xu/gitlarky/PoreDy/build/CMakeFiles/PoreDy.dir
+/home/xu/gitlarky/PoreDy/build/CMakeFiles/edit_cache.dir
