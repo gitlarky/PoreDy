@@ -8,4 +8,4 @@ points=1000000000
 
 # Make sure last argument matches total number of jobs in array!
 
-./T203_Stable < input-$SLURM_ARRAY_TASK_ID > Case$SLURM_ARRAY_TASK_ID.TD
+./PoreDy < input-$SLURM_ARRAY_TASK_ID > Case$SLURM_ARRAY_TASK_ID.TD
