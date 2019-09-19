@@ -2,7 +2,7 @@
 
 PoreDy: A Porous Media Simulation & Design Software Coupling Pore-Level Dynamics with Overflow Fluid Mechanics
 
-# Introduction ====================================================================================
+# Introduction
 
 PoreDy is a CFD tool originally designed for simulating porous media drying problems, which is capable of couple solving the pore-scale porous media interior and lab-scale outside field simultaneously. Right now, PoreDy is mainly used in 3 categories of problems: general fluid flow, porous media interior transportation, and transportation between porous media and external flow field. The results can be output in VTK format, which can be post-processed with ParaView.
 
@@ -20,7 +20,7 @@ Major Features for Lab-Scale Outside Field:
 	Optional Algorithm for Evaporation Solver: Convection-Diffusion Operator Splitting, Diffusion-Convection Operator Splitting, Non Operator Splitting
 	Optional Schemes: Hybrid, Hayase QUICK
 
-# Release Note ====================================================================================
+# Release Note
 
 Release 1.0 (Dec 24th, 2015)
 	Couple solver is optimized
