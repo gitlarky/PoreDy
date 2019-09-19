@@ -23,6 +23,8 @@ PoreDy is written in C++ with OOP technology, which make it easier to extend to 
 
 ## Release Note
 
+#### Release 1.4 (Oct 15th, 2019)
+- [ ] The feature of deep learning designing added
 #### Release 1.2 (Sep 22th, 2019)
 - [ ] The feature of assigning individual pore and throat specifically added
 - [ ] The feature of deep learning prediction added
