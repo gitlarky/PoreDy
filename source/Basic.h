@@ -57,7 +57,7 @@ enum       eqItem_e {convectionItem, diffussionItem, deltaPAVT, RorD};
 
 enum     cellType_e {fCell, uvCell, uCell, vCell, cCell, pore};
 
-enum porosityType_e {singlePorosity, downupPorosity, leftrightPorosity};
+enum porosityType_e {singlePorosity, downupPorosity, leftrightPorosity, assignPorosity};
 enum     position_e {liquidSide, inside, meniscus, open};
 enum     vpStatus_e {none, unknown, found, out, saturated};
 //enum      sStatus_e {empty, film, partial, liquid};

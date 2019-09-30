@@ -456,7 +456,11 @@ bool meshing() {
 							size_t theSeed=(T.size()+1)*Bk[k].RandomRealization;//**********Here make different realization different**********
 							numeric_t theDiameter(0);
 							size_t thePolyN(0);
-							if((i>=Bk[k].Nx/2 && Bk[k].porosityType==leftrightPorosity) ||
+							if(Bk[k].porosityType==assignPorosity) {
+								theDiameter=
+								
+								thePolyN=
+							} else if((i>=Bk[k].Nx/2 && Bk[k].porosityType==leftrightPorosity) ||
 							   (j>=Bk[k].Ny/2 && Bk[k].porosityType==downupPorosity)) {
 								theDiameter=Bk[k].avgTDiameter[1]*(1+Bk[k].TDVarianceRate[1]*(RandomPercentage(theSeed)-0.5));
 

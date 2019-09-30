@@ -598,6 +598,7 @@ istream & operator >> (istream & is, block_c & b) {
 		if(pt=="singlePorosity") b.porosityType=singlePorosity;
 		else if(pt=="downupPorosity") b.porosityType=downupPorosity;
 		else if(pt=="leftrightPorosity") b.porosityType=leftrightPorosity;
+		else if(pt=="assignPorosity") b.porosityType=assignPorosity;
 		is>>b.Nx>>b.Ny;
 		is>>b.PPConnectionRate>>b.PPCrossRate;
 
@@ -638,6 +639,8 @@ ostream & operator << (ostream & os, const block_c & b) {
 			os<<"leftrightPorosity"<<endl;
 		} else if(b.porosityType==downupPorosity) {
 			os<<"updownPorosity"<<endl;
+		} else if(b.porosityType==assignPorosity) {
+			os<<"assignPorosity"<<endl;
 		}
 		os<<";\tTPPConnectionRate: "<<b.PPConnectionRate
 		  <<";\tTPPCrossRate: "     <<b.PPCrossRate<<endl;
