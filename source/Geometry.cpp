@@ -599,19 +599,25 @@ istream & operator >> (istream & is, block_c & b) {
 		else if(pt=="downupPorosity") b.porosityType=downupPorosity;
 		else if(pt=="leftrightPorosity") b.porosityType=leftrightPorosity;
 		else if(pt=="assignPorosity") b.porosityType=assignPorosity;
-		is>>b.Nx>>b.Ny;
-		is>>b.PPConnectionRate>>b.PPCrossRate;
 
-		is>>b.avgTLength>>b.TLVarianceRate;
-		size_t theSize(b.porosityType==singlePorosity?1:2);
-		b.PolyN.resize(theSize, 0); b.avgTDiameter.resize(theSize, 0); b.TDVarianceRate.resize(theSize, 0);
-		b.TDisplayScale.resize(theSize, 1);
-		for(size_t i=0; i<theSize; ++i) {
-			is>>b.PolyN[i]>>b.avgTDiameter[i]>>b.TDVarianceRate[i];
+		if(b.porosityType==assignPorosity) {
+
+		} else {
+			is>>b.Nx>>b.Ny;
+			is>>b.PPConnectionRate>>b.PPCrossRate;
+
+			is>>b.avgTLength>>b.TLVarianceRate;
+			size_t theSize(b.porosityType==singlePorosity?1:2);
+			b.PolyN.resize(theSize, 0); b.avgTDiameter.resize(theSize, 0); b.TDVarianceRate.resize(theSize, 0);
+			b.TDisplayScale.resize(theSize, 1);
+			for(size_t i=0; i<theSize; ++i) {
+				is>>b.PolyN[i]>>b.avgTDiameter[i]>>b.TDVarianceRate[i];
+			}
+			is>>b.RandomRealization;
+
+			is>>b.NinDiameter>>b.NinLength;
 		}
-		is>>b.RandomRealization;
 
-		is>>b.NinDiameter>>b.NinLength;
 	}
 
 	return is;
