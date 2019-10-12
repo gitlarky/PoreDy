@@ -6,7 +6,7 @@ project (PoreDy)
 
 set (PoreDy_VERSION_MAJOR 1)
 
-set (PoreDy_VERSION_MINOR 0)
+set (PoreDy_VERSION_MINOR 2)
 
 # CMake version minimum required ------------------------------------------------------------------
 
@@ -14,9 +14,9 @@ cmake_minimum_required (VERSION 2.6)
 
 # Include Eigen -----------------------------------------------------------------------------------
 
-find_package(Eigen3 REQUIRED NO_MODULE)
-
 include_directories(./include/Eigen)
+
+# find_package(Eigen3 REQUIRED NO_MODULE)
 
 # Add source --------------------------------------------------------------------------------------
 

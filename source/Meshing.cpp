@@ -371,138 +371,193 @@ bool meshing() {
 		}
 
 		cout<<"Connecting selected Pores to form Throats......"<<endl;
-		for(size_t i=0; i<=Bk[k].Nx; ++i) {
-			for(size_t j=0; j<=Bk[k].Ny; ++j) {
-				if(Bk[k].PI[i][j]==voidIndex) {
-					//do nothing
-				} else {
-					vector<bool> Connected(sideNumber, false);
+		if(Bk[k].porosityType==assignPorosity) {
+			cout<<"Creating Throats by directly assigning parameters for each Throat......"<<endl;
 
-					//if the pore is on the edge, then there is no need to connect out, so fake connected
-					if(i==0       ) Connected[w]=true;
-					if(i==Bk[k].Nx) Connected[e]=true;
-					if(j==0       ) Connected[s]=true;
-					if(j==Bk[k].Ny) Connected[n]=true;
+			cout<<"Reading Throats Assignment......"<<endl;
+			string assignThroatsName=caseName+".at";
+			ifstream atIFS(assignThroatsName.c_str());
+			
+			numeric_t totTLength(0), totWeighted(0); //total throat length, and total weighted throat length
 
-					//if the pore is on the porousOpen border, then it is only allowed in one direction
-					vector<bool> ConnectAllowed(nodeNumber, true);
-					if(i==Bk[k].Nx && Bk[k].B[e].T==PorousOpen) {
-						ConnectAllowed[n ]=false;
-						ConnectAllowed[s ]=false;
-						ConnectAllowed[nw]=false;
-						ConnectAllowed[sw]=false;
-						Connected[n]=true;
-						Connected[s]=true;
-					}
-					if(i==0        && Bk[k].B[w].T==PorousOpen) {
-						ConnectAllowed[n ]=false;
-						ConnectAllowed[s ]=false;
-						ConnectAllowed[ne]=false;
-						ConnectAllowed[se]=false;
-						Connected[n]=true;
-						Connected[s]=true;
-					}
-					if(j==Bk[k].Ny && Bk[k].B[n].T==PorousOpen) {
-						ConnectAllowed[e ]=false;
-						ConnectAllowed[w ]=false;
-						ConnectAllowed[se]=false;
-						ConnectAllowed[sw]=false;
-						Connected[e]=true;
-						Connected[w]=true;
-					}
-					if(j==0        && Bk[k].B[s].T==PorousOpen) {
-						ConnectAllowed[e ]=false;
-						ConnectAllowed[w ]=false;
-						ConnectAllowed[ne]=false;
-						ConnectAllowed[nw]=false;
-						Connected[e]=true;
-						Connected[w]=true;
-					}
-					if((i==(Bk[k].Nx-1)) && Bk[k].B[e].T==PorousOpen) {
-						ConnectAllowed[ne]=false;
-						ConnectAllowed[se]=false;
-					}
-					if(i==1              && Bk[k].B[w].T==PorousOpen) {
-						ConnectAllowed[nw]=false;
-						ConnectAllowed[sw]=false;
-					}
-					if((j==(Bk[k].Ny-1)) && Bk[k].B[n].T==PorousOpen) {
-						ConnectAllowed[ne]=false;
-						ConnectAllowed[nw]=false;
-					}
-					if(j==1              && Bk[k].B[s].T==PorousOpen) {
-						ConnectAllowed[se]=false;
-						ConnectAllowed[sw]=false;
-					}
+			for(size_t indexj=0; indexj<=Bk[k].Ny*2; ++indexj) {
+				for(size_t indexi=0; indexi<=Bk[k].Nx*2; ++indexi) {
+					numeric_t theDiameter(0); //Throat Diameter: Positive: Normal or J+I+; Negative: J+I-
+					size_t thePolyN(0); //0: Circle; 3: Traiangle; 4: Square; 5: Pentagon; 6: Hexagon
+					index_t i(0), I(0), j(0), J(0);
 
-					for(index_t d=se; d>=e; --d) {
-	//					cout<<"Throat:"<<d<<"\t"<<T.size()<<endl;
-						bool NoCross(true);
-						index_t I(i), J(j);
-						switch (d) {
-						case ne: I=i+1; J=j+1; break;
-						case nw: I=i-1; J=j+1; break;
-						case sw: I=i-1; J=j-1; break;
-						case se: I=i+1; J=j-1; break;
-						case  e: I=i+1; J=j  ; break;
-						case  n: I=i  ; J=j+1; break;
-						case  w: I=i-1; J=j  ; break;
-						case  s: I=i  ; J=j-1; break;
+					atIFS>>theDiameter>>thePolyN;
+
+					if((indexi%2==0 && indexj%2==0) || theDiameter==0) {
+						//Do nothing, no throats
+					} else {
+						if(indexi%2==0) {
+							i=indexi/2    ;
+							I=i           ;
+							j=(indexj-1)/2;
+							J=(indexj+1)/2;
+						} else if(indexj%2==0) {
+							i=(indexi-1)/2;
+							I=(indexi+1)/2;
+							j=indexj/2    ;
+							J=j           ;
+						} else {
+							if(theDiameter>0) {
+								i=(indexi-1)/2;
+								I=(indexi+1)/2;
+								j=(indexj-1)/2;
+								J=(indexj+1)/2;
+							} else {
+								i=(indexi+1)/2;
+								I=(indexi-1)/2;
+								j=(indexj-1)/2;
+								J=(indexj+1)/2;
+							}
 						}
 
-	                    if(I>=0 && I<=Bk[k].Nx && J>=0 && J<=Bk[k].Ny && ConnectAllowed[d] && !ThroatExist(throat_c(Bk[k].PI[i][j], Bk[k].PI[I][J])) ) {//be sure no duplicates
-							if(ThroatExist(throat_c(Bk[k].PI[i][J], Bk[k].PI[I][j]))) NoCross=false;
+						Bk[k].TI.push_back(T.size());
+						P[Bk[k].PI[i][j]].TI.push_back(T.size());
+						P[Bk[k].PI[I][J]].TI.push_back(T.size());
+						T.push_back(throat_c(Bk[k].PI[i][j], Bk[k].PI[I][J], thePolyN, abs(theDiameter)/2, P[Bk[k].PI[i][j]].distance(P[Bk[k].PI[I][J]])));
 
-							size_t theSeed=(T.size()+1)*Bk[k].RandomRealization;//**********Here make different realization different**********
-							numeric_t theDiameter(0);
-							size_t thePolyN(0);
-							if(Bk[k].porosityType==assignPorosity) {
-								theDiameter=
-								
-								thePolyN=
-							} else if((i>=Bk[k].Nx/2 && Bk[k].porosityType==leftrightPorosity) ||
-							   (j>=Bk[k].Ny/2 && Bk[k].porosityType==downupPorosity)) {
-								theDiameter=Bk[k].avgTDiameter[1]*(1+Bk[k].TDVarianceRate[1]*(RandomPercentage(theSeed)-0.5));
-
-								thePolyN=Bk[k].PolyN[1];
-							} else {
-								theDiameter=Bk[k].avgTDiameter[0]*(1+Bk[k].TDVarianceRate[0]*(RandomPercentage(theSeed)-0.5));
-
-								thePolyN=Bk[k].PolyN[0];
-							}
-
-							switch (d) {
-							case ne: case nw: case sw: case se:
-								if(RandomPercentage(theSeed)<=Bk[k].PPCrossRate && NoCross) {
-									Bk[k].TI.push_back(T.size());
-									P[Bk[k].PI[i][j]].TI.push_back(T.size());
-									P[Bk[k].PI[I][J]].TI.push_back(T.size());
-									T.push_back(throat_c(Bk[k].PI[i][j], Bk[k].PI[I][J], thePolyN, theDiameter/2, P[Bk[k].PI[i][j]].distance(P[Bk[k].PI[I][J]])));
-									Connected[d-4]=true;
-									if(d==se) {
-										Connected[e]=true;
-									} else {
-										Connected[d-3]=true;
-									}
-								}
-								break;
-							case e: case n: case w: case s:
-								if(Connected[d]==false || RandomPercentage(theSeed)<=Bk[k].PPConnectionRate) {
-									Bk[k].TI.push_back(T.size());
-									P[Bk[k].PI[i][j]].TI.push_back(T.size());
-									P[Bk[k].PI[I][J]].TI.push_back(T.size());
-									T.push_back(throat_c(Bk[k].PI[i][j], Bk[k].PI[I][J], thePolyN, theDiameter/2, P[Bk[k].PI[i][j]].distance(P[Bk[k].PI[I][J]])));
-									Connected[d]=true;
-								}
-								break;
-							}
-						} else {
-							//if that pore doesn't exist or connection not allowed, then cannot create any throat
-						}//finish if
-					}//finish d
+						totTLength +=T[T.size()-1].L;
+						totWeighted+=T[T.size()-1].L*theDiameter*theDiameter;
+					}
 				}
-			}// finish j
-		}//finish i
+			}
+
+			Bk[k].avgTDiameter[0]=sqrt(totWeighted/totTLength);
+		} else {
+			cout<<"Creating Throats by connecting Pores using designated statistical parameters......"<<endl;
+
+			for(size_t i=0; i<=Bk[k].Nx; ++i) {
+				for(size_t j=0; j<=Bk[k].Ny; ++j) {
+					if(Bk[k].PI[i][j]==voidIndex) {
+						//do nothing
+					} else {
+						vector<bool> Connected(sideNumber, false);
+
+						//if the pore is on the edge, then there is no need to connect out, so fake connected
+						if(i==0       ) Connected[w]=true;
+						if(i==Bk[k].Nx) Connected[e]=true;
+						if(j==0       ) Connected[s]=true;
+						if(j==Bk[k].Ny) Connected[n]=true;
+
+						//if the pore is on the porousOpen border, then it is only allowed in one direction
+						vector<bool> ConnectAllowed(nodeNumber, true);
+						if(i==Bk[k].Nx && Bk[k].B[e].T==PorousOpen) {
+							ConnectAllowed[n ]=false;
+							ConnectAllowed[s ]=false;
+							ConnectAllowed[nw]=false;
+							ConnectAllowed[sw]=false;
+							Connected[n]=true;
+							Connected[s]=true;
+						}
+						if(i==0        && Bk[k].B[w].T==PorousOpen) {
+							ConnectAllowed[n ]=false;
+							ConnectAllowed[s ]=false;
+							ConnectAllowed[ne]=false;
+							ConnectAllowed[se]=false;
+							Connected[n]=true;
+							Connected[s]=true;
+						}
+						if(j==Bk[k].Ny && Bk[k].B[n].T==PorousOpen) {
+							ConnectAllowed[e ]=false;
+							ConnectAllowed[w ]=false;
+							ConnectAllowed[se]=false;
+							ConnectAllowed[sw]=false;
+							Connected[e]=true;
+							Connected[w]=true;
+						}
+						if(j==0        && Bk[k].B[s].T==PorousOpen) {
+							ConnectAllowed[e ]=false;
+							ConnectAllowed[w ]=false;
+							ConnectAllowed[ne]=false;
+							ConnectAllowed[nw]=false;
+							Connected[e]=true;
+							Connected[w]=true;
+						}
+						if((i==(Bk[k].Nx-1)) && Bk[k].B[e].T==PorousOpen) {
+							ConnectAllowed[ne]=false;
+							ConnectAllowed[se]=false;
+						}
+						if(i==1              && Bk[k].B[w].T==PorousOpen) {
+							ConnectAllowed[nw]=false;
+							ConnectAllowed[sw]=false;
+						}
+						if((j==(Bk[k].Ny-1)) && Bk[k].B[n].T==PorousOpen) {
+							ConnectAllowed[ne]=false;
+							ConnectAllowed[nw]=false;
+						}
+						if(j==1              && Bk[k].B[s].T==PorousOpen) {
+							ConnectAllowed[se]=false;
+							ConnectAllowed[sw]=false;
+						}
+
+						for(index_t d=se; d>=e; --d) {
+		//					cout<<"Throat:"<<d<<"\t"<<T.size()<<endl;
+							bool NoCross(true);
+							index_t I(i), J(j);
+							switch (d) {
+							case ne: I=i+1; J=j+1; break;
+							case nw: I=i-1; J=j+1; break;
+							case sw: I=i-1; J=j-1; break;
+							case se: I=i+1; J=j-1; break;
+							case  e: I=i+1; J=j  ; break;
+							case  n: I=i  ; J=j+1; break;
+							case  w: I=i-1; J=j  ; break;
+							case  s: I=i  ; J=j-1; break;
+							}
+
+		                    if(I>=0 && I<=Bk[k].Nx && J>=0 && J<=Bk[k].Ny && ConnectAllowed[d] && !ThroatExist(throat_c(Bk[k].PI[i][j], Bk[k].PI[I][J])) ) {//be sure no duplicates
+								if(ThroatExist(throat_c(Bk[k].PI[i][J], Bk[k].PI[I][j]))) NoCross=false;
+
+								size_t theSeed=(T.size()+1)*Bk[k].RandomRealization;//**********Here make different realization different**********
+								numeric_t theDiameter(0);
+								size_t thePolyN(0);
+								if((i>=Bk[k].Nx/2 && Bk[k].porosityType==leftrightPorosity) ||
+								   (j>=Bk[k].Ny/2 && Bk[k].porosityType==downupPorosity)) {
+									theDiameter=Bk[k].avgTDiameter[1]*(1+Bk[k].TDVarianceRate[1]*(RandomPercentage(theSeed)-0.5));
+									thePolyN=Bk[k].PolyN[1];
+								} else {
+									theDiameter=Bk[k].avgTDiameter[0]*(1+Bk[k].TDVarianceRate[0]*(RandomPercentage(theSeed)-0.5));
+									thePolyN=Bk[k].PolyN[0];
+								}
+
+								switch (d) {
+								case ne: case nw: case sw: case se:
+									if(RandomPercentage(theSeed)<=Bk[k].PPCrossRate && NoCross) {
+										Bk[k].TI.push_back(T.size());
+										P[Bk[k].PI[i][j]].TI.push_back(T.size());
+										P[Bk[k].PI[I][J]].TI.push_back(T.size());
+										T.push_back(throat_c(Bk[k].PI[i][j], Bk[k].PI[I][J], thePolyN, theDiameter/2, P[Bk[k].PI[i][j]].distance(P[Bk[k].PI[I][J]])));
+										Connected[d-4]=true;
+										if(d==se) {
+											Connected[e]=true;
+										} else {
+											Connected[d-3]=true;
+										}
+									}
+									break;
+								case e: case n: case w: case s:
+									if(Connected[d]==false || RandomPercentage(theSeed)<=Bk[k].PPConnectionRate) {
+										Bk[k].TI.push_back(T.size());
+										P[Bk[k].PI[i][j]].TI.push_back(T.size());
+										P[Bk[k].PI[I][J]].TI.push_back(T.size());
+										T.push_back(throat_c(Bk[k].PI[i][j], Bk[k].PI[I][J], thePolyN, theDiameter/2, P[Bk[k].PI[i][j]].distance(P[Bk[k].PI[I][J]])));
+										Connected[d]=true;
+									}
+									break;
+								}
+							} else {
+								//if that pore doesn't exist or connection not allowed, then cannot create any throat
+							}//finish if
+						}//finish d
+					}
+				}// finish j
+			}//finish i
+		}//finish if, if not assignPorosity
+
 
 		oflg<<"Throats added in Block #"<<k<<":"<<endl;
 		for(size_t ti=0; ti!=Bk[k].TI.size(); ++ti) {

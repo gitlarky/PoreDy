@@ -1,0 +1,1 @@
+c++ -o PoreDy -std=c++11 -I ../include/Eigen -O3 PoreDy.cpp BoundaryCondition.cpp CalculateEvaporation.cpp CalculateFlowfield.cpp CalculationDomain.cpp FiniteVolume.cpp Geometry.cpp Meshing.cpp Physics.cpp PoreThroat.cpp Testing.cpp
