@@ -16,7 +16,7 @@ cmake_minimum_required (VERSION 2.6)
 
 include_directories(./include/Eigen)
 
-# find_package(Eigen3 REQUIRED NO_MODULE)
+find_package(Eigen3 REQUIRED NO_MODULE)
 
 # Add source --------------------------------------------------------------------------------------
 
