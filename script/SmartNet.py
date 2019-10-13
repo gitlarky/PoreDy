@@ -19,15 +19,35 @@
 # import os
 #==================================================================================================
 #============================ Create Pore-Network Samples =========================================
-def WriteAT(File='', Matrix):
+def Name(Prefix='Sample', Digit=6, Index=0):
+	si=str(Index)
+	if Digit<len(si):
+		Digit=len(si)
+	for i in range(Digit-len(si)):
+		si='0'+si
+	return Prefix+si
+
+def WriteAT(Case='', Matrix=[]):
+	RN=len(Matrix   )
+	CN=len(Matrix[0])
+	with open(Case, 'w') as wat:
+		for i in range(RN):
+			for j in range(CN):
+				wat.write('% 9.6e\t% 9d\t' % (Matrix[i][j][0], Matrix[i][j][1]))
+			wat.write('\n')
+	wat.close()
 	return True
+
+def PixelAT(Case='', Matrix=[]):
+	return True
+
 def CreatePoreNetworkSamples(Nx=0, Ny=0, Folder=''):
 	# Determine What and How Many is each type of Throat ------------------------------------------
 	TP         =[1e-6, 2e-6, 3e-6, 4e-6, 5e-6, 6e-6, 7e-6, 8e-6, 9e-6] # Parameter is Diameter here
 	TypeN      =len(TP)
 	print('Throat Parameter   :', TP)
-	ShoTNum    =Ny*(Nx+1)+Ny*Nx
-	LonTNum    =Ny*Nx
+	ShoTNum    =Ny*(Nx+1)+Ny*Nx # Short(Straight) Throats
+	LonTNum    =Ny*Nx           # Long (Inclined) Throats
 	TotTNum    =ShoTNum+LonTNum
 	AvgShoTNum =ShoTNum//TypeN
 	RemShoTNum =ShoTNum%TypeN
@@ -41,8 +61,16 @@ def CreatePoreNetworkSamples(Nx=0, Ny=0, Folder=''):
 	print('Long  Throat Number:', LTN)
 	TN         =[STN[i]+LTN[i] for i in range(TypeN)]
 	print('Total Throat Number:', TN)
-
 	SampleIndex=0
+
+	Matrix=[[[0, 0] for i in range(Nx*2+1)] for j in range(Ny*2)]
+
+	WriteAT(Name(Index=SampleIndex), Matrix)
+	SampleIndex+=1
+
+	# Create some Pore-Network with only short Throats
+
+	# Create some Pore-Network with both short and long Throats
 
 	# for offset in range(Nx)
 
@@ -106,6 +134,7 @@ def CreatePoreNetworkSamples(Nx=0, Ny=0, Folder=''):
 
 
 #============================ Main Program ========================================================
-CreatePoreNetworkSamples(Nx=20, Ny=20, Folder='/home/xu/work/PoreNetwork2020Samples')
-CreatePoreNetworkSamples(Nx=10, Ny=10, Folder='/home/xu/work/PoreNetwork1010Samples')
-CreatePoreNetworkSamples(Nx=40, Ny=40, Folder='/home/xu/work/PoreNetwork4040Samples')
+# CreatePoreNetworkSamples(Nx=20, Ny=20, Folder='/home/xu/work/PoreNetwork2020Samples')
+# CreatePoreNetworkSamples(Nx=10, Ny=10, Folder='/home/xu/work/PoreNetwork1010Samples')
+# CreatePoreNetworkSamples(Nx=40, Ny=40, Folder='/home/xu/work/PoreNetwork4040Samples')
+CreatePoreNetworkSamples(Nx=3, Ny=3, Folder='/home/xu/work/PoreNetwork1010Samples')
