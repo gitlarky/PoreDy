@@ -44,6 +44,7 @@ def PixelAT(Case='', Matrix=[]):
 def CreatePoreNetworkSamples(Nx=0, Ny=0, Folder=''):
 	# Determine What and How Many is each type of Throat ------------------------------------------
 	TP         =[1e-6, 2e-6, 3e-6, 4e-6, 5e-6, 6e-6, 7e-6, 8e-6, 9e-6] # Parameter is Diameter here
+	PolyN      =5
 	TypeN      =len(TP)
 	print('Throat Parameter   :', TP)
 	ShoTNum    =Ny*(Nx+1)+Ny*Nx # Short(Straight) Throats
@@ -63,12 +64,25 @@ def CreatePoreNetworkSamples(Nx=0, Ny=0, Folder=''):
 	print('Total Throat Number:', TN)
 	SampleIndex=0
 
-	Matrix=[[[0, 0] for i in range(Nx*2+1)] for j in range(Ny*2)]
-
-	WriteAT(Name(Index=SampleIndex), Matrix)
-	SampleIndex+=1
-
 	# Create some Pore-Network with only short Throats
+	for offsetx in range(TypeN-1):
+		for offsety in range(TypeN-1):
+			for deltax in range(1,TypeN-1):
+				for deltay in range(1,TypeN-1):
+					Matrix=[[[0, 0] for i in range(Nx*2+1)] for j in range(Ny*2)]
+					for j in range(1, 2*Ny, 2):
+						addy+=deltay
+						for i in range(0, 2*Nx+1, 2):
+							Matrix[i][j][0]=TP(offsety+addy)
+							Matrix[i][j][1]=PolyN
+
+					for j in range(0, 2*Ny, 2):
+						for i in range(1, 2*Nx, 2):
+							Matrix[i][j][0]=TP(offsety+addy)
+							Matrix[i][j][1]=PolyN
+					
+					WriteAT(Name(Prefix='Row', Index=SampleIndex), Matrix)
+					SampleIndex+=1
 
 	# Create some Pore-Network with both short and long Throats
 
@@ -134,7 +148,7 @@ def CreatePoreNetworkSamples(Nx=0, Ny=0, Folder=''):
 
 
 #============================ Main Program ========================================================
-# CreatePoreNetworkSamples(Nx=20, Ny=20, Folder='/home/xu/work/PoreNetwork2020Samples')
+CreatePoreNetworkSamples(Nx=20, Ny=20, Folder='/home/xu/work/PoreNetwork2020Samples')
 # CreatePoreNetworkSamples(Nx=10, Ny=10, Folder='/home/xu/work/PoreNetwork1010Samples')
 # CreatePoreNetworkSamples(Nx=40, Ny=40, Folder='/home/xu/work/PoreNetwork4040Samples')
-CreatePoreNetworkSamples(Nx=3, Ny=3, Folder='/home/xu/work/PoreNetwork1010Samples')
+# CreatePoreNetworkSamples(Nx=3, Ny=3, Folder='/home/xu/work/PoreNetwork1010Samples')
