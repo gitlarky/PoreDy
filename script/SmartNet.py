@@ -87,8 +87,8 @@ class ThroatPool(object):
 #============================ Class PoreNetwork ===================================================
 class PoreNetwork(object):
 	# Initialize ----------------------------------------------------------------------------------
-	def __init__(self, Name='PoreNetwork', Nx=20, Ny=20, Open=['N'], Cross=False,
-		         DiameterChoice=[], ShapeChoice=[]):
+	def __init__(self, Name='PoreNetwork', Nx=20, Ny=20, Open=['N'], 
+		         DiameterChoice=[], ShapeChoice=[], Cross=False):
 		self.Name          =Name
 		self.Nx            =Nx
 		self.Ny            =Ny
@@ -100,6 +100,18 @@ class PoreNetwork(object):
 		self.Matrix        =[[[0, 0] for i in range(self.Mx)] for j in range(self.My)]
 		self.StraightTCount=0
 		self.CrossTCount   =0
+		self.VTColCount    =self.Ny
+		self.VTRowCount    =self.Nx+1
+		self.HTColCount    =self.Ny+1
+		self.HTRowCount    =self.Nx
+		if 'W' in self.Open:
+			self.VTRowCount-=1
+		if 'E' in self.Open:
+			self.VTRowCount-=1
+		if 'S' in self.Open:
+			self.HTColCount-=1
+		if 'N' in self.Open:
+			self.HTColCount-=1
 		for i in range(self.Mx):
 			for j in range(self.My):
 				if  (i%2==0 and j%2==0):
@@ -130,7 +142,7 @@ class PoreNetwork(object):
 		return True
 
 	# Assign Throat at a certain coordinate in Matrix ---------------------------------------------
-	def AssignT(self, i, j, T): # ----i, j is the index in Matrix, i in range [0, Mx), j in range [0, My)
+	def AssignT(self, i, j, T): # i, j is the index in Matrix, i in range [0, Mx), j in range [0, My)
 		self.Matrix[i][j][0]=T[0]
 		self.Matrix[i][j][1]=T[1]
 		return True
@@ -200,25 +212,27 @@ class PoreNetwork(object):
 	# Write PoreNetwork Data File -----------------------------------------------------------------
 	def Write(self):
 		with open(self.Name+'.at', 'w') as wat:
-			for i in range(self.Mx):
-				for j in range(self.My):
+			for j in range(self.My-1, -1, -1):
+				for i in range(self.Mx):
 					wat.write('% 9.6e\t% 9d\t' % (self.Matrix[i][j][0], self.Matrix[i][j][1]))
 				wat.write('\n')
 		wat.close()
 		return True
 
 	# Write PoreNetwork Pixel File ----------------------------------------------------------------
-	def Pixel(self, ):
+	def Pixel(self):
 		return True
 
 #============================ Create Pore-Network Samples =========================================
 def CreatePoreNetworkSamples(Nx=20, Ny=20, Folder=''):
 	# Determine What and How Many is each type of Throat ------------------------------------------
 	TypeN      =len(TD)
-	FixVStrNet =PoreNetwork(Nx=Nx, Ny=Ny, DiameterChoice=TD, ShapeChoice=[5])
-	FixVCrsNet =PoreNetwork(Nx=Nx, Ny=Ny, Cross=True, DiameterChoice=TD, ShapeChoice=[5])
-	RandStrNet =PoreNetwork(Nx=Nx, Ny=Ny, DiameterChoice=TD, ShapeChoice=[5])
-	RandCrsNet =PoreNetwork(Nx=Nx, Ny=Ny, Cross=True, DiameterChoice=TD, ShapeChoice=[5])
+	FixVStrNet =PoreNetwork(Name='FixVStrNet', Nx=Nx, Ny=Ny, DiameterChoice=TD, ShapeChoice=[5])
+	FixVCrsNet =PoreNetwork(Name='FixVCrsNet', Nx=Nx, Ny=Ny, DiameterChoice=TD, ShapeChoice=[5], 
+		                    Cross=True)
+	RandStrNet =PoreNetwork(Name='RandStrNet', Nx=Nx, Ny=Ny, DiameterChoice=TD, ShapeChoice=[5])
+	RandCrsNet =PoreNetwork(Name='RandCrsNet', Nx=Nx, Ny=Ny, DiameterChoice=TD, ShapeChoice=[5], 
+		                    Cross=True)
 	StrTN      =FixVCrsNet.StraightTCount
 	CrsTN      =FixVCrsNet.CrossTCount
 	TotTN      =StrTN+CrsTN
@@ -235,62 +249,22 @@ def CreatePoreNetworkSamples(Nx=20, Ny=20, Folder=''):
 	CTN[4]    +=RemCrsTN
 	FixVStrPool=ThroatPool(Name='FixVStrPool', ThroatType=[[td, 5] for td in TD], ThroatCount=STN)
 	FixVCrsPool=ThroatPool(Name='FixVCrsPool', ThroatType=[[td, 5] for td in TD], ThroatCount=CTN)
-	print('Straight Throat Pool: ', FixVStrPool.ThroatType, FixVStrPool.ThroatCount)
-	print('Cross    Throat Pool: ', FixVCrsPool.ThroatType, FixVCrsPool.ThroatCount)
+	print('Straight Throat Pool:\n\t', FixVStrPool.ThroatType, '\n\t', FixVStrPool.ThroatCount)
+	print('Cross    Throat Pool:\n\t', FixVCrsPool.ThroatType, '\n\t', FixVCrsPool.ThroatCount)
+	FixVStrNet.Write()
+	FixVCrsNet.Write()
+	RandStrNet.Write()
+	RandCrsNet.Write()
+	
+	SampleIndex=0
+	# Create some Pore-Network with only random straight Throats ----------------------------------
+	for vrs in range
+	
+
+	
 
 
-	# print('Short Throat Number:', STN)
 
-	# print('Long  Throat Number:', LTN)
-
-	# print('Total Throat Number:', TN)
-	# SampleIndex=0
-	# VRowSBunch =AvgShoTNum//(Nx+1)
-	# VColSBunch =AvgShoTNum//Ny
-	# HRowSBunch =AvgShoTNum//Nx
-	# HColSBunch =AvgShoTNum//Ny
-	# RowLBunch  =AvgLonTNum//Nx
-	# ColLBunch  =AvgLonTNum//Ny
-
-	# # Create some Pore-Network with only short Throats
-	# for offsetx in range(TypeN-1):
-	# 	for offsety in range(TypeN-1):
-	# 		for deltax in range(TypeN-1):
-	# 			for deltay in range(TypeN-1):
-	# 				for vr in range(VRowSBunch+1):
-	# 					for vc in range(VColSBunch+1):
-	# 						for hr in range(HRowSBunch+1):
-	# 							for hc in range(HColSBunch+1):
-	# 								Matrix=[[[0, 0] for i in range(Nx*2+1)] for j in range(Ny*2)]
-	# 								for j in range(1, 2*Ny, 2):
-	# 									addy+=deltay
-	# 									for i in range(0, 2*Nx+1, 2):
-	# 										Matrix[i][j][0]=TP(offsety+addy)
-	# 										Matrix[i][j][1]=PolyN
-
-	# 								for j in range(0, 2*Ny, 2):
-	# 									for i in range(1, 2*Nx, 2):
-	# 										Matrix[i][j][0]=TP(offsety+addy)
-	# 										Matrix[i][j][1]=PolyN
-									
-	# 								WriteAT(Name(Prefix='Row', Index=SampleIndex), Matrix)
-	# 								SampleIndex+=1
-
-	# Create some Pore-Network with both short and long Throats
-
-	# for offset in range(Nx)
-
-	# with open(CaseName+'.at', 'w') as at:
-	# 	for j in range(Ny*2):
-	# 		for i in range(Nx*2):
-	# 			if(i%2==0 and j%2==0):
-	# 				Diameter=0
-	# 				PolyN   =0
-	# 			elif():
-	# 				Diameter=
-	# 				PolyN   =5
-	# 			at.write('% 9d\t% 9.6e\t' % (Diameter, PolyN))
-	# 		at.write('\n')
 
 
 
@@ -340,7 +314,7 @@ def CreatePoreNetworkSamples(Nx=20, Ny=20, Folder=''):
 
 
 #============================ Main Program ========================================================
-CreatePoreNetworkSamples(Nx=20, Ny=20, Folder='/home/xu/work/PoreNetwork2020Samples')
+# CreatePoreNetworkSamples(Nx=20, Ny=20, Folder='/home/xu/work/PoreNetwork2020Samples')
 # CreatePoreNetworkSamples(Nx=10, Ny=10, Folder='/home/xu/work/PoreNetwork1010Samples')
 # CreatePoreNetworkSamples(Nx=40, Ny=40, Folder='/home/xu/work/PoreNetwork4040Samples')
-# CreatePoreNetworkSamples(Nx=3, Ny=3, Folder='/home/xu/work/PoreNetwork1010Samples')
+CreatePoreNetworkSamples(Nx=3, Ny=3, Folder='/home/xu/work/PoreNetwork1010Samples')
