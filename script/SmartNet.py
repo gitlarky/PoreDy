@@ -53,11 +53,11 @@ class ThroatPool(object):
 			self.TotalCount+=count
 
 	# Throat type count ---------------------------------------------------------------------------
-	def TypeCount():
+	def TypeCount(self):
 		return len(self.ThroatType)
 
 	# Find out the index of existing throat
-	def ExistType():
+	def ExistType(self):
 		EI=[]
 		for i in range(len(self.ThroatCount)):
 			if self.ThroatCount[i]>0:
@@ -65,17 +65,24 @@ class ThroatPool(object):
 		return EI
 
 	# Total throat available ----------------------------------------------------------------------
-	def ExistCount():
+	def ExistCount(self):
 		count=0
-		for type in ExistType():
+		for type in self.ExistType():
 			count+=self.ThroatCount[type]
 		return count
 
 	# Use one from ThroatPool ---------------------------------------------------------------------
-	def Use(Index, Count=1):
+	def Use(self, Index, Count=1):
 		if (self.ThroatCount[Index]-Count)>=0:
 			self.ThroatCount[Index]-=Count
 		return self.ThroatType[Index]
+
+	# Use one randomly from ThroatPool ------------------------------------------------------------
+	def UseRandom(self):
+		Index=self.ExistType()[random.randint(0, len(self.ExistType()))]
+		self.ThroatCount[Index]-=1
+		return self.ThroatType[Index]
+
 
 #============================ Class PoreNetwork ===================================================
 class PoreNetwork(object):
@@ -90,82 +97,108 @@ class PoreNetwork(object):
 		self.ShapeChoice   =ShapeChoice
 		self.Mx            =2*self.Nx+1
 		self.My            =2*self.Ny+1
-		self.Matrix        =[[[0, 0] for i in range(Mx)] for j in range(My)]
+		self.Matrix        =[[[0, 0] for i in range(self.Mx)] for j in range(self.My)]
 		self.StraightTCount=0
 		self.CrossTCount   =0
 		for i in range(self.Mx):
 			for j in range(self.My):
 				if  (i%2==0 and j%2==0):
+					continue
 				elif('W' in self.Open and i==0):
+					continue
 				elif('E' in self.Open and i==(self.Mx-1)):
+					continue
 				elif('S' in self.Open and j==0):
+					continue
 				elif('N' in self.Open and j==(self.My-1)):
+					continue
 				elif(Cross==False and (i%2!=0 and j%2!=0)):
+					continue
 				elif(Cross==True and (i%2!=0 and j%2!=0)):
-					Matrix[i][j][0]=Pick(self.DiameterChoice, -1)*Pick([1, -1], -1)
-					Matrix[i][j][1]=Pick(self.ShapeChoice, -1)
+					self.Matrix[i][j][0]=Pick(self.DiameterChoice, -1)*Pick([1, -1], -1)
+					self.Matrix[i][j][1]=Pick(self.ShapeChoice, -1)
 					self.CrossTCount+=1
 				else:
-					Matrix[i][j][0]=Pick(self.DiameterChoice, -1)
-					Matrix[i][j][1]=Pick(self.ShapeChoice, -1)
+					self.Matrix[i][j][0]=Pick(self.DiameterChoice, -1)
+					self.Matrix[i][j][1]=Pick(self.ShapeChoice, -1)
 					self.StraightTCount+=1
 		self.TotalTCount   =self.StraightTCount+self.CrossTCount
 
+	# set a new name ------------------------------------------------------------------------------
+	def SetName(self, Name):
+		self.Name=Name
+		return True
+
 	# Assign Throat at a certain coordinate in Matrix ---------------------------------------------
-	def AssignT(i, j, T): # ----i, j is the index in Matrix, i in range [0, Mx), j in range [0, My)
+	def AssignT(self, i, j, T): # ----i, j is the index in Matrix, i in range [0, Mx), j in range [0, My)
 		self.Matrix[i][j][0]=T[0]
 		self.Matrix[i][j][1]=T[1]
 		return True
 
 	# Assign Vertical Throat at a certain position ------------------------------------------------
-	def AssignVT(I, J, T): # I, J is the index in Nx and Ny, I in range [0, Nx], J in range [1, Ny]
-		AssignT(2*I, 2*J-1, T)
+	def AssignVT(self, I, J, T): # I, J is the index in Nx and Ny, I in range [0, Nx], J in range [1, Ny]
+		self.AssignT(2*I, 2*J-1, T)
 		return True
 	# Assign Horizontal Throat at a certain position ----------------------------------------------
-	def AssignHT(I, J, T): # I, J is the index in Nx and Ny, I in range [1, Nx], J in range [0, Ny]
-		AssignT(2*I-1, 2*J, T)
+	def AssignHT(self, I, J, T): # I, J is the index in Nx and Ny, I in range [1, Nx], J in range [0, Ny]
+		self.AssignT(2*I-1, 2*J, T)
 		return True
 	# Assign Cross Throat at a certain position ---------------------------------------------------
-	def AssignCT(I, J, T): # I, J is the index in Nx and Ny, I in range [1, Nx], J in range [1, Ny]
-		AssignT(2*I-1, 2*J-1, T)
+	def AssignCT(self, I, J, T): # I, J is the index in Nx and Ny, I in range [1, Nx], J in range [1, Ny]
+		self.AssignT(2*I-1, 2*J-1, T)
 		return True
 
 	# Assign Vertical Throat Box at a certain position --------------------------------------------
-	def AssignVTBox(T, IRange=[0, self.Nx], JRange=[1, self.Ny], Band=0):
+	def AssignVTBox(self, T, IRange=[], JRange=[], Band=0):
+		if IRange==[]: 
+			IRange=[0, self.Nx]
+		if JRange==[]:
+			JRange=[1, self.Ny]
 		Count=0
 		for I in range(IRange[0], IRange[1], 1):
 			for J in range(JRange[0], JRange[1], 1):
 				if (Band>0 and I>=IRange[0]+Band and I<=IRange[1]-Band 
 					       and J>=JRange[0]+Band and J<=JRange[1]-Band):
+					continue
 				else:
-					AssignVT(I, J, T)
+					self.AssignVT(I, J, T)
 					Count+=1
 		return Count
 	# Assign Horizontal Throat Box at a certain position ------------------------------------------
-	def AssignHTBox(T, IRange=[1, self.Nx], JRange=[0, self.Ny], Band=0):
+	def AssignHTBox(self, T, IRange=[], JRange=[], Band=0):
+		if IRange==[]:
+			IRange=[1, self.Nx]
+		if JRange==[]:
+			JRange=[0, self.Ny]
 		Count=0
 		for I in range(IRange[0], IRange[1], 1):
 			for J in range(JRange[0], JRange[1], 1):
 				if (Band>0 and I>=IRange[0]+Band and I<=IRange[1]-Band 
 					       and J>=JRange[0]+Band and J<=JRange[1]-Band):
+					continue
 				else:
-					AssignHT(I, J, T)
+					self.AssignHT(I, J, T)
 					Count+=1
 		return Count
 	# Assign Cross Throat Box at a certain position -----------------------------------------------
-	def AssignCTBox(T, IRange=[1, self.Nx], JRange=[1, self.Ny], Band=0):
+	def AssignCTBox(self, T, IRange=[], JRange=[], Band=0):
+		if IRange==[]:
+			IRange=[1, self.Nx]
+		if JRange==[]:
+			JRange=[1, self.Ny]
 		Count=0
 		for I in range(IRange[0], IRange[1], 1):
 			for J in range(JRange[0], JRange[1], 1):
 				if (Band>0 and I>=IRange[0]+Band and I<=IRange[1]-Band 
 					       and J>=JRange[0]+Band and J<=JRange[1]-Band):
+					continue
 				else:
-					AssignCT(I, J, T)
+					self.AssignCT(I, J, T)
 					Count+=1
 		return Count
 
 	# Write PoreNetwork Data File -----------------------------------------------------------------
-	def Write():
+	def Write(self):
 		with open(self.Name+'.at', 'w') as wat:
 			for i in range(self.Mx):
 				for j in range(self.My):
@@ -175,73 +208,73 @@ class PoreNetwork(object):
 		return True
 
 	# Write PoreNetwork Pixel File ----------------------------------------------------------------
-	def Pixel():
+	def Pixel(self, ):
 		return True
 
 #============================ Create Pore-Network Samples =========================================
-def CreatePoreNetworkSamples(Nx=0, Ny=0, Folder=''):
+def CreatePoreNetworkSamples(Nx=20, Ny=20, Folder=''):
+	# Determine What and How Many is each type of Throat ------------------------------------------
 	TypeN      =len(TD)
 	FixVStrNet =PoreNetwork(Nx=Nx, Ny=Ny, DiameterChoice=TD, ShapeChoice=[5])
 	FixVCrsNet =PoreNetwork(Nx=Nx, Ny=Ny, Cross=True, DiameterChoice=TD, ShapeChoice=[5])
+	RandStrNet =PoreNetwork(Nx=Nx, Ny=Ny, DiameterChoice=TD, ShapeChoice=[5])
+	RandCrsNet =PoreNetwork(Nx=Nx, Ny=Ny, Cross=True, DiameterChoice=TD, ShapeChoice=[5])
 	StrTN      =FixVCrsNet.StraightTCount
 	CrsTN      =FixVCrsNet.CrossTCount
 	TotTN      =StrTN+CrsTN
-
+	print('Straight Throat Number:', StrTN)
+	print('Cross    Throat Number:', CrsTN)
+	print('Total    Throat Number:', TotTN)
 	AvgStrTN   =StrTN//TypeN
 	RemStrTN   =StrTN%TypeN
 	AvgCrsTN   =CrsTN//TypeN
 	RemCrsTN   =CrsTN%TypeN
-	STN        =[AvgStrTN for i in range(TyepN)]
+	STN        =[AvgStrTN for i in range(TypeN)]
 	STN[4]    +=RemStrTN
 	CTN        =[AvgCrsTN for i in range(TypeN)]
 	CTN[4]    +=RemCrsTN
-	FixVStrPool=ThroatPool(ThroatType=[[td, 5] for td in TD], )
-	FixVCrsPool=ThroatPool()
-	# Determine What and How Many is each type of Throat ------------------------------------------
+	FixVStrPool=ThroatPool(Name='FixVStrPool', ThroatType=[[td, 5] for td in TD], ThroatCount=STN)
+	FixVCrsPool=ThroatPool(Name='FixVCrsPool', ThroatType=[[td, 5] for td in TD], ThroatCount=CTN)
+	print('Straight Throat Pool: ', FixVStrPool.ThroatType, FixVStrPool.ThroatCount)
+	print('Cross    Throat Pool: ', FixVCrsPool.ThroatType, FixVCrsPool.ThroatCount)
 
-	AvgShoTNum =ShoTNum//TypeN
-	RemShoTNum =ShoTNum%TypeN
-	STN        =[AvgShoTNum    for i in range(TypeN)]
-	STN[4]    +=RemShoTNum
-	print('Short Throat Number:', STN)
-	AvgLonTNum =LonTNum//TypeN
-	RemLonTNum =LonTNum%TypeN
-	LTN        =[AvgLonTNum    for i in range(TypeN)]
-	LTN[4]    +=RemLonTNum
-	print('Long  Throat Number:', LTN)
-	TN         =[STN[i]+LTN[i] for i in range(TypeN)]
-	print('Total Throat Number:', TN)
-	SampleIndex=0
-	VRowSBunch =AvgShoTNum//(Nx+1)
-	VColSBunch =AvgShoTNum//Ny
-	HRowSBunch =AvgShoTNum//Nx
-	HColSBunch =AvgShoTNum//Ny
-	RowLBunch  =AvgLonTNum//Nx
-	ColLBunch  =AvgLonTNum//Ny
 
-	# Create some Pore-Network with only short Throats
-	for offsetx in range(TypeN-1):
-		for offsety in range(TypeN-1):
-			for deltax in range(TypeN-1):
-				for deltay in range(TypeN-1):
-					for vr in range(VRowSBunch+1):
-						for vc in range(VColSBunch+1):
-							for hr in range(HRowSBunch+1):
-								for hc in range(HColSBunch+1):
-									Matrix=[[[0, 0] for i in range(Nx*2+1)] for j in range(Ny*2)]
-									for j in range(1, 2*Ny, 2):
-										addy+=deltay
-										for i in range(0, 2*Nx+1, 2):
-											Matrix[i][j][0]=TP(offsety+addy)
-											Matrix[i][j][1]=PolyN
+	# print('Short Throat Number:', STN)
 
-									for j in range(0, 2*Ny, 2):
-										for i in range(1, 2*Nx, 2):
-											Matrix[i][j][0]=TP(offsety+addy)
-											Matrix[i][j][1]=PolyN
+	# print('Long  Throat Number:', LTN)
+
+	# print('Total Throat Number:', TN)
+	# SampleIndex=0
+	# VRowSBunch =AvgShoTNum//(Nx+1)
+	# VColSBunch =AvgShoTNum//Ny
+	# HRowSBunch =AvgShoTNum//Nx
+	# HColSBunch =AvgShoTNum//Ny
+	# RowLBunch  =AvgLonTNum//Nx
+	# ColLBunch  =AvgLonTNum//Ny
+
+	# # Create some Pore-Network with only short Throats
+	# for offsetx in range(TypeN-1):
+	# 	for offsety in range(TypeN-1):
+	# 		for deltax in range(TypeN-1):
+	# 			for deltay in range(TypeN-1):
+	# 				for vr in range(VRowSBunch+1):
+	# 					for vc in range(VColSBunch+1):
+	# 						for hr in range(HRowSBunch+1):
+	# 							for hc in range(HColSBunch+1):
+	# 								Matrix=[[[0, 0] for i in range(Nx*2+1)] for j in range(Ny*2)]
+	# 								for j in range(1, 2*Ny, 2):
+	# 									addy+=deltay
+	# 									for i in range(0, 2*Nx+1, 2):
+	# 										Matrix[i][j][0]=TP(offsety+addy)
+	# 										Matrix[i][j][1]=PolyN
+
+	# 								for j in range(0, 2*Ny, 2):
+	# 									for i in range(1, 2*Nx, 2):
+	# 										Matrix[i][j][0]=TP(offsety+addy)
+	# 										Matrix[i][j][1]=PolyN
 									
-									WriteAT(Name(Prefix='Row', Index=SampleIndex), Matrix)
-									SampleIndex+=1
+	# 								WriteAT(Name(Prefix='Row', Index=SampleIndex), Matrix)
+	# 								SampleIndex+=1
 
 	# Create some Pore-Network with both short and long Throats
 
