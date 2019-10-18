@@ -380,7 +380,7 @@ bool meshing() {
 			
 			numeric_t totTLength(0), totWeighted(0); //total throat length, and total weighted throat length
 
-			for(size_t indexj=0; indexj<=Bk[k].Ny*2; ++indexj) {
+			for(size_t indexj=Bk[k].Ny*2; indexj>=0; --indexj) {
 				for(size_t indexi=0; indexi<=Bk[k].Nx*2; ++indexi) {
 					numeric_t theDiameter(0); //Throat Diameter: Positive: Normal or J+I+; Negative: J+I-
 					size_t thePolyN(0); //0: Circle; 3: Traiangle; 4: Square; 5: Pentagon; 6: Hexagon
