@@ -211,6 +211,8 @@ class PoreNetwork(object):
 					Count+=1
 		return Count
 
+	# Slice a Region from original Matrix ---------------------------------------------------------
+	def AssignVTRegion(self, IRange=[], IJump=0, IRep=1)
 	# Write PoreNetwork Data File -----------------------------------------------------------------
 	def Write(self):
 		with open(self.Name+'.at', 'w') as wat:
