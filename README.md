@@ -23,11 +23,13 @@ PoreDy is written in C++ with OOP technology, which make it easier to extend to 
 
 ## Release Note
 
-#### Release 1.6 (Oct 31th, 2019)
+#### Release 1.8 (Oct 31th, 2019)
 - [ ] The feature of deep learning designing added
-#### Release 1.4 (Oct 27th, 2019)
+#### Release 1.6 (Oct 27th, 2019)
 - [ ] The feature of deep learning prediction added
-#### Release 1.2 (Oct 22th, 2019)
+#### Release 1.4 (Oct 23th, 2019)
+- [ ] The feature of generating some specific pore-network added
+#### Release 1.2 (Oct 21th, 2019)
 - [ ] The feature of assigning individual pore and throat specifically added
 #### Release 1.0 (Dec 24th, 2015)
 - [x] Couple solver is optimized
