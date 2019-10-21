@@ -9,10 +9,10 @@ PoreDy is a CFD tool originally designed for simulating porous media drying prob
 
 PoreDy is written in C++ with OOP technology, which make it easier to extend to include more physical models, algorithms and schemes. Free linear library Eigen is used for the linear equations solver, which keeps the cost low and is the only module currently capable of parallel computing.
 
-#### Major Features for Pore-Scale Porous Media Interior:
+#### Major Features for Pore-Scale Porous Media Interior Solver:
 1. Implicit time marching solver for 2D/3D pore network evaporation model with invasion-percolation rule and film effect considered
 2. Complex shape pore network is acceptable, 2D regular/irregular pore network generator is included
-#### Major Features for Lab-Scale Outside Field:
+#### Major Features for Lab-Scale Outside Field Solver:
 1. Implicit 2D/3D steady flow finite volume solver for Navier-Stokes equations
 2. Implicit 2D/3D time marching solver for convection and diffusion evaporation model
 3. Complex geometry is acceptable, 2D meshing tool is included
@@ -28,15 +28,16 @@ PoreDy is written in C++ with OOP technology, which make it easier to extend to 
 #### Release 1.6 (Oct 27th, 2019)
 - [ ] The feature of deep learning prediction added
 #### Release 1.4 (Oct 23th, 2019)
-- [ ] The feature of generating some specific pore-network added
+- [ ] The specific pore-network generator is added
 #### Release 1.2 (Oct 21th, 2019)
-- [ ] The feature of assigning individual pore and throat specifically added
+- [ ] The feature of receiving individually assigned throat pore-network added
 #### Release 1.0 (Dec 24th, 2015)
 - [x] Couple solver is optimized
+- [x] Cases setting files for testing Version 1.0 are added
 #### Release 0.8 (Aug 30th, 2015)
-- [x] The film effect is added and tested
 - [x] The software is tested on clusters of UWM HPC center
 #### Release 0.6 (May 4th, 2015)
+- [x] The film effect is added and tested
 - [x] The pore network interior solver and outside solver is coupled together
 - [x] All solvers are extended to 3D
 - [x] A 2D meshing tool is added and tested

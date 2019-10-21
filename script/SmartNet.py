@@ -100,18 +100,17 @@ class PoreNetwork(object):
 		self.Matrix        =[[[0, 0] for i in range(self.Mx)] for j in range(self.My)]
 		self.StraightTCount=0
 		self.CrossTCount   =0
-		self.VTColCount    =self.Ny
-		self.VTRowCount    =self.Nx+1
-		self.HTColCount    =self.Ny+1
-		self.HTRowCount    =self.Nx
+		self.VTRange       =[[0, self.Nx], [1, self.Ny]]
+		self.HTRange       =[[1, self.Nx], [0, self.Ny]]
+		self.CTRange       =[[1, self.Nx], [1, self.Ny]]
 		if 'W' in self.Open:
-			self.VTRowCount-=1
+			self.VTRange[0][0]=1
 		if 'E' in self.Open:
-			self.VTRowCount-=1
+			self.VTRange[0][1]=self.Nx-1
 		if 'S' in self.Open:
-			self.HTColCount-=1
+			self.HTRange[0][0]=1
 		if 'N' in self.Open:
-			self.HTColCount-=1
+			self.HTRange[0][1]=self.Ny-1
 		for i in range(self.Mx):
 			for j in range(self.My):
 				if  (i%2==0 and j%2==0):
@@ -161,48 +160,51 @@ class PoreNetwork(object):
 		return True
 
 	# Assign Vertical Throat Box at a certain position --------------------------------------------
-	def AssignVTBox(self, T, IRange=[], JRange=[], Band=0):
+	def AssignVTBox(self, T, IRange=[], JRange=[], IBand=0, JBand=0):
 		if IRange==[]: 
-			IRange=[0, self.Nx]
+			IRange=self.VTRange[0]
 		if JRange==[]:
-			JRange=[1, self.Ny]
+			JRange=self.VTRange[1]
 		Count=0
 		for I in range(IRange[0], IRange[1], 1):
 			for J in range(JRange[0], JRange[1], 1):
-				if (Band>0 and I>=IRange[0]+Band and I<=IRange[1]-Band 
-					       and J>=JRange[0]+Band and J<=JRange[1]-Band):
+				if (IBand>0 and JBand>0 
+					and I>=IRange[0]+IBand and I<=IRange[1]-IBand 
+					and J>=JRange[0]+JBand and J<=JRange[1]-JBand):
 					continue
 				else:
 					self.AssignVT(I, J, T)
 					Count+=1
 		return Count
 	# Assign Horizontal Throat Box at a certain position ------------------------------------------
-	def AssignHTBox(self, T, IRange=[], JRange=[], Band=0):
+	def AssignHTBox(self, T, IRange=[], JRange=[], IBand=0, JBand=0):
 		if IRange==[]:
-			IRange=[1, self.Nx]
+			IRange=self.HTRange[0]
 		if JRange==[]:
-			JRange=[0, self.Ny]
+			JRange=self.HTRange[1]
 		Count=0
 		for I in range(IRange[0], IRange[1], 1):
 			for J in range(JRange[0], JRange[1], 1):
-				if (Band>0 and I>=IRange[0]+Band and I<=IRange[1]-Band 
-					       and J>=JRange[0]+Band and J<=JRange[1]-Band):
+				if (IBand>0 and JBand>0 
+					and I>=IRange[0]+IBand and I<=IRange[1]-IBand 
+					and J>=JRange[0]+JBand and J<=JRange[1]-JBand):
 					continue
 				else:
 					self.AssignHT(I, J, T)
 					Count+=1
 		return Count
 	# Assign Cross Throat Box at a certain position -----------------------------------------------
-	def AssignCTBox(self, T, IRange=[], JRange=[], Band=0):
+	def AssignCTBox(self, T, IRange=[], JRange=[], IBand=0, JBand=0):
 		if IRange==[]:
-			IRange=[1, self.Nx]
+			IRange=self.CTRange[0]
 		if JRange==[]:
-			JRange=[1, self.Ny]
+			JRange=self.CTRange[1]
 		Count=0
 		for I in range(IRange[0], IRange[1], 1):
 			for J in range(JRange[0], JRange[1], 1):
-				if (Band>0 and I>=IRange[0]+Band and I<=IRange[1]-Band 
-					       and J>=JRange[0]+Band and J<=JRange[1]-Band):
+				if (IBand>0 and JBand>0 
+					and I>=IRange[0]+IBand and I<=IRange[1]-IBand 
+					and J>=JRange[0]+JBand and J<=JRange[1]-JBand):
 					continue
 				else:
 					self.AssignCT(I, J, T)
@@ -251,14 +253,24 @@ def CreatePoreNetworkSamples(Nx=20, Ny=20, Folder=''):
 	FixVCrsPool=ThroatPool(Name='FixVCrsPool', ThroatType=[[td, 5] for td in TD], ThroatCount=CTN)
 	print('Straight Throat Pool:\n\t', FixVStrPool.ThroatType, '\n\t', FixVStrPool.ThroatCount)
 	print('Cross    Throat Pool:\n\t', FixVCrsPool.ThroatType, '\n\t', FixVCrsPool.ThroatCount)
-	FixVStrNet.Write()
-	FixVCrsNet.Write()
-	RandStrNet.Write()
-	RandCrsNet.Write()
+	# FixVStrNet.Write()
+	# FixVCrsNet.Write()
+	# RandStrNet.Write()
+	# RandCrsNet.Write()
 	
 	SampleIndex=0
+
 	# Create some Pore-Network with only random straight Throats ----------------------------------
-	for vrs in range
+	for vir in range(Nx):
+		for vjr in range(1, Ny, 1):
+			for hir in range(1, Nx, 1):
+				for hjr in range(0, Ny-1, 1):
+
+	for vrs in range(TypeN):
+		for vcs in range(TypeN):
+			for hrs in range(TypeN):
+				for hcs in range(TypeN):
+
 	
 
 	
