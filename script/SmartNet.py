@@ -206,8 +206,41 @@ class PoreNetwork(object):
 		self.Matrix[i][j][1]=T[1]
 		return True
 
+	# Get Information for a certain coordinate in Matrix ------------------------------------------
+	def GetMC(self, i, j):
+		if i>=0 and i<self.Mx and j>=0 and j<self.My:
+			if(i%2==0 and j%2!=0):
+				I=i/2
+				J=(j+1)/2
+				if (I>=self.VTRange[0][0] and I<=self.VTRange[0][1] and 
+					J>=self.VTRange[1][0] and J<=self.VTRange[1][1]):
+					return ['VT'  , I, J, self.Matrix[i][j]]
+				else:
+					return ['VT'  , I, J]
+			elif(i%2!=0 and j%2==0):
+				I=(i+1)/2
+				J=j/2
+				if (I>=self.HTRange[0][0] and I<=self.HTRange[0][1] and 
+					J>=self.HTRange[1][0] and J<=self.HTRange[1][1]):
+					return ['HT'  , I, J, self.Matrix[i][j]]
+				else:
+					return ['HT'  , I, J]
+			elif(i%2!=0 and j%2!=0):
+				I=(i+1)/2
+				J=(j+1)/2
+				if self.Cross:
+					return ['CT'  , I, J, self.Matrix[i][j]]
+				else:
+					return ['CT'  , I, J]
+			elif(i%2==0 and j%2==0):
+				I=i/2
+				J=j/2
+				return ['Pore', I, J]
+		else:
+			return []
+
 	# Assign Throat at a certain position ---------------------------------------------------------
-	def AssignT(self, I, J, T, TP=''):
+	def AssignT(self, TP, I, J, T):
 		if TP=='VT':
 			self.AssignMC(2*I  , 2*J-1, T)
 		elif TP=='HT':
@@ -219,27 +252,43 @@ class PoreNetwork(object):
 		return True
 	
 	# Assign Throat at a certain position ---------------------------------------------------------
-	def GetT(self, I, J, TP=''):
-		if TP=='VT':
-			return self.Matrix[2*I  ][2*J-1]
+	def GetT(self, TP, I, J):
+		if TP=='Pore':
+			i=2*I
+			j=2*J
+			return [i, j]
+		elif TP=='VT':
+			i=2*I
+			j=2*J-1
+			if (I>=self.VTRange[0][0] and I<=self.VTRange[0][1] and 
+				J>=self.VTRange[1][0] and J<=self.VTRange[1][1]):
+				return [i, j, self.Matrix[i][j]]
+			else:
+				return [i, j]
 		elif TP=='HT':
-			return self.Matrix[2*I-1][2*J  ]
+			i=2*I-1
+			j=2*J
+			if (I>=self.HTRange[0][0] and I<=self.HTRange[0][1] and 
+				J>=self.HTRange[1][0] and J<=self.HTRange[1][1]):
+				return [i, j, self.Matrix[i][j]]
+			else:
+				return [i, j]
 		elif TP=='CT':
-			return self.Matrix[2*I-1][2*J-1]
+			i=2*I-1
+			j=2*J-1
+			return [i, j, self.Matrix[i][i]]
 		else:
-			return [0, 0]
+			return []
 	
 	# Return Throat at a certain position back to appropriate pool --------------------------------
-	def ReturnT(self, I, J, TP=''):
-		if TP=='VT':
-			self.StrTPool.Return(T=GetT(I, J, TP))
-			self.AssignMC(2*I  , 2*J-1, [0, 0])
-		elif TP=='HT':
-			self.StrTPool.Return(T=GetT(I, J, TP))
-			self.AssignMC(2*I-1, 2*J  , [0, 0])
-		elif TP=='CT':
-			self.CrsTPool.Return(T=GetT(I, J, TP))
-			self.AssignMC(2*I-1, 2*J-1, [0, 0])
+	def ReturnT(self, TP, I, J):
+		T=GetT(TP, I, J)
+		if ((TP=='VT' or TP=='HT') and len(T)==3):
+			self.StrTPool.Return(T=T[2])
+			self.AssignT(TP, I, J, [0, 0])
+		elif TP=='CT' and len(T)==3:
+			self.CrsTPool.Return(T=[abs(T[2][0]), T[2][1]])
+			self.AssignT(TP, I, J, [0, 0])
 		else:
 			return False
 		return True
@@ -249,15 +298,15 @@ class PoreNetwork(object):
 		if 'VT' in TPs:
 			for I in range(self.VTRange[0][0], self.VTRange[0][1]+1, 1):
 				for J in range(self.VTRange[1][0], self.VTRange[1][1]+1, 1):
-					ReturnT(I, J, 'VT')
+					self.ReturnT('VT', I, J)
 		if 'HT' in TPs:
 			for I in range(self.HTRange[0][0], self.HTRange[0][1]+1, 1):
 				for J in range(self.HTRange[1][0], self.HTRange[1][1]+1, 1):
-					ReturnT(I, J, 'HT')
+					self.ReturnT('HT', I, J)
 		if 'CT' in TPs:
 			for I in range(self.CTRange[0][0], self.CTRange[0][1]+1, 1):
 				for J in range(self.CTRange[1][0], self.CTRange[1][1]+1, 1):
-					ReturnT(I, J, 'CT')
+					self.ReturnT('CT', I, J)
 		return True
 
 	# Assign Throat Box at a certain position -----------------------------------------------------
@@ -282,7 +331,7 @@ class PoreNetwork(object):
 					and J>=JRange[0]+Band[1] and J<=JRange[1]-Band[1]):
 					continue
 				else:
-					self.AssignT(I, J, T, TP)
+					self.AssignT(TP, I, J, T)
 					Count+=1
 		return Count
 
