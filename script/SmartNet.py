@@ -311,26 +311,26 @@ class PoreNetwork(object):
 
 	# Assign Throat Box at a certain position -----------------------------------------------------
 	def AssignBox(self, TP='',
-		                IRange=[], JRange=[], Band=[],
-		                T=[], GradT=[], RepeatT=[], JumpT=[]):
+		                Start=[0, 0], End=[0, 0], Band=[0, 0],
+		                TIC=[], GradT=[0, 0], RepeatT=[1, 1], JumpT=[0, 0]):
 		if TP=='VT':
 			Range=self.VTRange
 		elif TP=='HT':
 			Range=self.HTRange
 		elif TP=='CT':
 			Range=self.CTRange
-		if IRange==[]: 
-			IRange=Range[0]
-		if JRange==[]:
-			JRange=Range[1]
+		if Start[0]==0 and End[0]==0:
+			Start[0]=Range[0][0]
+			End  [0]=Range[0][1]
+		if Start[1]==0 and End[1]==0:
+			Start[1]=Range[1][0]+1
+			End  [1]=Range[1][1]+1
 		Count=0
-		for I in range(IRange[0], IRange[1], 1):
-			for J in range(JRange[0], JRange[1], 1):
-				if (Band[0]>0 and Band[0]>0 
-					and I>=IRange[0]+Band[0] and I<=IRange[1]-Band[0] 
-					and J>=JRange[0]+Band[1] and J<=JRange[1]-Band[1]):
-					continue
-				else:
+		for I in range(Start[0], End[0], 1):
+			for J in range(Start[1], End[1], 1):
+				if not (Band[0]>0 and Band[0]>0 
+					and I>=Start[0]+Band[0] and I<=End[0]-1-Band[0] 
+					and J>=Start[1]+Band[1] and J<=End[1]-1-Band[1]):
 					self.AssignT(TP, I, J, T)
 					Count+=1
 		return Count
@@ -358,10 +358,10 @@ def CreatePoreNetworkSamples(Nx=20, Ny=20, Folder=''):
 
 	# print('Straight Throat Pool:\n\t', FixVStrPool.ThroatType, '\n\t', FixVStrPool.ThroatCount)
 	# print('Cross    Throat Pool:\n\t', FixVCrsPool.ThroatType, '\n\t', FixVCrsPool.ThroatCount)
-	# FixVStrNet.Write()
-	# FixVCrsNet.Write()
-	# RandStrNet.Write()
-	# RandCrsNet.Write()
+	FixVStrNet.Write()
+	FixVCrsNet.Write()
+	RandStrNet.Write()
+	RandCrsNet.Write()
 	
 	SampleIndex=0
 
