@@ -26,11 +26,11 @@ TT=[[td, 5] for td in TD] # ----------------------------------------------------
 
 #============================ Basic Functions =====================================================
 # Pick one from a list ----------------------------------------------------------------------------
-def Pick(List=[], Index=-1):
-	if Index<0 or Index>=len(List):
+def Pick(List=[], Index=0, Method='Random'):
+	if Method=='Random':
 		return List[random.randint(0, len(List)-1)]
-	else:
-		return List[Index]
+	elif Method=='Rotate':
+		return List[Index%len(List)]
 
 # Create file name --------------------------------------------------------------------------------
 def Name(Prefix='Sample', Digit=6, Index=0):
@@ -40,6 +40,7 @@ def Name(Prefix='Sample', Digit=6, Index=0):
 	for i in range(Digit-len(si)):
 		si='0'+si
 	return Prefix+si
+
 
 #============================ Class ThroatPool ====================================================
 class ThroatPool(object):
@@ -79,17 +80,20 @@ class ThroatPool(object):
 		return self.ThroatType[Index]
 
 	# Use one randomly from ThroatPool ------------------------------------------------------------
-	def UseRandom(self):
-		Index=Pick(List=self.ExistType())
+	def UseRandom(self, SubC=[]): # SubC: Sub Throat Index Collection
+		Choice=self.ExistType()
+		if SubC!=[]:
+			Choice=set(SubC) & set(Choice)
+		Index=Pick(List=Choice)
 		self.ThroatCount[Index]-=1
 		return self.ThroatType[Index]
 
 	# Return one back to ThroatPool ---------------------------------------------------------------
-	def Return(self, Index=-1, T=[], Count=1):
-		if (Index>=0 and Index<len(self.ThroatType) and T==[]):
-			self.ThroatCount[Index]+=Count
-			T=self.ThroatType[Index]
-		elif ((Index<0 or Index>=len(self.ThroatType)) and T!=[]):
+	def Return(self, Index=0, T=[], Count=1, Method='ByIndex'):
+		if Method=='ByIndex':
+			Pick(List=self.ThroatCount, Index=Index, Method='Rotate')+=Count
+			T=Pick(List=self.ThroatType, Index=Index, Method='Rotate')
+		elif Method=='ByThroatType':
 			for i in range(len(self.ThroatType)):
 				if self.ThroatType[i]==T:
 					Index=i
@@ -174,7 +178,7 @@ class PoreNetwork(object):
 					continue
 				elif(Cross==True and (i%2!=0 and j%2!=0)):
 					theThroat=self.CrsTPool.UseRandom()
-					self.Matrix[i][j][0]=theThroat[0]*Pick([1, -1], -1)
+					self.Matrix[i][j][0]=theThroat[0]*Pick(List=[1, -1])
 					self.Matrix[i][j][1]=theThroat[1]
 				else:
 					self.Matrix[i][j]=self.StrTPool.UseRandom()
@@ -312,7 +316,9 @@ class PoreNetwork(object):
 	# Assign Throat Box at a certain position -----------------------------------------------------
 	def AssignBox(self, TP='',
 		                Start=[0, 0], End=[0, 0], Band=[0, 0],
-		                TIC=[], GradT=[0, 0], RepeatT=[1, 1], JumpT=[0, 0]):
+		                SubC=[], 
+		                GradIJ=[0, 0], RepeIJ=[0, 0], JumpIJ=[0, 0],
+		                GradB=0, RepeB=0, JumpB=0):
 		if TP=='VT':
 			Range=self.VTRange
 		elif TP=='HT':
@@ -328,9 +334,9 @@ class PoreNetwork(object):
 		Count=0
 		for I in range(Start[0], End[0], 1):
 			for J in range(Start[1], End[1], 1):
-				if not (Band[0]>0 and Band[0]>0 
-					and I>=Start[0]+Band[0] and I<=End[0]-1-Band[0] 
-					and J>=Start[1]+Band[1] and J<=End[1]-1-Band[1]):
+				if not (Band[0]>0 and Band[0]>0 # if not (Band defined and in the band)
+					    and I>=Start[0]+Band[0] and I<=End[0]-1-Band[0] 
+					    and J>=Start[1]+Band[1] and J<=End[1]-1-Band[1]):
 					self.AssignT(TP, I, J, T)
 					Count+=1
 		return Count
