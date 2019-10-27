@@ -317,8 +317,7 @@ class PoreNetwork(object):
 	def AssignBox(self, TP='',
 		                Start=[0, 0], End=[0, 0], Band=[0, 0],
 		                SubC=[], 
-		                GradIJ=[0, 0], RepeIJ=[0, 0], JumpIJ=[0, 0],
-		                GradB=0, RepeB=0, JumpB=0):
+		                Grad=[0, 0, 0], Repe=[0, 0, 0], Jump=[0, 0, 0]):
 		if TP=='VT':
 			Range=self.VTRange
 		elif TP=='HT':
