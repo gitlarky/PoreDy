@@ -73,8 +73,8 @@ class ThroatPool(object):
 			count+=self.ThroatCount[type]
 		return count
 
-	# Use one from ThroatPool ---------------------------------------------------------------------
-	def Use(self, Index, Count=1):
+	# Use appointed one from ThroatPool -----------------------------------------------------------
+	def UseAppoint(self, Index, Count=1):
 		if (self.ThroatCount[Index]-Count)>=0:
 			self.ThroatCount[Index]-=Count
 		return self.ThroatType[Index]
@@ -86,6 +86,16 @@ class ThroatPool(object):
 			Choice=set(SubC) & set(Choice)
 		Index=Pick(List=Choice)
 		self.ThroatCount[Index]-=1
+		return self.ThroatType[Index]
+
+	# Use appointed or choose randomly from pool exclude a sub ------------------------------------
+	def Use(self, Index, ExC=[]):
+		if self.ThroatCount[Index]>=1:
+			self.ThroatCount[Index]-=1
+		else:
+			Available=set(self.ExistType())-set(Exc)
+			Index=Pick(List=Available)
+			self.ThroatCount[Index]-=1
 		return self.ThroatType[Index]
 
 	# Return one back to ThroatPool ---------------------------------------------------------------
@@ -254,7 +264,18 @@ class PoreNetwork(object):
 		else:
 			return False
 		return True
-	
+
+	# Judge if it is assigned or not --------------------------------------------------------------
+	def Assigned(self, TP, I, J):
+		if   TP=='VT' and self.Matrix[2*I  ][2*J-1] in self.StrTPool.ThroatType:
+			return True
+		elif TP=='HT' and self.Matrix[2*I-1][2*J  ] in self.StrTPool.ThroatType:
+			return True
+		elif TP=='CT' and self.Matrix[2*I-1][2*J-1] in self.CrsTPool.ThroatType:
+			return True
+		else:
+			return False
+
 	# Assign Throat at a certain position ---------------------------------------------------------
 	def GetT(self, TP, I, J):
 		if TP=='Pore':
@@ -313,11 +334,10 @@ class PoreNetwork(object):
 					self.ReturnT('CT', I, J)
 		return True
 
-	# Assign Throat Box at a certain position -----------------------------------------------------
+	# Assign Throat distribution in a box of certain position -------------------------------------
 	def AssignBox(self, TP='',
-		                Start=[0, 0], End=[0, 0], Band=[0, 0],
-		                SubC=[], 
-		                Grad=[0, 0, 0], Repe=[0, 0, 0], Jump=[0, 0, 0]):
+		                Start=[0, 0], End=[0, 0], Band=0
+		                SubC=[], Grad=[1, 1, 0], Repeat=[1, 1, 1]):
 		if TP=='VT':
 			Range=self.VTRange
 		elif TP=='HT':
@@ -333,9 +353,25 @@ class PoreNetwork(object):
 		Count=0
 		for I in range(Start[0], End[0], 1):
 			for J in range(Start[1], End[1], 1):
-				if not (Band[0]>0 and Band[0]>0 # if not (Band defined and in the band)
-					    and I>=Start[0]+Band[0] and I<=End[0]-1-Band[0] 
-					    and J>=Start[1]+Band[1] and J<=End[1]-1-Band[1]):
+				if Band==0 or (
+				   Band>0 and not(I>=Start[0]+Band and I<=End[0]-Band-1 and 
+					              J>=Start[1]+Band and J<=End[1]-Band-1)):
+					if self.Assigned(TP, I, J):
+						self.Return(TP, I, J)
+
+					for ring in range(Band):
+						if not (I>=Start[0]+ring+1 and I<=End[0]-ring-2 and 
+						        J>=Start[1]+ring+1 and J<=End[1]-ring-2)
+						   and (I>=Start[0]+ring   and I<=End[0]-ring-1 and 
+						        J>=Start[1]+ring   and J<=End[1]-ring-1):
+						   RingIndex=ring
+					Index=Pick(List=SubC, Index=(I-Start[0])//Repeat[0]*Grad[0]+
+						                        (J-Start[1])//Repeat[1]*Grad[1]+
+						                        RingIndex   //Repeat[2]*Grad[2], Method='Rotate')
+					if TP=='VT' or TP=='HT':
+						T=self.StrTPool.Use(Index=Index, ExC=SubC)
+					elif TP=='CT':
+						T=self.CrsTPool.Use(Index=Index, ExC=SubC)
 					self.AssignT(TP, I, J, T)
 					Count+=1
 		return Count
