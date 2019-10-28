@@ -8,6 +8,7 @@
 
 #============================ Module Importation ==================================================
 import random
+import pickle
 # from __future__ import absolute_import, division, print_function, unicode_literals
 
 # import tensorflow as tf
@@ -101,7 +102,8 @@ class ThroatPool(object):
 	# Return one back to ThroatPool ---------------------------------------------------------------
 	def Return(self, Index=0, T=[], Count=1, Method='ByIndex'):
 		if Method=='ByIndex':
-			Pick(List=self.ThroatCount, Index=Index, Method='Rotate')+=Count
+			I=Pick(List=self.ThroatCount, Index=Index, Method='Rotate')
+			I+=Count
 			T=Pick(List=self.ThroatType, Index=Index, Method='Rotate')
 		elif Method=='ByThroatType':
 			for i in range(len(self.ThroatType)):
@@ -211,9 +213,17 @@ class PoreNetwork(object):
 		return True
 
 	# Write PoreNetwork Pixel File ----------------------------------------------------------------
-	def Pixel(self):
+	def Pixel(self, Scale=1):
 		return True
 	
+	# Dump the foil into a binary file ------------------------------------------------------------
+	def Dump(self, Destination='', Disp=False):
+		if not Destination: Destination=self.Name+'.net'
+		pickle.dump(self, open(Destination, 'wb'))
+		if Disp: print('Successfully saved pore-network file.')
+
+		return True
+
 	# Assign Throat at a certain coordinate in Matrix ---------------------------------------------
 	def AssignMC(self, i, j, T): # i, j is the index in Matrix, i in range [0, Mx), j in range [0, My)
 		self.Matrix[i][j][0]=T[0]
@@ -336,75 +346,124 @@ class PoreNetwork(object):
 
 	# Assign Throat distribution in a box of certain position -------------------------------------
 	def AssignBox(self, TP='',
-		                Start=[0, 0], End=[0, 0], Band=0
+		                Start=[0, 0], End=[0, 0], Band=[0, 0],
 		                SubC=[], Grad=[1, 1, 0], Repeat=[1, 1, 1]):
 		if TP=='VT':
 			Range=self.VTRange
+			TypeChoice=self.StrTType
 		elif TP=='HT':
 			Range=self.HTRange
+			TypeChoice=self.StrTType
 		elif TP=='CT':
 			Range=self.CTRange
+			TypeChoice=self.CrsTType
 		if Start[0]==0 and End[0]==0:
 			Start[0]=Range[0][0]
 			End  [0]=Range[0][1]
 		if Start[1]==0 and End[1]==0:
 			Start[1]=Range[1][0]+1
 			End  [1]=Range[1][1]+1
+		if SubC==[]:
+			SubC=[i for i in range(len(TypeChoice))]
+			ExC =[]
+		else:
+			SubC=[]
+			Exc =[]
+
 		Count=0
 		for I in range(Start[0], End[0], 1):
 			for J in range(Start[1], End[1], 1):
-				if Band==0 or (
-				   Band>0 and not(I>=Start[0]+Band and I<=End[0]-Band-1 and 
-					              J>=Start[1]+Band and J<=End[1]-Band-1)):
+				if Band==[0, 0] or (
+				   (Band[0]>0 and Band[1]>0) and not(I>=Start[0]+Band[0] and I<=End[0]-Band[0]-1 and 
+				                                     J>=Start[1]+Band[1] and J<=End[1]-Band[1]-1)) or (
+				   (Band[0]>0 and Band[1]==0) and not(I>=Start[0]+Band[0] and I<=End[0]-Band[0]-1)) or (
+				   (Band[0]==0 and Band[1]>0) and not(J>=Start[1]+Band[1] and J<=End[1]-Band[1]-1)):
 					if self.Assigned(TP, I, J):
 						self.Return(TP, I, J)
 
-					for ring in range(Band):
-						if not (I>=Start[0]+ring+1 and I<=End[0]-ring-2 and 
-						        J>=Start[1]+ring+1 and J<=End[1]-ring-2)
-						   and (I>=Start[0]+ring   and I<=End[0]-ring-1 and 
-						        J>=Start[1]+ring   and J<=End[1]-ring-1):
-						   RingIndex=ring
+					for ring in range(min(Band[0], Band[1])+1):
+						if not (I>=Start[0]+ring+1 and I<=End[0]-ring-2 and J>=Start[1]+ring+1 and J<=End[1]-ring-2) and (I>=Start[0]+ring   and I<=End[0]-ring-1 and J>=Start[1]+ring   and J<=End[1]-ring-1):
+							RingIndex=ring
 					Index=Pick(List=SubC, Index=(I-Start[0])//Repeat[0]*Grad[0]+
 						                        (J-Start[1])//Repeat[1]*Grad[1]+
 						                        RingIndex   //Repeat[2]*Grad[2], Method='Rotate')
 					if TP=='VT' or TP=='HT':
-						T=self.StrTPool.Use(Index=Index, ExC=SubC)
+						T=self.StrTPool.Use(Index=Index, ExC=ExC)
 					elif TP=='CT':
-						T=self.CrsTPool.Use(Index=Index, ExC=SubC)
+						T=self.CrsTPool.Use(Index=Index, ExC=ExC)
 					self.AssignT(TP, I, J, T)
 					Count+=1
+		
 		return Count
 
 	# Slice a Region from original Matrix ---------------------------------------------------------
-	def AssignRegion(self, TType='',
-		                   IRange=[], IJump=0, IRep=1):
+	def RestRandom(self):
 		Count=0
+		for I in range(self.VTRange[0][0], self.VTRange[0][1], 1):
+			for J in range(self.VTRange[1][0], self.VTRange[1][1], 1):
+				if not self.Assigned('VT', I, J):
+					self.AssignT('VT', I, J, self.StrTPool.UseRandom())
+					Count+=1
+		for I in range(self.HTRange[0][0], self.HTRange[0][1], 1):
+			for J in range(self.HTRange[1][0], self.HTRange[1][1], 1):
+				if not self.Assigned('HT', I, J):
+					self.AssignT('HT', I, J, self.StrTPool.UseRandom())
+					Count+=1
+		for I in range(self.CTRange[0][0], self.CTRange[0][1], 1):
+			for J in range(self.CTRange[1][0], self.CTRange[1][1], 1):
+				if not self.Assigned('CT', I, J):
+					self.AssignT('CT', I, J, self.CrsTPool.UseRandom())
+					Count+=1
+
 		return Count
+
 #============================ Create Pore-Network Samples =========================================
 def CreatePoreNetworkSamples(Nx=20, Ny=20, Folder=''):
-	# Determine What and How Many is each type of Throat ------------------------------------------
-	FixVStrNet =PoreNetwork(Name='FixVStrNet', Nx=Nx, Ny=Ny, FixV=True, 
-		                    StrTType=TT)
-	FixVCrsNet =PoreNetwork(Name='FixVCrsNet', Nx=Nx, Ny=Ny, Cross=True, FixV=True, 
-		                    StrTType=TT, CrsTType=TT)
-	RandStrNet =PoreNetwork(Name='FixVStrNet', Nx=Nx, Ny=Ny, 
-		                    StrTType=TT)
-	RandCrsNet =PoreNetwork(Name='FixVCrsNet', Nx=Nx, Ny=Ny, Cross=True, 
-		                    StrTType=TT, CrsTType=TT)
-
-	print('Straight Throat Number:', FixVCrsNet.StrTCount)
-	print('Cross    Throat Number:', FixVCrsNet.CrsTCount)
-	print('Total    Throat Number:', FixVCrsNet.TotTCount)
-
-	# print('Straight Throat Pool:\n\t', FixVStrPool.ThroatType, '\n\t', FixVStrPool.ThroatCount)
-	# print('Cross    Throat Pool:\n\t', FixVCrsPool.ThroatType, '\n\t', FixVCrsPool.ThroatCount)
-	FixVStrNet.Write()
-	FixVCrsNet.Write()
-	RandStrNet.Write()
-	RandCrsNet.Write()
-	
 	SampleIndex=0
+
+	RandStrNet =PoreNetwork(Name='RandStrNet', Nx=Nx, Ny=Ny, 
+		                    StrTType=TT)
+	for IS in range(RandStrNet.VTRange[0][0], RandStrNet.VTRange[0][1], 1):
+		for IE in range(IS+1, RandStrNet.VTRange[0][1]+1, 1):
+			for JS in range(RandStrNet.VTRange[1][0], RandStrNet.VTRange[1][1], 1):
+				for JE in range(JS+1, RandStrNet.VTRange[1][1]+1, 1):
+					for IB in range(Nx//3):
+						for JB in range(Ny//3):
+							# for SC in SCs:
+							SampleIndex+=1
+	print(SampleIndex)
+
+
+
+
+	# RandStrNet.Restore()
+	# RandStrNet.AssignBox(TP='VT', Start=[IS, JS], End=[IE, JE], Band=[IB, JB],
+	# 	                 SubC=SC, Grad=[IG, JG, RG], Repeat=[IR, JR, RR])
+	# RandStrNet.RandomRest()
+	# RandStrNet.SetName(Name=Name(Prefix='RandStrNet', Index=SampleIndex))
+	# RandStrNet.write()
+	# SampleIndex+=1
+	# # Determine What and How Many is each type of Throat ------------------------------------------
+	# FixVStrNet =PoreNetwork(Name='FixVStrNet', Nx=Nx, Ny=Ny, FixV=True, 
+	# 	                    StrTType=TT)
+	# FixVCrsNet =PoreNetwork(Name='FixVCrsNet', Nx=Nx, Ny=Ny, Cross=True, FixV=True, 
+	# 	                    StrTType=TT, CrsTType=TT)
+
+	# RandCrsNet =PoreNetwork(Name='FixVCrsNet', Nx=Nx, Ny=Ny, Cross=True, 
+	# 	                    StrTType=TT, CrsTType=TT)
+
+	# print('Straight Throat Number:', FixVCrsNet.StrTCount)
+	# print('Cross    Throat Number:', FixVCrsNet.CrsTCount)
+	# print('Total    Throat Number:', FixVCrsNet.TotTCount)
+
+	# # print('Straight Throat Pool:\n\t', FixVStrPool.ThroatType, '\n\t', FixVStrPool.ThroatCount)
+	# # print('Cross    Throat Pool:\n\t', FixVCrsPool.ThroatType, '\n\t', FixVCrsPool.ThroatCount)
+	# FixVStrNet.Write()
+	# FixVCrsNet.Write()
+	# RandStrNet.Write()
+	# RandCrsNet.Write()
+	
+	
 
 	# Create some Pore-Network with only random straight Throats ----------------------------------
 	# for vir in range(Nx):
@@ -472,7 +531,7 @@ def CreatePoreNetworkSamples(Nx=20, Ny=20, Folder=''):
 
 
 #============================ Main Program ========================================================
-# CreatePoreNetworkSamples(Nx=20, Ny=20, Folder='/home/xu/work/PoreNetwork2020Samples')
-# CreatePoreNetworkSamples(Nx=10, Ny=10, Folder='/home/xu/work/PoreNetwork1010Samples')
-# CreatePoreNetworkSamples(Nx=40, Ny=40, Folder='/home/xu/work/PoreNetwork4040Samples')
+CreatePoreNetworkSamples(Nx=20, Ny=20, Folder='/home/xu/work/PoreNetwork2020Samples')
+CreatePoreNetworkSamples(Nx=10, Ny=10, Folder='/home/xu/work/PoreNetwork1010Samples')
+CreatePoreNetworkSamples(Nx=40, Ny=40, Folder='/home/xu/work/PoreNetwork4040Samples')
 CreatePoreNetworkSamples(Nx=3, Ny=3, Folder='/home/xu/work/PoreNetwork1010Samples')
