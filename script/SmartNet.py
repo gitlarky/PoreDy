@@ -382,7 +382,10 @@ class PoreNetwork(object):
 						self.Return(TP, I, J)
 
 					for ring in range(min(Band[0], Band[1])+1):
-						if not (I>=Start[0]+ring+1 and I<=End[0]-ring-2 and J>=Start[1]+ring+1 and J<=End[1]-ring-2) and (I>=Start[0]+ring   and I<=End[0]-ring-1 and J>=Start[1]+ring   and J<=End[1]-ring-1):
+						if not (I>=Start[0]+ring+1 and I<=End[0]-ring-2 and 
+							J>=Start[1]+ring+1 and J<=End[1]-ring-2) and (
+							I>=Start[0]+ring   and I<=End[0]-ring-1 and 
+							J>=Start[1]+ring   and J<=End[1]-ring-1):
 							RingIndex=ring
 					Index=Pick(List=SubC, Index=(I-Start[0])//Repeat[0]*Grad[0]+
 						                        (J-Start[1])//Repeat[1]*Grad[1]+
@@ -427,8 +430,8 @@ def CreatePoreNetworkSamples(Nx=20, Ny=20, Folder=''):
 		for IE in range(IS+1, RandStrNet.VTRange[0][1]+1, 1):
 			for JS in range(RandStrNet.VTRange[1][0], RandStrNet.VTRange[1][1], 1):
 				for JE in range(JS+1, RandStrNet.VTRange[1][1]+1, 1):
-					for IB in range(Nx//3):
-						for JB in range(Ny//3):
+			# 		for IB in range(Nx//3):
+			# 			for JB in range(Ny//3):
 							# for SC in SCs:
 							SampleIndex+=1
 	print(SampleIndex)
