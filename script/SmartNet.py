@@ -422,18 +422,103 @@ class PoreNetwork(object):
 
 #============================ Create Pore-Network Samples =========================================
 def CreatePoreNetworkSamples(Nx=20, Ny=20, Folder=''):
-	SampleIndex=0
-
-	RandStrNet =PoreNetwork(Name='RandStrNet', Nx=Nx, Ny=Ny, 
+	# Initialize 4 kinds of networks --------------------------------------------------------------
+	RandStrNet =PoreNetwork(Name='RandStrNet', Nx=Nx, Ny=Ny, Cross=False, FixV=False,
 		                    StrTType=TT)
-	for IS in range(RandStrNet.VTRange[0][0], RandStrNet.VTRange[0][1], 1):
-		for IE in range(IS+1, RandStrNet.VTRange[0][1]+1, 1):
-			for JS in range(RandStrNet.VTRange[1][0], RandStrNet.VTRange[1][1], 1):
-				for JE in range(JS+1, RandStrNet.VTRange[1][1]+1, 1):
+	RandCrsNet =PoreNetwork(Name='RandCrsNet', Nx=Nx, Ny=Ny, Cross=True , FixV=False,
+		                    StrTType=TT, CrsTType=TT)
+	FixVStrNet =PoreNetwork(Name='FixVStrNet', Nx=Nx, Ny=Ny, Cross=False, FixV=True , 
+		                    StrTType=TT)
+	FixVCrsNet =PoreNetwork(Name='FixVCrsNet', Nx=Nx, Ny=Ny, Cross=True , FixV=True , 
+		                    StrTType=TT, CrsTType=TT)
+
+	SampleIndex=0
+	for B in [0, 4]:
+		for SC in [[1, 0, 2], [4, 3, 5], [7, 6, 8]]:
+			for IG in [0, 1, 2]:
+				for JG in [0, 1, 2]:
+					for IR in [1, 2, 3, 4, 5]:
+						for JR in [1, 2, 3, 4, 5]:
+							IB=B
+							JB=B
+							IS=0
+							JS=0
+							IE=0
+							JE=0
+							IB=0
+							JB=0
+							RG=0
+							RR=0
+							# RandStrNet.Restore()
+							# RandStrNet.AssignBox(TP='VT', Start=[IS, JS], End=[IE, JE], Band=[IB, JB],
+							# 	                 SubC=SC, Grad=[IG, JG, RG], Repeat=[IR, JR, RR])
+							# RandStrNet.RandomRest()
+							# RandStrNet.SetName(Name=Name(Prefix='RandStrNet', Index=SampleIndex))
+							# RandStrNet.write()
+
+							# RandCrsNet.Restore()
+							# RandCrsNet.AssignBox(TP='VT', Start=[IS, JS], End=[IE, JE], Band=[IB, JB],
+							# 	                 SubC=SC, Grad=[IG, JG, RG], Repeat=[IR, JR, RR])
+							# if Pick([0, 1])==0:
+							# 	RandCrsNet.RandomRest()
+							# else:
+							# 	RandCrsNet.AssignBox(TP='CT', Start=[IS, JS], End=[IE, JE], Band=[IB, JB],
+							# 	                   SubC=SC, Grad=[IG, JG, RG], Repeat=[IR, JR, RR])
+							# RandCrsNet.SetName(Name=Name(Prefix='RandCrsNet', Index=SampleIndex))
+							# RandCrsNet.write()
+							SampleIndex+=1
+
+							# RandStrNet.Restore()
+							# RandStrNet.AssignBox(TP='HT', Start=[IS, JS], End=[IE, JE], Band=[IB, JB],
+							# 	                 SubC=SC, Grad=[IG, JG, RG], Repeat=[IR, JR, RR])
+							# RandStrNet.RandomRest()
+							# RandStrNet.SetName(Name=Name(Prefix='RandStrNet', Index=SampleIndex))
+							# RandStrNet.write()
+
+							# RandCrsNet.Restore()
+							# RandCrsNet.AssignBox(TP='HT', Start=[IS, JS], End=[IE, JE], Band=[IB, JB],
+							# 	                 SubC=SC, Grad=[IG, JG, RG], Repeat=[IR, JR, RR])
+							# if Pick([0, 1])==0:
+							# 	RandCrsNet.RandomRest()
+							# else:
+							# 	RandCrsNet.AssignBox(TP='CT', Start=[IS, JS], End=[IE, JE], Band=[IB, JB],
+							# 	                   SubC=SC, Grad=[IG, JG, RG], Repeat=[IR, JR, RR])
+							# RandCrsNet.SetName(Name=Name(Prefix='RandCrsNet', Index=SampleIndex))
+							# RandCrsNet.write()
+							SampleIndex+=1
+
+							# RandStrNet.Restore()
+							# RandStrNet.AssignBox(TP='VT', Start=[IS, JS], End=[IE, JE], Band=[IB, JB],
+							# 	                 SubC=SC, Grad=[IG, JG, RG], Repeat=[IR, JR, RR])
+							# RandStrNet.AssignBox(TP='HT', Start=[IS, JS], End=[IE, JE], Band=[IB, JB],
+							# 	                 SubC=SC, Grad=[IG, JG, RG], Repeat=[IR, JR, RR])
+							# RandStrNet.RandomRest()
+							# RandStrNet.SetName(Name=Name(Prefix='RandStrNet', Index=SampleIndex))
+							# RandStrNet.write()
+
+							# RandCrsNet.Restore()
+							# RandCrsNet.AssignBox(TP='VT', Start=[IS, JS], End=[IE, JE], Band=[IB, JB],
+							# 	                 SubC=SC, Grad=[IG, JG, RG], Repeat=[IR, JR, RR])
+							# RandCrsNet.AssignBox(TP='HT', Start=[IS, JS], End=[IE, JE], Band=[IB, JB],
+							# 	                 SubC=SC, Grad=[IG, JG, RG], Repeat=[IR, JR, RR])
+							# if Pick([0, 1])==0:
+							# 	RandCrsNet.RandomRest()
+							# else:
+							# 	RandCrsNet.AssignBox(TP='CT', Start=[IS, JS], End=[IE, JE], Band=[IB, JB],
+							# 	                   SubC=SC, Grad=[IG, JG, RG], Repeat=[IR, JR, RR])
+							# RandCrsNet.SetName(Name=Name(Prefix='RandCrsNet', Index=SampleIndex))
+							# RandCrsNet.write()
+							SampleIndex+=1
+# , [0, 1, 2, 3], [5, 6, 7, 8], [0, 1, 2, 3, 4, 5, 6, 7, 8]
+# , [3, 2, 1, 0], [5, 6, 7, 8], 
+# 	for IS in range(RandStrNet.VTRange[0][0], RandStrNet.VTRange[0][1], 1):
+# 		for IE in range(IS+1, RandStrNet.VTRange[0][1]+1, 1):
+# 			for JS in range(RandStrNet.VTRange[1][0], RandStrNet.VTRange[1][1], 1):
+# 				for JE in range(JS+1, RandStrNet.VTRange[1][1]+1, 1):
 			# 		for IB in range(Nx//3):
 			# 			for JB in range(Ny//3):
 							# for SC in SCs:
-							SampleIndex+=1
+							
 	print(SampleIndex)
 
 
@@ -447,13 +532,7 @@ def CreatePoreNetworkSamples(Nx=20, Ny=20, Folder=''):
 	# RandStrNet.write()
 	# SampleIndex+=1
 	# # Determine What and How Many is each type of Throat ------------------------------------------
-	# FixVStrNet =PoreNetwork(Name='FixVStrNet', Nx=Nx, Ny=Ny, FixV=True, 
-	# 	                    StrTType=TT)
-	# FixVCrsNet =PoreNetwork(Name='FixVCrsNet', Nx=Nx, Ny=Ny, Cross=True, FixV=True, 
-	# 	                    StrTType=TT, CrsTType=TT)
 
-	# RandCrsNet =PoreNetwork(Name='FixVCrsNet', Nx=Nx, Ny=Ny, Cross=True, 
-	# 	                    StrTType=TT, CrsTType=TT)
 
 	# print('Straight Throat Number:', FixVCrsNet.StrTCount)
 	# print('Cross    Throat Number:', FixVCrsNet.CrsTCount)
@@ -534,7 +613,7 @@ def CreatePoreNetworkSamples(Nx=20, Ny=20, Folder=''):
 
 
 #============================ Main Program ========================================================
-CreatePoreNetworkSamples(Nx=20, Ny=20, Folder='/home/xu/work/PoreNetwork2020Samples')
-CreatePoreNetworkSamples(Nx=10, Ny=10, Folder='/home/xu/work/PoreNetwork1010Samples')
-CreatePoreNetworkSamples(Nx=40, Ny=40, Folder='/home/xu/work/PoreNetwork4040Samples')
 CreatePoreNetworkSamples(Nx=3, Ny=3, Folder='/home/xu/work/PoreNetwork1010Samples')
+CreatePoreNetworkSamples(Nx=10, Ny=10, Folder='/home/xu/work/PoreNetwork1010Samples')
+CreatePoreNetworkSamples(Nx=20, Ny=20, Folder='/home/xu/work/PoreNetwork2020Samples')
+CreatePoreNetworkSamples(Nx=40, Ny=40, Folder='/home/xu/work/PoreNetwork4040Samples')
