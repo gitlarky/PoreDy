@@ -347,7 +347,7 @@ class PoreNetwork(object):
 	# Assign Throat distribution in a box of certain position -------------------------------------
 	def AssignBox(self, TP='',
 		                Start=[0, 0], End=[0, 0], Band=[0, 0],
-		                SubC=[], Grad=[1, 1, 0], Repeat=[1, 1, 1]):
+		                SubC=[], Grad=[1, 1, 0], Repeat=[1, 1, 1], Flip=0):
 		if TP=='VT':
 			Range=self.VTRange
 			TypeChoice=self.StrTType
@@ -394,13 +394,21 @@ class PoreNetwork(object):
 						T=self.StrTPool.Use(Index=Index, ExC=ExC)
 					elif TP=='CT':
 						T=self.CrsTPool.Use(Index=Index, ExC=ExC)
+						if Flip==0:
+							T=[Pick([-1, 1])*T[0], T[1]]
+						elif Flip==2 and I%2==0:
+							T=[      -1     *T[0], T[1]]
+						elif Flip==3 and J%2==0:
+							T=[      -1     *T[0], T[1]]
+						else: # Flip= -1 or 1
+							T=[Flip         *T[0], T[1]]
 					self.AssignT(TP, I, J, T)
 					Count+=1
 		
 		return Count
 
 	# Slice a Region from original Matrix ---------------------------------------------------------
-	def RestRandom(self):
+	def RandomRest(self):
 		Count=0
 		for I in range(self.VTRange[0][0], self.VTRange[0][1], 1):
 			for J in range(self.VTRange[1][0], self.VTRange[1][1], 1):
@@ -432,9 +440,10 @@ def CreatePoreNetworkSamples(Nx=20, Ny=20, Folder=''):
 	FixVCrsNet =PoreNetwork(Name='FixVCrsNet', Nx=Nx, Ny=Ny, Cross=True , FixV=True , 
 		                    StrTType=TT, CrsTType=TT)
 
+	# Generate Random Volume Network --------------------------------------------------------------
 	SampleIndex=0
-	for B in [0, 4]:
-		for SC in [[1, 0, 2], [4, 3, 5], [7, 6, 8]]:
+	for B in [0, 4, 8]:
+		for SC in [[0, 1, 2], [4, 3, 5], [8, 7, 6], [2, 4, 6, 8], [7, 5, 3, 1]]:
 			for IG in [0, 1, 2]:
 				for JG in [0, 1, 2]:
 					for IR in [1, 2, 3, 4, 5]:
@@ -449,77 +458,106 @@ def CreatePoreNetworkSamples(Nx=20, Ny=20, Folder=''):
 							JB=0
 							RG=0
 							RR=0
-							# RandStrNet.Restore()
-							# RandStrNet.AssignBox(TP='VT', Start=[IS, JS], End=[IE, JE], Band=[IB, JB],
-							# 	                 SubC=SC, Grad=[IG, JG, RG], Repeat=[IR, JR, RR])
-							# RandStrNet.RandomRest()
-							# RandStrNet.SetName(Name=Name(Prefix='RandStrNet', Index=SampleIndex))
-							# RandStrNet.write()
+							# ---------------------------------------------------------------------
+							RandStrNet.Restore()
+							if Pick([0, 1, 2, 3, 4, 5, 6, 7, 8, 9])<2:
+								RandStrNet.AssignBox(TP='VT', Start=[IS, JS], End=[IE, JE], Band=[IB, JB],
+									                 SubC=SC, Grad=[IG, JG, RG], Repeat=[IR, JR, RR])
+							RandStrNet.RandomRest()
+							RandStrNet.SetName(Name=Name(Prefix='RandStrNet', Index=SampleIndex))
+							RandStrNet.write()
 
-							# RandCrsNet.Restore()
-							# RandCrsNet.AssignBox(TP='VT', Start=[IS, JS], End=[IE, JE], Band=[IB, JB],
-							# 	                 SubC=SC, Grad=[IG, JG, RG], Repeat=[IR, JR, RR])
-							# if Pick([0, 1])==0:
-							# 	RandCrsNet.RandomRest()
-							# else:
-							# 	RandCrsNet.AssignBox(TP='CT', Start=[IS, JS], End=[IE, JE], Band=[IB, JB],
-							# 	                   SubC=SC, Grad=[IG, JG, RG], Repeat=[IR, JR, RR])
-							# RandCrsNet.SetName(Name=Name(Prefix='RandCrsNet', Index=SampleIndex))
-							# RandCrsNet.write()
+							RandCrsNet.Restore()
+							if Pick([0, 1, 2, 3, 4, 5, 6, 7, 8, 9])<2:
+								RandCrsNet.AssignBox(TP='VT', Start=[IS, JS], End=[IE, JE], Band=[IB, JB],
+								                     SubC=SC, Grad=[IG, JG, RG], Repeat=[IR, JR, RR])
+							if Pick([0, 1, 2, 3, 4, 5, 6, 7, 8, 9])<3:
+								RandCrsNet.AssignBox(TP='CT', Start=[IS, JS], End=[IE, JE], Band=[IB, JB],
+								                     SubC=SC, Grad=[IG, JG, RG], Repeat=[IR, JR, RR], Flip=2)
+							elif Pick([0, 1, 2, 3, 4, 5, 6, 7, 8, 9])>6:
+								RandCrsNet.AssignBox(TP='CT', Start=[IS, JS], End=[IE, JE], Band=[IB, JB],
+								                     SubC=SC, Grad=[IG, JG, RG], Repeat=[IR, JR, RR], Flip=3)
+							else:
+								RandCrsNet.AssignBox(TP='CT', Start=[IS, JS], End=[IE, JE], Band=[IB, JB],
+								                     SubC=SC, Grad=[IG, JG, RG], Repeat=[IR, JR, RR], Flip=0)
+							RandCrsNet.RandomRest()
+							RandCrsNet.SetName(Name=Name(Prefix='RandCrsNet', Index=SampleIndex))
+							RandCrsNet.write()
 							SampleIndex+=1
+							# ---------------------------------------------------------------------
 
-							# RandStrNet.Restore()
-							# RandStrNet.AssignBox(TP='HT', Start=[IS, JS], End=[IE, JE], Band=[IB, JB],
-							# 	                 SubC=SC, Grad=[IG, JG, RG], Repeat=[IR, JR, RR])
-							# RandStrNet.RandomRest()
-							# RandStrNet.SetName(Name=Name(Prefix='RandStrNet', Index=SampleIndex))
-							# RandStrNet.write()
+							# ---------------------------------------------------------------------
+							RandStrNet.Restore()
+							if Pick([0, 1, 2, 3, 4, 5, 6, 7, 8, 9])<2:
+								RandStrNet.AssignBox(TP='HT', Start=[IS, JS], End=[IE, JE], Band=[IB, JB],
+									                 SubC=SC, Grad=[IG, JG, RG], Repeat=[IR, JR, RR])
+							RandStrNet.RandomRest()
+							RandStrNet.SetName(Name=Name(Prefix='RandStrNet', Index=SampleIndex))
+							RandStrNet.write()
 
-							# RandCrsNet.Restore()
-							# RandCrsNet.AssignBox(TP='HT', Start=[IS, JS], End=[IE, JE], Band=[IB, JB],
-							# 	                 SubC=SC, Grad=[IG, JG, RG], Repeat=[IR, JR, RR])
-							# if Pick([0, 1])==0:
-							# 	RandCrsNet.RandomRest()
-							# else:
-							# 	RandCrsNet.AssignBox(TP='CT', Start=[IS, JS], End=[IE, JE], Band=[IB, JB],
-							# 	                   SubC=SC, Grad=[IG, JG, RG], Repeat=[IR, JR, RR])
-							# RandCrsNet.SetName(Name=Name(Prefix='RandCrsNet', Index=SampleIndex))
-							# RandCrsNet.write()
+							RandCrsNet.Restore()
+							if Pick([0, 1, 2, 3, 4, 5, 6, 7, 8, 9])<2:
+								RandCrsNet.AssignBox(TP='HT', Start=[IS, JS], End=[IE, JE], Band=[IB, JB],
+									                 SubC=SC, Grad=[IG, JG, RG], Repeat=[IR, JR, RR])
+							if Pick([0, 1, 2, 3, 4, 5, 6, 7, 8, 9])<3:
+								RandCrsNet.AssignBox(TP='CT', Start=[IS, JS], End=[IE, JE], Band=[IB, JB],
+								                     SubC=SC, Grad=[IG, JG, RG], Repeat=[IR, JR, RR], Flip=2)
+							elif Pick([0, 1, 2, 3, 4, 5, 6, 7, 8, 9])>6:
+								RandCrsNet.AssignBox(TP='CT', Start=[IS, JS], End=[IE, JE], Band=[IB, JB],
+								                     SubC=SC, Grad=[IG, JG, RG], Repeat=[IR, JR, RR], Flip=3)
+							else:
+								RandCrsNet.AssignBox(TP='CT', Start=[IS, JS], End=[IE, JE], Band=[IB, JB],
+								                     SubC=SC, Grad=[IG, JG, RG], Repeat=[IR, JR, RR], Flip=0)
+							RandCrsNet.RandomRest()
+							RandCrsNet.SetName(Name=Name(Prefix='RandCrsNet', Index=SampleIndex))
+							RandCrsNet.write()
 							SampleIndex+=1
+							# ---------------------------------------------------------------------
 
-							# RandStrNet.Restore()
-							# RandStrNet.AssignBox(TP='VT', Start=[IS, JS], End=[IE, JE], Band=[IB, JB],
-							# 	                 SubC=SC, Grad=[IG, JG, RG], Repeat=[IR, JR, RR])
-							# RandStrNet.AssignBox(TP='HT', Start=[IS, JS], End=[IE, JE], Band=[IB, JB],
-							# 	                 SubC=SC, Grad=[IG, JG, RG], Repeat=[IR, JR, RR])
-							# RandStrNet.RandomRest()
-							# RandStrNet.SetName(Name=Name(Prefix='RandStrNet', Index=SampleIndex))
-							# RandStrNet.write()
+							# ---------------------------------------------------------------------
+							RandStrNet.Restore()
+							if Pick([0, 1, 2, 3, 4, 5, 6, 7, 8, 9])<1:
+								RandStrNet.AssignBox(TP='VT', Start=[IS, JS], End=[IE, JE], Band=[IB, JB],
+									                 SubC=SC, Grad=[IG, JG, RG], Repeat=[IR, JR, RR])
+							if Pick([0, 1, 2, 3, 4, 5, 6, 7, 8, 9])<1:
+								RandStrNet.AssignBox(TP='HT', Start=[IS, JS], End=[IE, JE], Band=[IB, JB],
+									                 SubC=SC, Grad=[IG, JG, RG], Repeat=[IR, JR, RR])
+							RandStrNet.RandomRest()
+							RandStrNet.SetName(Name=Name(Prefix='RandStrNet', Index=SampleIndex))
+							RandStrNet.write()
 
-							# RandCrsNet.Restore()
-							# RandCrsNet.AssignBox(TP='VT', Start=[IS, JS], End=[IE, JE], Band=[IB, JB],
-							# 	                 SubC=SC, Grad=[IG, JG, RG], Repeat=[IR, JR, RR])
-							# RandCrsNet.AssignBox(TP='HT', Start=[IS, JS], End=[IE, JE], Band=[IB, JB],
-							# 	                 SubC=SC, Grad=[IG, JG, RG], Repeat=[IR, JR, RR])
-							# if Pick([0, 1])==0:
-							# 	RandCrsNet.RandomRest()
-							# else:
-							# 	RandCrsNet.AssignBox(TP='CT', Start=[IS, JS], End=[IE, JE], Band=[IB, JB],
-							# 	                   SubC=SC, Grad=[IG, JG, RG], Repeat=[IR, JR, RR])
-							# RandCrsNet.SetName(Name=Name(Prefix='RandCrsNet', Index=SampleIndex))
-							# RandCrsNet.write()
+							RandCrsNet.Restore()
+							if Pick([0, 1, 2, 3, 4, 5, 6, 7, 8, 9])<1:
+								RandCrsNet.AssignBox(TP='VT', Start=[IS, JS], End=[IE, JE], Band=[IB, JB],
+									                 SubC=SC, Grad=[IG, JG, RG], Repeat=[IR, JR, RR])
+							if Pick([0, 1, 2, 3, 4, 5, 6, 7, 8, 9])<1:
+								RandCrsNet.AssignBox(TP='HT', Start=[IS, JS], End=[IE, JE], Band=[IB, JB],
+									                 SubC=SC, Grad=[IG, JG, RG], Repeat=[IR, JR, RR])
+							if Pick([0, 1, 2, 3, 4, 5, 6, 7, 8, 9])<3:
+								RandCrsNet.AssignBox(TP='CT', Start=[IS, JS], End=[IE, JE], Band=[IB, JB],
+								                     SubC=SC, Grad=[IG, JG, RG], Repeat=[IR, JR, RR], Flip=2)
+							elif Pick([0, 1, 2, 3, 4, 5, 6, 7, 8, 9])>6:
+								RandCrsNet.AssignBox(TP='CT', Start=[IS, JS], End=[IE, JE], Band=[IB, JB],
+								                     SubC=SC, Grad=[IG, JG, RG], Repeat=[IR, JR, RR], Flip=3)
+							else:
+								RandCrsNet.AssignBox(TP='CT', Start=[IS, JS], End=[IE, JE], Band=[IB, JB],
+								                     SubC=SC, Grad=[IG, JG, RG], Repeat=[IR, JR, RR], Flip=0)
+							RandCrsNet.RandomRest()
+							RandCrsNet.SetName(Name=Name(Prefix='RandCrsNet', Index=SampleIndex))
+							RandCrsNet.write()
 							SampleIndex+=1
-# , [0, 1, 2, 3], [5, 6, 7, 8], [0, 1, 2, 3, 4, 5, 6, 7, 8]
-# , [3, 2, 1, 0], [5, 6, 7, 8], 
-# 	for IS in range(RandStrNet.VTRange[0][0], RandStrNet.VTRange[0][1], 1):
-# 		for IE in range(IS+1, RandStrNet.VTRange[0][1]+1, 1):
-# 			for JS in range(RandStrNet.VTRange[1][0], RandStrNet.VTRange[1][1], 1):
-# 				for JE in range(JS+1, RandStrNet.VTRange[1][1]+1, 1):
-			# 		for IB in range(Nx//3):
-			# 			for JB in range(Ny//3):
-							# for SC in SCs:
-							
+							# ---------------------------------------------------------------------
 	print(SampleIndex)
+
+	# Generate Fixed Volume Network ---------------------------------------------------------------
+	SampleIndex=0
+	for B in [0, 4, 8]:
+		for SC in [[0, 1, 2], [4, 3, 5], [8, 7, 6], [2, 4, 6, 8], [7, 5, 3, 1]]:
+			for IG in [0, 1, 2]:
+				for JG in [0, 1, 2]:
+					for IR in [1, 2, 3, 4]:
+						for JR in [1, 2, 3, 4]:
+
 
 
 
@@ -613,7 +651,7 @@ def CreatePoreNetworkSamples(Nx=20, Ny=20, Folder=''):
 
 
 #============================ Main Program ========================================================
-CreatePoreNetworkSamples(Nx=3, Ny=3, Folder='/home/xu/work/PoreNetwork1010Samples')
+CreatePoreNetworkSamples(Nx= 3, Ny= 3, Folder='/home/xu/work/PoreNetwork1010Samples')
 CreatePoreNetworkSamples(Nx=10, Ny=10, Folder='/home/xu/work/PoreNetwork1010Samples')
 CreatePoreNetworkSamples(Nx=20, Ny=20, Folder='/home/xu/work/PoreNetwork2020Samples')
 CreatePoreNetworkSamples(Nx=40, Ny=40, Folder='/home/xu/work/PoreNetwork4040Samples')
