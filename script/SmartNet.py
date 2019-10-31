@@ -211,25 +211,26 @@ class PoreNetwork(object):
 			for j in range(self.My):
 				if  (i%2==0 and j%2==0):
 					continue
-				elif('W' in self.Open and i==0):
+				elif('W' in self.Open and i==0           and j%2!=0):
 					continue
-				elif('E' in self.Open and i==(self.Mx-1)):
+				elif('E' in self.Open and i==(self.Mx-1) and j%2!=0):
 					continue
-				elif('S' in self.Open and j==0):
+				elif('S' in self.Open and j==0           and i%2!=0):
 					continue
-				elif('N' in self.Open and j==(self.My-1)):
+				elif('N' in self.Open and j==(self.My-1) and i%2!=0):
 					continue
 				elif(self.Cross==False and (i%2!=0 and j%2!=0)):
 					continue
 				elif(self.Cross==True  and (i%2!=0 and j%2!=0)):
 					crsthroat=self.CrsTPool.UseRandom()
+					print('OK-Cross', crsthroat)
 					self.Matrix[i][j][0]=crsthroat[0]*Pick(List=[1, -1])
 					self.Matrix[i][j][1]=crsthroat[1]
-					print('OK-Cross', crsthroat)
 				else:
 					strthroat=self.StrTPool.UseRandom()
+					print('OK-Straight', i,j, strthroat)
 					self.Matrix[i][j]=strthroat
-					print('OK-Straight', strthroat)
+					
 					# self.Matrix[i][j]=self.StrTPool.UseRandom()
 					
 		print('StrTPool', self.StrTPool.ThroatType, self.StrTPool.ThroatCount)
@@ -256,7 +257,6 @@ class PoreNetwork(object):
 	def Write(self, Folder=''):
 		with open(Folder+self.Name+'.at', 'w') as wat:
 			for j in range(self.My-1, -1, -1):
-			# for j in range(self.My):
 				for i in range(self.Mx):
 					wat.write('% 9.6e\t% 9d\t' % (self.Matrix[i][j][0], self.Matrix[i][j][1]))
 				wat.write('\n')
@@ -349,11 +349,11 @@ class PoreNetwork(object):
 	# Assign Throat at a certain position ---------------------------------------------------------
 	def AssignT(self, TP, I, J, T):
 		if   TP=='VT' and I>=self.VTRange[0][0] and I<=self.VTRange[0][1] and J>=self.VTRange[1][0] and J<=self.VTRange[1][1]:
-			self.AssignMC(2*I  , 2*J-1, T)
+			self.AssignMC(i=2*I  , j=2*J-1, T=T)
 		elif TP=='HT' and I>=self.HTRange[0][0] and I<=self.HTRange[0][1] and J>=self.HTRange[1][0] and J<=self.HTRange[1][1]:
-			self.AssignMC(2*I-1, 2*J  , T)
+			self.AssignMC(i=2*I-1, j=2*J  , T=T)
 		elif TP=='CT' and I>=self.CTRange[0][0] and I<=self.CTRange[0][1] and J>=self.CTRange[1][0] and J<=self.CTRange[1][1] and self.Cross:
-			self.AssignMC(2*I-1, 2*J-1, T)
+			self.AssignMC(i=2*I-1, j=2*J-1, T=T)
 		else:
 			return False
 		return True
@@ -375,12 +375,11 @@ class PoreNetwork(object):
 		if  (TP=='VT' or TP=='HT') and len(T)==4:
 			print(TP, I, J, T)
 			self.StrTPool.Return(T=T[3], Method='ByThroatType')
-			self.AssignT(TP, I, J, [0, 0])
+			self.AssignT(TP=TP, I=I, J=J, T=[0, 0])
 		elif TP=='CT' and len(T)==4:
 			print(TP, I, J, T)
 			self.CrsTPool.Return(T=[abs(T[3][0]), T[3][1]], Method='ByThroatType')
-			
-			self.AssignT(TP, I, J, [0, 0])
+			self.AssignT(TP=TP, I=I, J=J, T=[0, 0])
 		else:
 			return False
 		return True
@@ -954,6 +953,6 @@ def CreatePoreNetworkSamples(Nx=20, Ny=20, Folder=''):
 
 #============================ Main Program ========================================================
 # CreatePoreNetworkSamples(Nx= 3, Ny= 3, Folder='/home/xu/work/PoreNetwork1010Samples')
-CreatePoreNetworkSamples(Nx=10, Ny=10, Folder='/home/xu/work/PoreNetwork1010Samples/')
+CreatePoreNetworkSamples(Nx=10, Ny=5, Folder='/home/xu/work/PoreNetwork1010Samples/')
 # CreatePoreNetworkSamples(Nx=20, Ny=20, Folder='/home/xu/work/PoreNetwork2020Samples/')
 # CreatePoreNetworkSamples(Nx=40, Ny=40, Folder='/home/xu/work/PoreNetwork4040Samples/')
