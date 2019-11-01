@@ -154,7 +154,8 @@ class PoreNetwork(object):
 		self.CrsTCount     =self.Nx*self.Ny if self.Cross else 0
 		self.VTRange       =[[0, self.Nx], [1, self.Ny]]
 		self.HTRange       =[[1, self.Nx], [0, self.Ny]]
-		self.CTRange       =[[1, self.Nx], [1, self.Ny]] #if self.Cross else []
+		self.CTRange       =[[1, self.Nx], [1, self.Ny]] if self.Cross else []
+		# print(self.Matrix[2][1][1])
 		if 'W' in self.Open:
 			self.VTRange[0][0] =1
 			self.StrTCount    -=self.Ny
@@ -222,19 +223,16 @@ class PoreNetwork(object):
 				elif(self.Cross==False and (i%2!=0 and j%2!=0)):
 					continue
 				elif(self.Cross==True  and (i%2!=0 and j%2!=0)):
-					crsthroat=self.CrsTPool.UseRandom()
-					print('OK-Cross', crsthroat)
-					self.Matrix[i][j][0]=crsthroat[0]*Pick(List=[1, -1])
-					self.Matrix[i][j][1]=crsthroat[1]
+					ct=self.CrsTPool.UseRandom()
+					crsthroat=[ct[0]*Pick(List=[1, -1]), ct[1]]
+					self.Matrix[j][i]=crsthroat
 				else:
 					strthroat=self.StrTPool.UseRandom()
-					print('OK-Straight', i,j, strthroat)
-					self.Matrix[i][j]=strthroat
-					
-					# self.Matrix[i][j]=self.StrTPool.UseRandom()
-					
-		print('StrTPool', self.StrTPool.ThroatType, self.StrTPool.ThroatCount)
-		print('CrsTPool', self.CrsTPool.ThroatType, self.CrsTPool.ThroatCount)
+					self.Matrix[j][i]=strthroat
+		print('StrTPool', self.StrTPool.ThroatType, self.StrTPool.ThroatCount, self.StrTPool.ExistTypeIndex(), self.StrTPool.ExistThroatCount())
+		print('CrsTPool', self.CrsTPool.ThroatType, self.CrsTPool.ThroatCount, self.CrsTPool.ExistTypeIndex(), self.CrsTPool.ExistThroatCount())
+		# print('StrTPool', self.StrTPool.ThroatType, self.StrTPool.ThroatCount)
+		# print('CrsTPool', self.CrsTPool.ThroatType, self.CrsTPool.ThroatCount)
 		self.TotTCount=self.StrTCount+self.CrsTCount
 
 	# set a new name ------------------------------------------------------------------------------
@@ -250,15 +248,16 @@ class PoreNetwork(object):
 		print('\tStrTCount=', self.StrTCount, 'CrsTCount=', self.CrsTCount, 'TotTCount=', self.TotTCount)
 		print('\tVTRange=', self.VTRange, 'HTRange=', self.HTRange, 'CTRange=', self.CTRange)
 		print('\tStrTType=', self.StrTType, 'StrTPool: ', self.StrTPool.ThroatType, self.StrTPool.ThroatCount)
-		print('\tCrsTType=', self.CrsTType, 'CrsTPool: ', self.CrsTPool.ThroatType, self.CrsTPool.ThroatCount)
+		if self.Cross: print('\tCrsTType=', self.CrsTType, 'CrsTPool: ', self.CrsTPool.ThroatType, self.CrsTPool.ThroatCount)
 
 		return True
+
 	# Write PoreNetwork Data File -----------------------------------------------------------------
 	def Write(self, Folder=''):
 		with open(Folder+self.Name+'.at', 'w') as wat:
 			for j in range(self.My-1, -1, -1):
 				for i in range(self.Mx):
-					wat.write('% 9.6e\t% 9d\t' % (self.Matrix[i][j][0], self.Matrix[i][j][1]))
+					wat.write('% 9.6e\t% 9d\t' % (self.Matrix[j][i][0], self.Matrix[j][i][1]))
 				wat.write('\n')
 		wat.close()
 		return True
@@ -287,7 +286,7 @@ class PoreNetwork(object):
 				J=(j+1)/2
 				if (I>=self.VTRange[0][0] and I<=self.VTRange[0][1] and 
 					J>=self.VTRange[1][0] and J<=self.VTRange[1][1]):
-					return ['VT'  , I, J, self.Matrix[i][j]]
+					return ['VT'  , I, J, self.Matrix[j][i]]
 				else:
 					return ['VT'  , I, J]
 			elif i%2!=0 and j%2==0:
@@ -295,14 +294,14 @@ class PoreNetwork(object):
 				J=j/2
 				if (I>=self.HTRange[0][0] and I<=self.HTRange[0][1] and 
 					J>=self.HTRange[1][0] and J<=self.HTRange[1][1]):
-					return ['HT'  , I, J, self.Matrix[i][j]]
+					return ['HT'  , I, J, self.Matrix[j][i]]
 				else:
 					return ['HT'  , I, J]
 			elif i%2!=0 and j%2!=0:
 				I=(i+1)/2
 				J=(j+1)/2
 				if self.Cross:
-					return ['CT'  , I, J, self.Matrix[i][j]]
+					return ['CT'  , I, J, self.Matrix[j][i]]
 				else:
 					return ['CT'  , I, J]
 		else:
@@ -319,7 +318,7 @@ class PoreNetwork(object):
 			j=2*J-1
 			if (I>=self.VTRange[0][0] and I<=self.VTRange[0][1] and 
 				J>=self.VTRange[1][0] and J<=self.VTRange[1][1]):
-				return ['VT', i, j, self.Matrix[i][j]]
+				return ['VT', i, j, self.Matrix[j][i]]
 			else:
 				return ['VT', i, j]
 		elif TP=='HT':
@@ -327,14 +326,14 @@ class PoreNetwork(object):
 			j=2*J
 			if (I>=self.HTRange[0][0] and I<=self.HTRange[0][1] and 
 				J>=self.HTRange[1][0] and J<=self.HTRange[1][1]):
-				return ['HT', i, j, self.Matrix[i][j]]
+				return ['HT', i, j, self.Matrix[j][i]]
 			else:
 				return ['HT', i, j]
 		elif TP=='CT':
 			i=2*I-1
 			j=2*J-1
 			if self.Cross and I>=self.CTRange[0][0] and I<=self.CTRange[0][1] and J>=self.CTRange[1][0] and J<=self.CTRange[1][1]:
-				return ['CT', i, j, self.Matrix[i][j]]
+				return ['CT', i, j, self.Matrix[j][i]]
 			else:
 				return ['CT', i, j]
 		else:
@@ -342,8 +341,12 @@ class PoreNetwork(object):
 
 	# Assign Throat at a certain coordinate in Matrix ---------------------------------------------
 	def AssignMC(self, i, j, T): # i, j is the index in Matrix, i in range [0, Mx), j in range [0, My)
-		self.Matrix[i][j][0]=T[0]
-		self.Matrix[i][j][1]=T[1]
+
+		self.Matrix[j][i]=T
+
+		# self.Matrix[j][i][0]=T[0]
+		# self.Matrix[j][i][1]=T[1]
+
 		return True
 
 	# Assign Throat at a certain position ---------------------------------------------------------
@@ -360,11 +363,11 @@ class PoreNetwork(object):
 
 	# Judge if it is assigned or not --------------------------------------------------------------
 	def Assigned(self, TP, I, J):
-		if   TP=='VT' and self.Matrix[2*I  ][2*J-1] in self.StrTPool.ThroatType:
+		if   TP=='VT' and self.Matrix[2*J-1][2*I  ] in self.StrTPool.ThroatType:
 			return True
-		elif TP=='HT' and self.Matrix[2*I-1][2*J  ] in self.StrTPool.ThroatType:
+		elif TP=='HT' and self.Matrix[2*J  ][2*I-1] in self.StrTPool.ThroatType:
 			return True
-		elif TP=='CT' and self.Matrix[2*I-1][2*J-1] in self.CrsTPool.ThroatType:
+		elif TP=='CT' and self.Matrix[2*J-1][2*I-1] in self.CrsTPool.ThroatType:
 			return True
 		else:
 			return False
@@ -525,8 +528,8 @@ def CreatePoreNetworkSamples(Nx=20, Ny=20, Folder=''):
 	# RandCrsNet.Report()
 	# FixVStrNet.Report()
 	# FixVCrsNet.Report()
-
-
+	RandStrNet.AssignMC(0,1,[9,5])
+	RandStrNet.Write()
 	# # Generate Random Volume Network --------------------------------------------------------------
 	# SampleIndex=0
 	# for B in [0, 4, 8]:
@@ -953,6 +956,6 @@ def CreatePoreNetworkSamples(Nx=20, Ny=20, Folder=''):
 
 #============================ Main Program ========================================================
 # CreatePoreNetworkSamples(Nx= 3, Ny= 3, Folder='/home/xu/work/PoreNetwork1010Samples')
-CreatePoreNetworkSamples(Nx=10, Ny=5, Folder='/home/xu/work/PoreNetwork1010Samples/')
+CreatePoreNetworkSamples(Nx=10, Ny=10, Folder='/home/xu/work/PoreNetwork1010Samples/')
 # CreatePoreNetworkSamples(Nx=20, Ny=20, Folder='/home/xu/work/PoreNetwork2020Samples/')
 # CreatePoreNetworkSamples(Nx=40, Ny=40, Folder='/home/xu/work/PoreNetwork4040Samples/')
