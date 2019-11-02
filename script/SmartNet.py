@@ -34,6 +34,18 @@ def Pick(List=[], Index=0, Method='Random'):
 	elif Method=='Rotate':
 		return List[Index%len(List)]
 
+# List Operation ----------------------------------------------------------------------------------
+def Union(Base=[], SubC=[], ExC=[]):
+	final=[]
+	if not SubC:
+		SubC=Base
+	for item in Base:
+		if item in SubC and not item in ExC:
+			final.append(item)
+	if not final:
+		final=Base
+	return final
+
 # Create file name --------------------------------------------------------------------------------
 def Name(Prefix='Sample', Index=0, Digit=6):
 	si=str(Index)
@@ -43,17 +55,27 @@ def Name(Prefix='Sample', Index=0, Digit=6):
 		si='0'+si
 	return Prefix+si
 
+#============================ Class Throat ========================================================
+def Throat(object):
+	def __init__(self, D=0, P=0, Type=0, Count=0):
+		self.D    =D
+		self.P    =P
+		self.Type =Type
+		self.Count=Count
+
 #============================ Class ThroatPool ====================================================
 class ThroatPool(object):
 	# Initialize ----------------------------------------------------------------------------------
 	def __init__(self, Name='ThroatPool', ThroatType=[], ThroatCount=[]):
-		self.Name       =Name
-		self.ThroatType =ThroatType
-		self.ThroatCount=ThroatCount
-		self.TypeCount  =len(self.ThroatType)
+		self.Name          =Name
+		self.ThroatType    =ThroatType
+		self.ThroatCount   =ThroatCount
+		self.TypeCount     =len(self.ThroatType)
+		self.TypePool      =[i for i in range(self.TypeCount)]
+		self.OriginalTotal =sum(self.ThroatCount)
 
 	# Pool Total Throat Count ---------------------------------------------------------------------
-	def TotalCount(self):
+	def ExistTotalCount(self):
 		TotC=0
 		for count in self.ThroatCount:
 			TotC+=count
@@ -66,75 +88,54 @@ class ThroatPool(object):
 				etc+=1
 		return etc
 
-	# Find out the index of existing throat
+	# Find out the index of existing throat -------------------------------------------------------
 	def ExistTypeIndex(self):
 		eti=[]
-		for i in range(len(self.ThroatCount)):
+		for i in self.TypePool:
 			if self.ThroatCount[i]>0:
 				eti.append(i)
 		return eti
 
-	# Total throat available ----------------------------------------------------------------------
-	def ExistThroatCount(self):
-		count=0
-		for type in self.ExistTypeIndex():
-			count+=self.ThroatCount[type]
-		return count
+	# Throat in Pool or not -----------------------------------------------------------------------
+	def InPool(self, T):
+		throat=[abs(T[0]), T[1]]
+		for t in self.ThroatType:
+			if throat==t:
+				return True
+		return False
 
-	# Use appointed one from ThroatPool -----------------------------------------------------------
-	def UseAppoint(self, Index, Count=1):
-		if (self.ThroatCount[Index]-Count)>=0:
-			self.ThroatCount[Index]-=Count
-			return self.ThroatType[Index]
-		else:
-			print('Not enough throats of this type, nothing assigned!')
-			return [0, 0]
+	# Throat Type Index in Pool -------------------------------------------------------------------
+	def TypeInPool(self, T):
+		throat=[abs(T[0]), T[1]]
+		for i in self.TypePool:
+			if throat==self.ThroatType[i]:
+				return i
 
-	# Use one randomly from ThroatPool ------------------------------------------------------------
-	def UseRandom(self, SubC=[]): # SubC: Sub Throat Index Collection
-		Choice=[]
-		if SubC==[]:
-			Choice=self.ExistTypeIndex()
-		else:
-			for eti in self.ExistTypeIndex():
-				if eti in SubC:
-					Choice.append(eti)
-		Index=Pick(List=Choice)
-		self.ThroatCount[Index]-=1
-		return self.ThroatType[Index]
+	# Fetch one -----------------------------------------------------------------------------------
+	def FetchOne(self, Index=0, SubC=[], ExC=[], Method='Random'):
+		Base=self.ExistTypeIndex()
+		if not Base: print('Warning: Throat Pool Used Up!')
+		Choice=Union(Base=Base, SubC=SubC, ExC=ExC)
+		if Method=='Random':
+			Selection=Pick(List=Base)
+		elif Method=='Rotate':
+			Selection=Pick(List=Choice, Index=Index, Method=Method)
+		self.ThroatCount[Selection]-=1
+		return self.ThroatType[Selection]
 
-	# Use one appointed or choose randomly from pool exclude a sub --------------------------------
-	def Use(self, Index, ExC=[]):
-		if self.ThroatCount[Index]>=1:
-			self.ThroatCount[Index]-=1
-		else:
-			Available=[]
-			for eti in self.ExistTypeIndex():
-				if eti in ExC:
-					continue
-				else:
-					Available.append(eti)
-			Index=Pick(List=Available)
-			self.ThroatCount[Index]-=1
-		return self.ThroatType[Index]
-
-	# Return one back to ThroatPool ---------------------------------------------------------------
-	def Return(self, Index=0, T=[], Count=1, Method='ByIndex'):
-		# print(T)
+	# Return One ----------------------------------------------------------------------------------
+	def ReturnOne(self, Index=0, T=[], Method='ByThroatType'):
+		Selection =Index
 		if Method=='ByIndex':
-			I=Pick(List=self.ThroatCount, Index=Index, Method='Rotate')
-			self.ThroatCount[I]+=Count
-			T=self.ThroatType[I]
-			return True
+			Selection =Pick(List=self.TypePool, Index=Index, Method='Rotate')
 		elif Method=='ByThroatType':
-			for i in range(len(self.ThroatType)):
-				if self.ThroatType[i]==T:
-					Index=i
-					self.ThroatCount[Index]+=Count
-					return True
-			return False
-		else:
-			return False
+			if self.InPool(T):
+				Selection=self.TypeInPool(T)
+			else:
+				print('Warning: cannot return, no throat type matched!')
+				return False
+		self.ThroatCount[Selection]+=1
+		return True
 
 #============================ Class PoreNetwork ===================================================
 class PoreNetwork(object):
@@ -169,10 +170,10 @@ class PoreNetwork(object):
 			self.HTRange[1][1] =self.Ny-1
 			self.StrTCount    -=self.Nx
 		
-		if (StrTType==[]) and (StrTPool.TotalCount()!=0):
+		if (StrTType==[]) and (StrTPool.OriginalTotal!=0):
 			self.StrTPool     =StrTPool
 			self.StrTType     =StrTPool.ThroatType
-		elif (StrTType!=[] and StrTPool.TotalCount()==0):
+		elif (StrTType!=[] and StrTPool.OriginalTotal==0):
 			self.StrTType     =StrTType
 			STN=[]
 			if self.FixV:
@@ -188,10 +189,10 @@ class PoreNetwork(object):
 			self.StrTPool=ThroatPool()
 			self.StrTType=[]
 
-		if (CrsTType==[]) and (CrsTPool.TotalCount()!=0):
+		if (CrsTType==[]) and (CrsTPool.OriginalTotal!=0):
 			self.CrsTPool     =CrsTPool
 			self.CrsTType     =CrsTPool.ThroatType
-		elif (CrsTType!=[] and CrsTPool.TotalCount()==0):
+		elif (CrsTType!=[] and CrsTPool.OriginalTotal==0):
 			self.CrsTType     =CrsTType
 			CTN=[]
 			if self.FixV:
@@ -206,8 +207,12 @@ class PoreNetwork(object):
 		else:
 			self.CrsTPool=ThroatPool()
 			self.CrsTType=[]
-		print('StrTPool', self.StrTPool.ThroatType, self.StrTPool.ThroatCount, self.StrTPool.ExistTypeIndex(), self.StrTPool.ExistThroatCount())
-		print('CrsTPool', self.CrsTPool.ThroatType, self.CrsTPool.ThroatCount, self.CrsTPool.ExistTypeIndex(), self.CrsTPool.ExistThroatCount())
+		if self.StrTCount>self.StrTPool.ExistTotalCount():
+			print('Warning: Straight Throat Pool Created but Not Enough!')
+		if self.Cross and self.CrsTCount>self.CrsTPool.ExistTotalCount():
+			print('Warning: Cross Throat Pool Created but Not Enough!')
+		# print('StrTPool', self.StrTPool.ThroatType, self.StrTPool.ThroatCount, self.StrTPool.ExistTypeIndex(), self.StrTPool.ExistThroatCount())
+		# print('CrsTPool', self.CrsTPool.ThroatType, self.CrsTPool.ThroatCount, self.CrsTPool.ExistTypeIndex(), self.CrsTPool.ExistThroatCount())
 		for i in range(self.Mx):
 			for j in range(self.My):
 				if  (i%2==0 and j%2==0):
@@ -223,14 +228,14 @@ class PoreNetwork(object):
 				elif(self.Cross==False and (i%2!=0 and j%2!=0)):
 					continue
 				elif(self.Cross==True  and (i%2!=0 and j%2!=0)):
-					ct=self.CrsTPool.UseRandom()
+					ct=self.CrsTPool.FetchOne()
 					crsthroat=[ct[0]*Pick(List=[1, -1]), ct[1]]
 					self.Matrix[j][i]=crsthroat
 				else:
-					strthroat=self.StrTPool.UseRandom()
+					strthroat=self.StrTPool.FetchOne()
 					self.Matrix[j][i]=strthroat
-		print('StrTPool', self.StrTPool.ThroatType, self.StrTPool.ThroatCount, self.StrTPool.ExistTypeIndex(), self.StrTPool.ExistThroatCount())
-		print('CrsTPool', self.CrsTPool.ThroatType, self.CrsTPool.ThroatCount, self.CrsTPool.ExistTypeIndex(), self.CrsTPool.ExistThroatCount())
+		# print('StrTPool', self.StrTPool.ThroatType, self.StrTPool.ThroatCount, self.StrTPool.ExistTypeIndex(), self.StrTPool.ExistThroatCount())
+		# print('CrsTPool', self.CrsTPool.ThroatType, self.CrsTPool.ThroatCount, self.CrsTPool.ExistTypeIndex(), self.CrsTPool.ExistThroatCount())
 		# print('StrTPool', self.StrTPool.ThroatType, self.StrTPool.ThroatCount)
 		# print('CrsTPool', self.CrsTPool.ThroatType, self.CrsTPool.ThroatCount)
 		self.TotTCount=self.StrTCount+self.CrsTCount
@@ -341,11 +346,7 @@ class PoreNetwork(object):
 
 	# Assign Throat at a certain coordinate in Matrix ---------------------------------------------
 	def AssignMC(self, i, j, T): # i, j is the index in Matrix, i in range [0, Mx), j in range [0, My)
-
 		self.Matrix[j][i]=T
-
-		# self.Matrix[j][i][0]=T[0]
-		# self.Matrix[j][i][1]=T[1]
 
 		return True
 
@@ -363,27 +364,37 @@ class PoreNetwork(object):
 
 	# Judge if it is assigned or not --------------------------------------------------------------
 	def Assigned(self, TP, I, J):
-		if   TP=='VT' and self.Matrix[2*J-1][2*I  ] in self.StrTPool.ThroatType:
-			return True
-		elif TP=='HT' and self.Matrix[2*J  ][2*I-1] in self.StrTPool.ThroatType:
-			return True
-		elif TP=='CT' and self.Matrix[2*J-1][2*I-1] in self.CrsTPool.ThroatType:
-			return True
+		thro=self.GetT(TP, I, J)
+		pool=ThroatPool()
+		if TP=='VT' or TP=='HT':
+			pool=self.StrTPool
+		elif TP=='CT':
+			pool=self.CrsTPool
+		if len(thro)==4:
+			if pool.InPool(thro[3]):
+				return True
+			else:
+				print('Warning: Throat Found but Not a Certifed Type!', pool.Name, thro[3])
+				return False
 		else:
+			print('Warning: No Throat Found!')
 			return False
 	
 	# Return Throat at a certain position back to appropriate pool --------------------------------
 	def ReturnT(self, TP, I, J):
 		T=self.GetT(TP, I, J)
 		if  (TP=='VT' or TP=='HT') and len(T)==4:
-			print(TP, I, J, T)
-			self.StrTPool.Return(T=T[3], Method='ByThroatType')
+			# print(TP, I, J, T)
+			succeed=self.StrTPool.ReturnOne(T=T[3], Method='ByThroatType')
+			if not succeed: print('Warning: Returning Operation Failed!')
 			self.AssignT(TP=TP, I=I, J=J, T=[0, 0])
 		elif TP=='CT' and len(T)==4:
-			print(TP, I, J, T)
-			self.CrsTPool.Return(T=[abs(T[3][0]), T[3][1]], Method='ByThroatType')
+			# print(TP, I, J, T)
+			succeed=self.CrsTPool.ReturnOne(T=T[3], Method='ByThroatType')
+			if not succeed: print('Warning: Returning Operation Failed!')
 			self.AssignT(TP=TP, I=I, J=J, T=[0, 0])
 		else:
+			print('Warning: No Throat to Return!')
 			return False
 		return True
 
@@ -449,18 +460,23 @@ class PoreNetwork(object):
 						                        (J-Start[1])//Repeat[1]*Grad[1]+
 						                        RingIndex   //Repeat[2]*Grad[2], Method='Rotate')
 					if TP=='VT' or TP=='HT':
-						T=self.StrTPool.Use(Index=Index, ExC=ExC)
+						T=self.StrTPool.FetchOne(Index=Index, SubC=SubC, ExC=ExC, Method='Rotate')
 					elif TP=='CT':
-						T=self.CrsTPool.Use(Index=Index, ExC=ExC)
+						# print('ExC=', ExC)
+						t=self.CrsTPool.FetchOne(Index=Index, SubC=SubC, ExC=ExC, Method='Rotate')
+						T=t
+						if not self.CrsTPool.InPool(t): print('Warning: Fuck it is impossible!')
 						if Flip==0:
-							T=[Pick(List=[-1, 1])*T[0], T[1]]
+							T=[ t[0]*Pick(List=[-1, 1]), t[1]]
 						elif Flip==2 and I%2==0:
-							T=[      -1     *T[0], T[1]]
+							T=[-t[0],                    t[1]]
 						elif Flip==3 and J%2==0:
-							T=[      -1     *T[0], T[1]]
-						else: # Flip= -1 or 1
-							T=[Flip         *T[0], T[1]]
-					self.AssignT(TP, I, J, T)
+							T=[-t[0],                    t[1]]
+						elif Flip==-1 or Flip==1: # Flip= -1 or 1
+							T=[ t[0]*Flip ,              t[1]]
+						if not self.CrsTPool.InPool(T): print('Warning: Fuck! What happened here!', t, T)
+					succeed=self.AssignT(TP, I, J, T)
+					if not succeed: print('Warning: AssignT when AssignBox not succeed!')
 					Count+=1
 		
 		return Count
@@ -471,25 +487,30 @@ class PoreNetwork(object):
 		for I in range(self.VTRange[0][0], self.VTRange[0][1]+1, 1):
 			for J in range(self.VTRange[1][0], self.VTRange[1][1]+1, 1):
 				if not self.Assigned('VT', I, J):
-					self.AssignT('VT', I, J, self.StrTPool.UseRandom())
+					succeed=self.AssignT('VT', I, J, self.StrTPool.FetchOne())
+					if not succeed: print('Warning: AssignT when RandomRest not succeed!')
 					Count+=1
 		for I in range(self.HTRange[0][0], self.HTRange[0][1]+1, 1):
 			for J in range(self.HTRange[1][0], self.HTRange[1][1]+1, 1):
 				if not self.Assigned('HT', I, J):
-					self.AssignT('HT', I, J, self.StrTPool.UseRandom())
+					succeed=self.AssignT('HT', I, J, self.StrTPool.FetchOne())
+					if not succeed: print('Warning: AssignT when RandomRest not succeed!')
 					Count+=1
 		if self.Cross:
 			for I in range(self.CTRange[0][0], self.CTRange[0][1]+1, 1):
 				for J in range(self.CTRange[1][0], self.CTRange[1][1]+1, 1):
 					if not self.Assigned('CT', I, J):
-						self.AssignT('CT', I, J, self.CrsTPool.UseRandom())
+						t=self.CrsTPool.FetchOne()
+						T=[t[0]*Pick(List=[-1, 1]), t[1]]
+						succeed=self.AssignT('CT', I, J, T)
+						if not succeed: print('Warning: AssignT when RandomRest not succeed!')
 						Count+=1
 
 		return Count
 
 #============================ Create Pore-Network Samples =========================================
 def CreatePoreNetworkSamples(Nx=20, Ny=20, Folder=''):
-	# Prepare the folders -------------------------------------------------------------------------
+	print('Prepare the folders ------------------------------------------------------------------')
 	cmd='mkdir '+Folder
 	subprocess.call(cmd, shell=True)
 	cmd='mkdir '+Folder+'RandStrNet/'
@@ -500,7 +521,7 @@ def CreatePoreNetworkSamples(Nx=20, Ny=20, Folder=''):
 	subprocess.call(cmd, shell=True)
 	cmd='mkdir '+Folder+'FixVCrsNet/'
 	subprocess.call(cmd, shell=True)
-	# Initialize 4 kinds of networks --------------------------------------------------------------
+	print('Initialize 4 kinds of networks -------------------------------------------------------')
 	RandStrNet =PoreNetwork(Name='RandStrNet', Nx=Nx, Ny=Ny, Open=['N'], Cross=False, FixV=False,
 		                    StrTType=TT)
 	RandCrsNet =PoreNetwork(Name='RandCrsNet', Nx=Nx, Ny=Ny, Open=['N'], Cross=True , FixV=False,
@@ -514,7 +535,7 @@ def CreatePoreNetworkSamples(Nx=20, Ny=20, Folder=''):
 	FixVStrNet.Report()
 	FixVCrsNet.Report()
 
-	# Generate Random Volume Network --------------------------------------------------------------
+	print('Generate Random Volume Network -------------------------------------------------------')
 	SampleIndex=0
 	for B in [0, 4, 8]:
 		for SC in [[0, 1, 2], [4, 3, 5], [8, 7, 6], [2, 4, 6, 8], [7, 5, 3, 1]]:
@@ -536,8 +557,10 @@ def CreatePoreNetworkSamples(Nx=20, Ny=20, Folder=''):
 								RandStrNet.AssignBox(TP='VT', Start=[IS, JS], End=[IE, JE], Band=[IB, JB],
 									                 SubC=SC, Grad=[IG, JG, RG], Repeat=[IR, JR, RR])
 							RandStrNet.RandomRest()
-							RandStrNet.SetName(Name=Name(Prefix='RandStrNet', Index=SampleIndex))
+							name=Name(Prefix='RandStrNet', Index=SampleIndex)
+							RandStrNet.SetName(Name=name)
 							RandStrNet.Write(Folder+'RandStrNet/')
+							print(name, 'Written!:\t', B, SC, IG, JG, IR, JR)
 
 							RandCrsNet.Restore()
 							if Pick(List=[0, 1, 2, 3, 4, 5, 6, 7, 8, 9])<8:
@@ -560,8 +583,10 @@ def CreatePoreNetworkSamples(Nx=20, Ny=20, Folder=''):
 								RandCrsNet.AssignBox(TP='CT', Start=[IS, JS], End=[IE, JE], Band=[IB, JB],
 								                     SubC=SC, Grad=[IG, JG, RG], Repeat=[IR, JR, RR], Flip= 0)
 							RandCrsNet.RandomRest()
-							RandCrsNet.SetName(Name=Name(Prefix='RandCrsNet', Index=SampleIndex))
+							name=Name(Prefix='RandCrsNet', Index=SampleIndex)
+							RandCrsNet.SetName(Name=name)
 							RandCrsNet.Write(Folder+'RandCrsNet/')
+							print(name, 'Written!:\t', B, SC, IG, JG, IR, JR)
 							SampleIndex+=1
 							# ---------------------------------------------------------------------
 
@@ -571,8 +596,10 @@ def CreatePoreNetworkSamples(Nx=20, Ny=20, Folder=''):
 								RandStrNet.AssignBox(TP='HT', Start=[IS, JS], End=[IE, JE], Band=[IB, JB],
 									                 SubC=SC, Grad=[IG, JG, RG], Repeat=[IR, JR, RR])
 							RandStrNet.RandomRest()
-							RandStrNet.SetName(Name=Name(Prefix='RandStrNet', Index=SampleIndex))
+							name=Name(Prefix='RandStrNet', Index=SampleIndex)
+							RandStrNet.SetName(Name=name)
 							RandStrNet.Write(Folder+'RandStrNet/')
+							print(name, 'Written!:\t', B, SC, IG, JG, IR, JR)
 
 							RandCrsNet.Restore()
 							if Pick(List=[0, 1, 2, 3, 4, 5, 6, 7, 8, 9])<8:
@@ -595,8 +622,10 @@ def CreatePoreNetworkSamples(Nx=20, Ny=20, Folder=''):
 								RandCrsNet.AssignBox(TP='CT', Start=[IS, JS], End=[IE, JE], Band=[IB, JB],
 								                     SubC=SC, Grad=[IG, JG, RG], Repeat=[IR, JR, RR], Flip= 0)
 							RandCrsNet.RandomRest()
-							RandCrsNet.SetName(Name=Name(Prefix='RandCrsNet', Index=SampleIndex))
+							name=Name(Prefix='RandCrsNet', Index=SampleIndex)
+							RandCrsNet.SetName(Name=name)
 							RandCrsNet.Write(Folder+'RandCrsNet/')
+							print(name, 'Written!:\t', B, SC, IG, JG, IR, JR)
 							SampleIndex+=1
 							# ---------------------------------------------------------------------
 
@@ -609,8 +638,10 @@ def CreatePoreNetworkSamples(Nx=20, Ny=20, Folder=''):
 								RandStrNet.AssignBox(TP='HT', Start=[IS, JS], End=[IE, JE], Band=[IB, JB],
 									                 SubC=SC, Grad=[IG, JG, RG], Repeat=[IR, JR, RR])
 							RandStrNet.RandomRest()
-							RandStrNet.SetName(Name=Name(Prefix='RandStrNet', Index=SampleIndex))
+							name=Name(Prefix='RandStrNet', Index=SampleIndex)
+							RandStrNet.SetName(Name=name)
 							RandStrNet.Write(Folder+'RandStrNet/')
+							print(name, 'Written!:\t', B, SC, IG, JG, IR, JR)
 
 							RandCrsNet.Restore()
 							if Pick(List=[0, 1, 2, 3, 4, 5, 6, 7, 8, 9])<1:
@@ -636,14 +667,16 @@ def CreatePoreNetworkSamples(Nx=20, Ny=20, Folder=''):
 								RandCrsNet.AssignBox(TP='CT', Start=[IS, JS], End=[IE, JE], Band=[IB, JB],
 								                     SubC=SC, Grad=[IG, JG, RG], Repeat=[IR, JR, RR], Flip= 0)
 							RandCrsNet.RandomRest()
-							RandCrsNet.SetName(Name=Name(Prefix='RandCrsNet', Index=SampleIndex))
+							name=Name(Prefix='RandCrsNet', Index=SampleIndex)
+							RandCrsNet.SetName(Name=name)
 							RandCrsNet.Write(Folder+'RandCrsNet/')
+							print(name, 'Written!:\t', B, SC, IG, JG, IR, JR)
 							SampleIndex+=1
 							# ---------------------------------------------------------------------
 	print(SampleIndex)
 	# ---------------------------------------------------------------------------------------------
 
-	# Generate Fixed Volume Network ---------------------------------------------------------------
+	print('Generate Fixed Volume Network --------------------------------------------------------')
 	SampleIndex=0
 	for B in [0, 2, 4, 6, 8]:
 		for SC in [[0, 1, 2, 3, 4], [8, 7, 6, 5, 4], [4, 0, 8, 2, 6], [4, 1, 7, 3, 5], [4, 5, 3, 6, 2]]:
@@ -665,8 +698,10 @@ def CreatePoreNetworkSamples(Nx=20, Ny=20, Folder=''):
 								FixVStrNet.AssignBox(TP='VT', Start=[IS, JS], End=[IE, JE], Band=[IB, JB],
 									                 SubC=SC, Grad=[IG, JG, RG], Repeat=[IR, JR, RR])
 							FixVStrNet.RandomRest()
-							FixVStrNet.SetName(Name=Name(Prefix='FixVStrNet', Index=SampleIndex))
+							name=Name(Prefix='FixVStrNet', Index=SampleIndex)
+							FixVStrNet.SetName(Name=name)
 							FixVStrNet.Write(Folder+'FixVStrNet/')
+							print(name, 'Written!:\t', B, SC, IG, JG, IR, JR)
 
 							FixVCrsNet.Restore()
 							if Pick(List=[0, 1, 2, 3, 4, 5, 6, 7, 8, 9])<8:
@@ -689,8 +724,11 @@ def CreatePoreNetworkSamples(Nx=20, Ny=20, Folder=''):
 								FixVCrsNet.AssignBox(TP='CT', Start=[IS, JS], End=[IE, JE], Band=[IB, JB],
 								                     SubC=SC, Grad=[IG, JG, RG], Repeat=[IR, JR, RR], Flip= 0)
 							FixVCrsNet.RandomRest()
-							FixVCrsNet.SetName(Name=Name(Prefix='FixVCrsNet', Index=SampleIndex))
+							name=Name(Prefix='FixVCrsNet', Index=SampleIndex)
+							FixVCrsNet.SetName(Name=name)
 							FixVCrsNet.Write(Folder+'FixVCrsNet/')
+							print(name, 'Written!:\t', B, SC, IG, JG, IR, JR)
+
 							SampleIndex+=1
 							# ---------------------------------------------------------------------
 
@@ -700,8 +738,10 @@ def CreatePoreNetworkSamples(Nx=20, Ny=20, Folder=''):
 								FixVStrNet.AssignBox(TP='HT', Start=[IS, JS], End=[IE, JE], Band=[IB, JB],
 									                 SubC=SC, Grad=[IG, JG, RG], Repeat=[IR, JR, RR])
 							FixVStrNet.RandomRest()
-							FixVStrNet.SetName(Name=Name(Prefix='FixVStrNet', Index=SampleIndex))
+							name=Name(Prefix='FixVStrNet', Index=SampleIndex)
+							FixVStrNet.SetName(Name=name)
 							FixVStrNet.Write(Folder+'FixVStrNet/')
+							print(name, 'Written!:\t', B, SC, IG, JG, IR, JR)
 
 							FixVCrsNet.Restore()
 							if Pick(List=[0, 1, 2, 3, 4, 5, 6, 7, 8, 9])<8:
@@ -724,8 +764,11 @@ def CreatePoreNetworkSamples(Nx=20, Ny=20, Folder=''):
 								FixVCrsNet.AssignBox(TP='CT', Start=[IS, JS], End=[IE, JE], Band=[IB, JB],
 								                     SubC=SC, Grad=[IG, JG, RG], Repeat=[IR, JR, RR], Flip= 0)
 							FixVCrsNet.RandomRest()
-							FixVCrsNet.SetName(Name=Name(Prefix='FixVCrsNet', Index=SampleIndex))
+							name=Name(Prefix='FixVCrsNet', Index=SampleIndex)
+							FixVCrsNet.SetName(Name=name)
 							FixVCrsNet.Write(Folder+'FixVCrsNet/')
+							print(name, 'Written!:\t', B, SC, IG, JG, IR, JR)
+
 							SampleIndex+=1
 							# ---------------------------------------------------------------------
 
@@ -738,8 +781,10 @@ def CreatePoreNetworkSamples(Nx=20, Ny=20, Folder=''):
 								FixVStrNet.AssignBox(TP='HT', Start=[IS, JS], End=[IE, JE], Band=[IB, JB],
 									                 SubC=SC, Grad=[IG, JG, RG], Repeat=[IR, JR, RR])
 							FixVStrNet.RandomRest()
-							FixVStrNet.SetName(Name=Name(Prefix='FixVStrNet', Index=SampleIndex))
+							name=Name(Prefix='FixVStrNet', Index=SampleIndex)
+							FixVStrNet.SetName(Name=name)
 							FixVStrNet.Write(Folder+'FixVStrNet/')
+							print(name, 'Written!:\t', B, SC, IG, JG, IR, JR)
 
 							FixVCrsNet.Restore()
 							if Pick(List=[0, 1, 2, 3, 4, 5, 6, 7, 8, 9])<1:
@@ -765,8 +810,11 @@ def CreatePoreNetworkSamples(Nx=20, Ny=20, Folder=''):
 								FixVCrsNet.AssignBox(TP='CT', Start=[IS, JS], End=[IE, JE], Band=[IB, JB],
 								                     SubC=SC, Grad=[IG, JG, RG], Repeat=[IR, JR, RR], Flip= 0)
 							FixVCrsNet.RandomRest()
-							FixVCrsNet.SetName(Name=Name(Prefix='FixVCrsNet', Index=SampleIndex))
+							name=Name(Prefix='FixVCrsNet', Index=SampleIndex)
+							FixVCrsNet.SetName(Name=name)
 							FixVCrsNet.Write(Folder+'FixVCrsNet/')
+							print(name, 'Written!:\t', B, SC, IG, JG, IR, JR)
+
 							SampleIndex+=1
 							# ---------------------------------------------------------------------
 	print(SampleIndex)
@@ -790,8 +838,10 @@ def CreatePoreNetworkSamples(Nx=20, Ny=20, Folder=''):
 								FixVStrNet.AssignBox(TP='VT', Start=[IS, JS], End=[IE, JE], Band=[IB, JB],
 									                 SubC=SC, Grad=[IG, JG, RG], Repeat=[IR, JR, RR])
 							FixVStrNet.RandomRest()
-							FixVStrNet.SetName(Name=Name(Prefix='FixVStrNet', Index=SampleIndex))
+							name=Name(Prefix='FixVStrNet', Index=SampleIndex)
+							FixVStrNet.SetName(Name=name)
 							FixVStrNet.Write(Folder+'FixVStrNet/')
+							print(name, 'Written!:\t', B, SC, RG)
 
 							FixVCrsNet.Restore()
 							if Pick(List=[0, 1, 2, 3, 4, 5, 6, 7, 8, 9])<8:
@@ -814,8 +864,11 @@ def CreatePoreNetworkSamples(Nx=20, Ny=20, Folder=''):
 								FixVCrsNet.AssignBox(TP='CT', Start=[IS, JS], End=[IE, JE], Band=[IB, JB],
 								                     SubC=SC, Grad=[IG, JG, RG], Repeat=[IR, JR, RR], Flip= 0)
 							FixVCrsNet.RandomRest()
-							FixVCrsNet.SetName(Name=Name(Prefix='FixVCrsNet', Index=SampleIndex))
+							name=Name(Prefix='FixVCrsNet', Index=SampleIndex)
+							FixVCrsNet.SetName(Name=name)
 							FixVCrsNet.Write(Folder+'FixVCrsNet/')
+							print(name, 'Written!:\t', B, SC, RG)
+
 							SampleIndex+=1
 							# ---------------------------------------------------------------------
 
@@ -825,8 +878,10 @@ def CreatePoreNetworkSamples(Nx=20, Ny=20, Folder=''):
 								FixVStrNet.AssignBox(TP='HT', Start=[IS, JS], End=[IE, JE], Band=[IB, JB],
 									                 SubC=SC, Grad=[IG, JG, RG], Repeat=[IR, JR, RR])
 							FixVStrNet.RandomRest()
-							FixVStrNet.SetName(Name=Name(Prefix='FixVStrNet', Index=SampleIndex))
+							name=Name(Prefix='FixVStrNet', Index=SampleIndex)
+							FixVStrNet.SetName(Name=name)
 							FixVStrNet.Write(Folder+'FixVStrNet/')
+							print(name, 'Written!:\t', B, SC, RG)
 
 							FixVCrsNet.Restore()
 							if Pick(List=[0, 1, 2, 3, 4, 5, 6, 7, 8, 9])<8:
@@ -849,8 +904,11 @@ def CreatePoreNetworkSamples(Nx=20, Ny=20, Folder=''):
 								FixVCrsNet.AssignBox(TP='CT', Start=[IS, JS], End=[IE, JE], Band=[IB, JB],
 								                     SubC=SC, Grad=[IG, JG, RG], Repeat=[IR, JR, RR], Flip= 0)
 							FixVCrsNet.RandomRest()
-							FixVCrsNet.SetName(Name=Name(Prefix='FixVCrsNet', Index=SampleIndex))
+							name=Name(Prefix='FixVCrsNet', Index=SampleIndex)
+							FixVCrsNet.SetName(Name=name)
 							FixVCrsNet.Write(Folder+'FixVCrsNet/')
+							print(name, 'Written!:\t', B, SC, RG)
+
 							SampleIndex+=1
 							# ---------------------------------------------------------------------
 
@@ -863,8 +921,10 @@ def CreatePoreNetworkSamples(Nx=20, Ny=20, Folder=''):
 								FixVStrNet.AssignBox(TP='HT', Start=[IS, JS], End=[IE, JE], Band=[IB, JB],
 									                 SubC=SC, Grad=[IG, JG, RG], Repeat=[IR, JR, RR])
 							FixVStrNet.RandomRest()
-							FixVStrNet.SetName(Name=Name(Prefix='FixVStrNet', Index=SampleIndex))
+							name=Name(Prefix='FixVStrNet', Index=SampleIndex)
+							FixVStrNet.SetName(Name=name)
 							FixVStrNet.Write(Folder+'FixVStrNet/')
+							print(name, 'Written!:\t', B, SC, RG)
 
 							FixVCrsNet.Restore()
 							if Pick(List=[0, 1, 2, 3, 4, 5, 6, 7, 8, 9])<1:
@@ -890,8 +950,11 @@ def CreatePoreNetworkSamples(Nx=20, Ny=20, Folder=''):
 								FixVCrsNet.AssignBox(TP='CT', Start=[IS, JS], End=[IE, JE], Band=[IB, JB],
 								                     SubC=SC, Grad=[IG, JG, RG], Repeat=[IR, JR, RR], Flip= 0)
 							FixVCrsNet.RandomRest()
-							FixVCrsNet.SetName(Name=Name(Prefix='FixVCrsNet', Index=SampleIndex))
+							name=Name(Prefix='FixVCrsNet', Index=SampleIndex)
+							FixVCrsNet.SetName(Name=name)
 							FixVCrsNet.Write(Folder+'FixVCrsNet/')
+							print(name, 'Written!:\t', B, SC, RG)
+
 							SampleIndex+=1
 							# ---------------------------------------------------------------------
 	print(SampleIndex)
@@ -939,7 +1002,7 @@ def CreatePoreNetworkSamples(Nx=20, Ny=20, Folder=''):
 
 
 #============================ Main Program ========================================================
-# CreatePoreNetworkSamples(Nx= 3, Ny= 3, Folder='/home/xu/work/PoreNetwork1010Samples')
+CreatePoreNetworkSamples(Nx= 3, Ny= 3, Folder='/home/xu/work/PoreNetwork0303Samples')
 # CreatePoreNetworkSamples(Nx=10, Ny=10, Folder='/home/xu/work/PoreNetwork1010Samples/')
-CreatePoreNetworkSamples(Nx=20, Ny=20, Folder='/home/xu/work/PoreNetwork2020Samples/')
+# CreatePoreNetworkSamples(Nx=20, Ny=20, Folder='/home/xu/work/PoreNetwork2020Samples/')
 # CreatePoreNetworkSamples(Nx=40, Ny=40, Folder='/home/xu/work/PoreNetwork4040Samples/')
