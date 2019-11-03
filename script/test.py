@@ -35,7 +35,10 @@ def SetDifference(Base=[], ExC=[]):
 			final.append(item)
 	return final
 
-
+def haha(t):
+	a=t
+	a=[0,0]
+	return a
 
 
 
@@ -63,3 +66,6 @@ print('7', SetDifference(a,b))
 print('8', SetDifference(b,c))
 print('9', SetDifference(c,d))
 print(a,b,c,d)
+
+print('10', haha(b))
+print('10', b)
