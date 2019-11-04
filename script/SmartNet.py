@@ -573,7 +573,7 @@ class PoreNetwork(object):
 						if not succeed: print('Warning: AssignT when RandomRest not succeed!')
 						ct+=1
 		print('RandomRest: ', vt+ht+ct, '\tVT: ', vt, '\tHT: ', ht, '\tCT: ', ct)
-		return Count
+		return vt+ht+ct
 
 #============================ Create Pore-Network Samples =========================================
 def CreatePoreNetworkSamples(Nx=20, Ny=20, Folder=''):
@@ -602,7 +602,7 @@ def CreatePoreNetworkSamples(Nx=20, Ny=20, Folder=''):
 	FixVStrNet.Report()
 	FixVCrsNet.Report()
 
-	# Create one sample for each of the 4 kinds of networks =======================================
+	# Create samples for One Assignment Region for each of the 4 kinds of networks ================
 	def CreateOne(SIN=0, PNW=['Rand', 'FixV'], AVTP=0, AHTP=0, \
 		          IS=0, JS=0, IE=0, JE=0, IB=0, JB=0, \
 		          SC=[], IG=0, JG=0, RG=0, IR=1, JR=1, RR=1):
@@ -610,10 +610,10 @@ def CreatePoreNetworkSamples(Nx=20, Ny=20, Folder=''):
 			# -------------------------------------------------------------------------------------
 			RandStrNet.Restore()
 			if Pick(List=[0, 1, 2, 3, 4, 5, 6, 7, 8, 9])<AVTP:
-				RandStrNet.AssignBox(TP='VT', Start=[IS, JS], End=[IE, JE], Band=[IB, JB],
+				RandStrNet.AssignBox(TP='VT', Start=[IS, JS], End=[IE, JE], Band=[IB, JB],\
 					                 SubC=SC, Grad=[IG, JG, RG], Repeat=[IR, JR, RR])
 			if Pick(List=[0, 1, 2, 3, 4, 5, 6, 7, 8, 9])<AHTP:
-				RandStrNet.AssignBox(TP='HT', Start=[IS, JS], End=[IE, JE], Band=[IB, JB],
+				RandStrNet.AssignBox(TP='HT', Start=[IS, JS], End=[IE, JE], Band=[IB, JB],\
 					                 SubC=SC, Grad=[IG, JG, RG], Repeat=[IR, JR, RR])
 			RandStrNet.RandomRest()
 			name=Name(Prefix='RandStrNet', Index=SIN)
@@ -624,32 +624,32 @@ def CreatePoreNetworkSamples(Nx=20, Ny=20, Folder=''):
 			# -------------------------------------------------------------------------------------
 			RandCrsNet.Restore()
 			if Pick(List=[0, 1, 2, 3, 4, 5, 6, 7, 8, 9])<AVTP:
-				RandCrsNet.AssignBox(TP='VT', Start=[IS, JS], End=[IE, JE], Band=[IB, JB],
+				RandCrsNet.AssignBox(TP='VT', Start=[IS, JS], End=[IE, JE], Band=[IB, JB],\
 					                 SubC=SC, Grad=[IG, JG, RG], Repeat=[IR, JR, RR])
 			if Pick(List=[0, 1, 2, 3, 4, 5, 6, 7, 8, 9])<AHTP:
-				RandCrsNet.AssignBox(TP='HT', Start=[IS, JS], End=[IE, JE], Band=[IB, JB],
+				RandCrsNet.AssignBox(TP='HT', Start=[IS, JS], End=[IE, JE], Band=[IB, JB],\
 					                 SubC=SC, Grad=[IG, JG, RG], Repeat=[IR, JR, RR])
 			CrsPick=Pick(List=[0, 1, 2, 3, 4, 5, 6, 7, 8, 9])
 			if CrsPick<2:
-				FixVCrsNet.AssignBox(TP='CT', Start=[IS, JS], End=[IE, JE], Band=[IB, JB],
+				RandCrsNet.AssignBox(TP='CT', Start=[IS, JS], End=[IE, JE], Band=[IB, JB],\
 				                     SubC=SC, Grad=[IG, JG, RG], Repeat=[IR, JR, RR], Flip= 2)
 			elif CrsPick>7:
-				FixVCrsNet.AssignBox(TP='CT', Start=[IS, JS], End=[IE, JE], Band=[IB, JB],
+				RandCrsNet.AssignBox(TP='CT', Start=[IS, JS], End=[IE, JE], Band=[IB, JB],\
 				                     SubC=SC, Grad=[IG, JG, RG], Repeat=[IR, JR, RR], Flip= 3)
 			elif CrsPick==3:
-				FixVCrsNet.AssignBox(TP='CT', Start=[IS, JS], End=[IE, JE], Band=[IB, JB],
+				RandCrsNet.AssignBox(TP='CT', Start=[IS, JS], End=[IE, JE], Band=[IB, JB],\
 				                     SubC=SC, Grad=[IG, JG, RG], Repeat=[IR, JR, RR], Flip=-1)
 			elif CrsPick==6:
-				FixVCrsNet.AssignBox(TP='CT', Start=[IS, JS], End=[IE, JE], Band=[IB, JB],
+				RandCrsNet.AssignBox(TP='CT', Start=[IS, JS], End=[IE, JE], Band=[IB, JB],\
 				                     SubC=SC, Grad=[IG, JG, RG], Repeat=[IR, JR, RR], Flip= 1)
 			elif CrsPick==4:
-				FixVCrsNet.AssignBox(TP='CT', Start=[IS, JS], End=[IE, JE], Band=[IB, JB],
+				RandCrsNet.AssignBox(TP='CT', Start=[IS, JS], End=[IE, JE], Band=[IB, JB],\
 				                     SubC=[], Grad=[IG, JG, RG], Repeat=[IR, JR, RR], Flip=-1)
 			elif CrsPick==5:
-				FixVCrsNet.AssignBox(TP='CT', Start=[IS, JS], End=[IE, JE], Band=[IB, JB],
+				RandCrsNet.AssignBox(TP='CT', Start=[IS, JS], End=[IE, JE], Band=[IB, JB],\
 				                     SubC=[], Grad=[IG, JG, RG], Repeat=[IR, JR, RR], Flip= 1)
 			else:
-				FixVCrsNet.AssignBox(TP='CT', Start=[IS, JS], End=[IE, JE], Band=[IB, JB],
+				RandCrsNet.AssignBox(TP='CT', Start=[IS, JS], End=[IE, JE], Band=[IB, JB],\
 				                     SubC=SC, Grad=[IG, JG, RG], Repeat=[IR, JR, RR], Flip= 0)
 			RandCrsNet.RandomRest()
 			name=Name(Prefix='RandCrsNet', Index=SIN)
@@ -662,10 +662,10 @@ def CreatePoreNetworkSamples(Nx=20, Ny=20, Folder=''):
 			# -------------------------------------------------------------------------------------
 			FixVStrNet.Restore()
 			if Pick(List=[0, 1, 2, 3, 4, 5, 6, 7, 8, 9])<AVTP:
-				FixVStrNet.AssignBox(TP='VT', Start=[IS, JS], End=[IE, JE], Band=[IB, JB],
+				FixVStrNet.AssignBox(TP='VT', Start=[IS, JS], End=[IE, JE], Band=[IB, JB],\
 					                 SubC=SC, Grad=[IG, JG, RG], Repeat=[IR, JR, RR])
 			if Pick(List=[0, 1, 2, 3, 4, 5, 6, 7, 8, 9])<AHTP:
-				FixVStrNet.AssignBox(TP='HT', Start=[IS, JS], End=[IE, JE], Band=[IB, JB],
+				FixVStrNet.AssignBox(TP='HT', Start=[IS, JS], End=[IE, JE], Band=[IB, JB],\
 					                 SubC=SC, Grad=[IG, JG, RG], Repeat=[IR, JR, RR])
 			FixVStrNet.RandomRest()
 			name=Name(Prefix='FixVStrNet', Index=SIN)
@@ -676,32 +676,32 @@ def CreatePoreNetworkSamples(Nx=20, Ny=20, Folder=''):
 			# -------------------------------------------------------------------------------------
 			FixVCrsNet.Restore()
 			if Pick(List=[0, 1, 2, 3, 4, 5, 6, 7, 8, 9])<AVTP:
-				FixVCrsNet.AssignBox(TP='VT', Start=[IS, JS], End=[IE, JE], Band=[IB, JB],
+				FixVCrsNet.AssignBox(TP='VT', Start=[IS, JS], End=[IE, JE], Band=[IB, JB],\
 					                 SubC=SC, Grad=[IG, JG, RG], Repeat=[IR, JR, RR])
 			if Pick(List=[0, 1, 2, 3, 4, 5, 6, 7, 8, 9])<AHTP:
-				FixVCrsNet.AssignBox(TP='HT', Start=[IS, JS], End=[IE, JE], Band=[IB, JB],
+				FixVCrsNet.AssignBox(TP='HT', Start=[IS, JS], End=[IE, JE], Band=[IB, JB],\
 					                 SubC=SC, Grad=[IG, JG, RG], Repeat=[IR, JR, RR])
 			CrsPick=Pick(List=[0, 1, 2, 3, 4, 5, 6, 7, 8, 9])
 			if CrsPick<2:
-				FixVCrsNet.AssignBox(TP='CT', Start=[IS, JS], End=[IE, JE], Band=[IB, JB],
+				FixVCrsNet.AssignBox(TP='CT', Start=[IS, JS], End=[IE, JE], Band=[IB, JB],\
 				                     SubC=SC, Grad=[IG, JG, RG], Repeat=[IR, JR, RR], Flip= 2)
 			elif CrsPick>7:
-				FixVCrsNet.AssignBox(TP='CT', Start=[IS, JS], End=[IE, JE], Band=[IB, JB],
+				FixVCrsNet.AssignBox(TP='CT', Start=[IS, JS], End=[IE, JE], Band=[IB, JB],\
 				                     SubC=SC, Grad=[IG, JG, RG], Repeat=[IR, JR, RR], Flip= 3)
 			elif CrsPick==3:
-				FixVCrsNet.AssignBox(TP='CT', Start=[IS, JS], End=[IE, JE], Band=[IB, JB],
+				FixVCrsNet.AssignBox(TP='CT', Start=[IS, JS], End=[IE, JE], Band=[IB, JB],\
 				                     SubC=SC, Grad=[IG, JG, RG], Repeat=[IR, JR, RR], Flip=-1)
 			elif CrsPick==6:
-				FixVCrsNet.AssignBox(TP='CT', Start=[IS, JS], End=[IE, JE], Band=[IB, JB],
+				FixVCrsNet.AssignBox(TP='CT', Start=[IS, JS], End=[IE, JE], Band=[IB, JB],\
 				                     SubC=SC, Grad=[IG, JG, RG], Repeat=[IR, JR, RR], Flip= 1)
 			elif CrsPick==4:
-				FixVCrsNet.AssignBox(TP='CT', Start=[IS, JS], End=[IE, JE], Band=[IB, JB],
+				FixVCrsNet.AssignBox(TP='CT', Start=[IS, JS], End=[IE, JE], Band=[IB, JB],\
 				                     SubC=[], Grad=[IG, JG, RG], Repeat=[IR, JR, RR], Flip=-1)
 			elif CrsPick==5:
-				FixVCrsNet.AssignBox(TP='CT', Start=[IS, JS], End=[IE, JE], Band=[IB, JB],
+				FixVCrsNet.AssignBox(TP='CT', Start=[IS, JS], End=[IE, JE], Band=[IB, JB],\
 				                     SubC=[], Grad=[IG, JG, RG], Repeat=[IR, JR, RR], Flip= 1)
 			else:
-				FixVCrsNet.AssignBox(TP='CT', Start=[IS, JS], End=[IE, JE], Band=[IB, JB],
+				FixVCrsNet.AssignBox(TP='CT', Start=[IS, JS], End=[IE, JE], Band=[IB, JB],\
 				                     SubC=SC, Grad=[IG, JG, RG], Repeat=[IR, JR, RR], Flip= 0)
 			FixVCrsNet.RandomRest()
 			name=Name(Prefix='FixVCrsNet', Index=SIN)
@@ -712,173 +712,366 @@ def CreatePoreNetworkSamples(Nx=20, Ny=20, Folder=''):
 			# -------------------------------------------------------------------------------------
 		return True
 	# =============================================================================================
-
-
+	# Create samples for Two Assignment Region for each of the 4 kinds of networks ================
+	def CreateTwo(SIN=0, PNW=['Rand', 'FixV'], AVTP=0, AHTP=0, \
+		          IS=0, JS=0, IE=0, JE=0, IB=0, JB=0, \
+		          SC=[], IG=0, JG=0, RG=0, IR=1, JR=1, RR=1):
+		if 'Rand' in PNW:
+			# -------------------------------------------------------------------------------------
+			RandStrNet.Restore()
+			if Pick(List=[0, 1, 2, 3, 4, 5, 6, 7, 8, 9])<AVTP:
+				RandStrNet.AssignBox(TP='VT', Start=[IS, 0], End=[IE, 0], Band=[IB, JB],\
+					                 SubC=SC, Grad=[IG, JG, RG], Repeat=[IR, JR, RR])
+				RandStrNet.AssignBox(TP='VT', Start=[0, JS], End=[0, JE], Band=[IB, JB],\
+					                 SubC=SC, Grad=[IG, JG, RG], Repeat=[IR, JR, RR])
+			if Pick(List=[0, 1, 2, 3, 4, 5, 6, 7, 8, 9])<AHTP:
+				RandStrNet.AssignBox(TP='HT', Start=[0, JS], End=[0, JE], Band=[IB, JB],\
+					                 SubC=SC, Grad=[IG, JG, RG], Repeat=[IR, JR, RR])
+				RandStrNet.AssignBox(TP='HT', Start=[IS, 0], End=[IE, 0], Band=[IB, JB],\
+					                 SubC=SC, Grad=[IG, JG, RG], Repeat=[IR, JR, RR])
+			RandStrNet.RandomRest()
+			name=Name(Prefix='RandStrNet', Index=SIN)
+			RandStrNet.SetName(Name=name)
+			RandStrNet.Write(Folder+'RandStrNet/')
+			RandStrNet.Pixel(Folder+'RandStrNet/')
+			print(name, 'Written!:\t', [IS, IE], [JS, JE], [IB, JB], SC, [IG, JG, RG], [IR, JR, RR])
+			# -------------------------------------------------------------------------------------
+			RandCrsNet.Restore()
+			if Pick(List=[0, 1, 2, 3, 4, 5, 6, 7, 8, 9])<AVTP:
+				RandCrsNet.AssignBox(TP='VT', Start=[0, JS], End=[0, JE], Band=[IB, JB],\
+					                 SubC=SC, Grad=[IG, JG, RG], Repeat=[IR, JR, RR])
+				RandCrsNet.AssignBox(TP='VT', Start=[IS, 0], End=[IE, 0], Band=[IB, JB],\
+					                 SubC=SC, Grad=[IG, JG, RG], Repeat=[IR, JR, RR])
+			if Pick(List=[0, 1, 2, 3, 4, 5, 6, 7, 8, 9])<AHTP:
+				RandCrsNet.AssignBox(TP='HT', Start=[IS, 0], End=[IE, 0], Band=[IB, JB],\
+					                 SubC=SC, Grad=[IG, JG, RG], Repeat=[IR, JR, RR])
+				RandCrsNet.AssignBox(TP='HT', Start=[0, JS], End=[0, JE], Band=[IB, JB],\
+					                 SubC=SC, Grad=[IG, JG, RG], Repeat=[IR, JR, RR])
+			CrsPick=Pick(List=[0, 1, 2, 3, 4, 5, 6, 7, 8, 9])
+			if CrsPick<2:
+				RandCrsNet.AssignBox(TP='CT', Start=[0, JS], End=[0, JE], Band=[IB, JB],\
+				                     SubC=SC, Grad=[IG, JG, RG], Repeat=[IR, JR, RR], Flip= 2)
+				RandCrsNet.AssignBox(TP='CT', Start=[IS, 0], End=[IE, 0], Band=[IB, JB],\
+				                     SubC=SC, Grad=[IG, JG, RG], Repeat=[IR, JR, RR], Flip= 2)
+			elif CrsPick>7:
+				RandCrsNet.AssignBox(TP='CT', Start=[IS, 0], End=[IE, 0], Band=[IB, JB],\
+				                     SubC=SC, Grad=[IG, JG, RG], Repeat=[IR, JR, RR], Flip= 3)
+				RandCrsNet.AssignBox(TP='CT', Start=[0, JS], End=[0, JE], Band=[IB, JB],\
+				                     SubC=SC, Grad=[IG, JG, RG], Repeat=[IR, JR, RR], Flip= 3)
+			elif CrsPick==3:
+				RandCrsNet.AssignBox(TP='CT', Start=[0, JS], End=[0, JE], Band=[IB, JB],\
+				                     SubC=SC, Grad=[IG, JG, RG], Repeat=[IR, JR, RR], Flip=-1)
+				RandCrsNet.AssignBox(TP='CT', Start=[IS, 0], End=[IE, 0], Band=[IB, JB],\
+				                     SubC=SC, Grad=[IG, JG, RG], Repeat=[IR, JR, RR], Flip=-1)
+			elif CrsPick==6:
+				RandCrsNet.AssignBox(TP='CT', Start=[IS, 0], End=[IE, 0], Band=[IB, JB],\
+				                     SubC=SC, Grad=[IG, JG, RG], Repeat=[IR, JR, RR], Flip= 1)
+				RandCrsNet.AssignBox(TP='CT', Start=[0, JS], End=[0, JE], Band=[IB, JB],\
+				                     SubC=SC, Grad=[IG, JG, RG], Repeat=[IR, JR, RR], Flip= 1)
+			elif CrsPick==4:
+				RandCrsNet.AssignBox(TP='CT', Start=[0, JS], End=[0, JE], Band=[IB, JB],\
+				                     SubC=[], Grad=[IG, JG, RG], Repeat=[IR, JR, RR], Flip=-1)
+				RandCrsNet.AssignBox(TP='CT', Start=[IS, 0], End=[IE, 0], Band=[IB, JB],\
+				                     SubC=[], Grad=[IG, JG, RG], Repeat=[IR, JR, RR], Flip=-1)
+			elif CrsPick==5:
+				RandCrsNet.AssignBox(TP='CT', Start=[IS, 0], End=[IE, 0], Band=[IB, JB],\
+				                     SubC=[], Grad=[IG, JG, RG], Repeat=[IR, JR, RR], Flip= 1)
+				RandCrsNet.AssignBox(TP='CT', Start=[0, JS], End=[0, JE], Band=[IB, JB],\
+				                     SubC=[], Grad=[IG, JG, RG], Repeat=[IR, JR, RR], Flip= 1)
+			else:
+				RandCrsNet.AssignBox(TP='CT', Start=[0, JS], End=[0, JE], Band=[IB, JB],\
+				                     SubC=SC, Grad=[IG, JG, RG], Repeat=[IR, JR, RR], Flip= 0)
+				RandCrsNet.AssignBox(TP='CT', Start=[IS, 0], End=[IE, 0], Band=[IB, JB],\
+				                     SubC=SC, Grad=[IG, JG, RG], Repeat=[IR, JR, RR], Flip= 0)
+			RandCrsNet.RandomRest()
+			name=Name(Prefix='RandCrsNet', Index=SIN)
+			RandCrsNet.SetName(Name=name)
+			RandCrsNet.Write(Folder+'RandCrsNet/')
+			RandCrsNet.Pixel(Folder+'RandCrsNet/')
+			print(name, 'Written!:\t', [IS, IE], [JS, JE], [IB, JB], SC, [IG, JG, RG], [IR, JR, RR])
+			# -------------------------------------------------------------------------------------
+		if 'FixV' in PNW:
+			# -------------------------------------------------------------------------------------
+			FixVStrNet.Restore()
+			if Pick(List=[0, 1, 2, 3, 4, 5, 6, 7, 8, 9])<AVTP:
+				FixVStrNet.AssignBox(TP='VT', Start=[0, JS], End=[0, JE], Band=[IB, JB],\
+					                 SubC=SC, Grad=[IG, JG, RG], Repeat=[IR, JR, RR])
+				FixVStrNet.AssignBox(TP='VT', Start=[IS, 0], End=[IE, 0], Band=[IB, JB],\
+					                 SubC=SC, Grad=[IG, JG, RG], Repeat=[IR, JR, RR])
+			if Pick(List=[0, 1, 2, 3, 4, 5, 6, 7, 8, 9])<AHTP:
+				FixVStrNet.AssignBox(TP='HT', Start=[IS, 0], End=[IE, 0], Band=[IB, JB],\
+					                 SubC=SC, Grad=[IG, JG, RG], Repeat=[IR, JR, RR])
+				FixVStrNet.AssignBox(TP='HT', Start=[0, JS], End=[0, JE], Band=[IB, JB],\
+					                 SubC=SC, Grad=[IG, JG, RG], Repeat=[IR, JR, RR])
+			FixVStrNet.RandomRest()
+			name=Name(Prefix='FixVStrNet', Index=SIN)
+			FixVStrNet.SetName(Name=name)
+			FixVStrNet.Write(Folder+'FixVStrNet/')
+			FixVStrNet.Pixel(Folder+'FixVStrNet/')
+			print(name, 'Written!:\t', [IS, IE], [JS, JE], [IB, JB], SC, [IG, JG, RG], [IR, JR, RR])
+			# -------------------------------------------------------------------------------------
+			FixVCrsNet.Restore()
+			if Pick(List=[0, 1, 2, 3, 4, 5, 6, 7, 8, 9])<AVTP:
+				FixVCrsNet.AssignBox(TP='VT', Start=[IS, 0], End=[IE, 0], Band=[IB, JB],\
+					                 SubC=SC, Grad=[IG, JG, RG], Repeat=[IR, JR, RR])
+				FixVCrsNet.AssignBox(TP='VT', Start=[0, JS], End=[0, JE], Band=[IB, JB],\
+					                 SubC=SC, Grad=[IG, JG, RG], Repeat=[IR, JR, RR])
+			if Pick(List=[0, 1, 2, 3, 4, 5, 6, 7, 8, 9])<AHTP:
+				FixVCrsNet.AssignBox(TP='HT', Start=[0, JS], End=[0, JE], Band=[IB, JB],\
+					                 SubC=SC, Grad=[IG, JG, RG], Repeat=[IR, JR, RR])
+				FixVCrsNet.AssignBox(TP='HT', Start=[IS, 0], End=[IE, 0], Band=[IB, JB],\
+					                 SubC=SC, Grad=[IG, JG, RG], Repeat=[IR, JR, RR])
+			CrsPick=Pick(List=[0, 1, 2, 3, 4, 5, 6, 7, 8, 9])
+			if CrsPick<2:
+				FixVCrsNet.AssignBox(TP='CT', Start=[IS, 0], End=[IE, 0], Band=[IB, JB],\
+				                     SubC=SC, Grad=[IG, JG, RG], Repeat=[IR, JR, RR], Flip= 2)
+				FixVCrsNet.AssignBox(TP='CT', Start=[0, JS], End=[0, JE], Band=[IB, JB],\
+				                     SubC=SC, Grad=[IG, JG, RG], Repeat=[IR, JR, RR], Flip= 2)
+			elif CrsPick>7:
+				FixVCrsNet.AssignBox(TP='CT', Start=[0, JS], End=[0, JE], Band=[IB, JB],\
+				                     SubC=SC, Grad=[IG, JG, RG], Repeat=[IR, JR, RR], Flip= 3)
+				FixVCrsNet.AssignBox(TP='CT', Start=[IS, 0], End=[IE, 0], Band=[IB, JB],\
+				                     SubC=SC, Grad=[IG, JG, RG], Repeat=[IR, JR, RR], Flip= 3)
+			elif CrsPick==3:
+				FixVCrsNet.AssignBox(TP='CT', Start=[IS, 0], End=[IE, 0], Band=[IB, JB],\
+				                     SubC=SC, Grad=[IG, JG, RG], Repeat=[IR, JR, RR], Flip=-1)
+				FixVCrsNet.AssignBox(TP='CT', Start=[0, JS], End=[0, JE], Band=[IB, JB],\
+				                     SubC=SC, Grad=[IG, JG, RG], Repeat=[IR, JR, RR], Flip=-1)
+			elif CrsPick==6:
+				FixVCrsNet.AssignBox(TP='CT', Start=[0, JS], End=[0, JE], Band=[IB, JB],\
+				                     SubC=SC, Grad=[IG, JG, RG], Repeat=[IR, JR, RR], Flip= 1)
+				FixVCrsNet.AssignBox(TP='CT', Start=[IS, 0], End=[IE, 0], Band=[IB, JB],\
+				                     SubC=SC, Grad=[IG, JG, RG], Repeat=[IR, JR, RR], Flip= 1)
+			elif CrsPick==4:
+				FixVCrsNet.AssignBox(TP='CT', Start=[IS, 0], End=[IE, 0], Band=[IB, JB],\
+				                     SubC=[], Grad=[IG, JG, RG], Repeat=[IR, JR, RR], Flip=-1)
+				FixVCrsNet.AssignBox(TP='CT', Start=[0, JS], End=[0, JE], Band=[IB, JB],\
+				                     SubC=[], Grad=[IG, JG, RG], Repeat=[IR, JR, RR], Flip=-1)
+			elif CrsPick==5:
+				FixVCrsNet.AssignBox(TP='CT', Start=[0, JS], End=[0, JE], Band=[IB, JB],\
+				                     SubC=[], Grad=[IG, JG, RG], Repeat=[IR, JR, RR], Flip= 1)
+				FixVCrsNet.AssignBox(TP='CT', Start=[IS, 0], End=[IE, 0], Band=[IB, JB],\
+				                     SubC=[], Grad=[IG, JG, RG], Repeat=[IR, JR, RR], Flip= 1)
+			else:
+				FixVCrsNet.AssignBox(TP='CT', Start=[IS, 0], End=[IE, 0], Band=[IB, JB],\
+				                     SubC=SC, Grad=[IG, JG, RG], Repeat=[IR, JR, RR], Flip= 0)
+				FixVCrsNet.AssignBox(TP='CT', Start=[0, JS], End=[0, JE], Band=[IB, JB],\
+				                     SubC=SC, Grad=[IG, JG, RG], Repeat=[IR, JR, RR], Flip= 0)
+			FixVCrsNet.RandomRest()
+			name=Name(Prefix='FixVCrsNet', Index=SIN)
+			FixVCrsNet.SetName(Name=name)
+			FixVCrsNet.Write(Folder+'FixVCrsNet/')
+			FixVCrsNet.Pixel(Folder+'FixVCrsNet/')
+			print(name, 'Written!:\t', [IS, IE], [JS, JE], [IB, JB], SC, [IG, JG, RG], [IR, JR, RR])
+			# -------------------------------------------------------------------------------------
+		return True
+	# =============================================================================================
 	print('Generate Pore-Networks ---------------------------------------------------------------')
 	SampleIndex=0
-
-	for SC in [[0, 1], [2, 3], [6, 5], [8, 7], [0, 8], [7, 1], [6, 2], [3, 5]]:
-		for IS in range(1, Nx-7, 1):
+	print('Generating 1st Group of Pore-Networks ------------------------------------------------')
+	for SC in [[0, 1], [2, 3], [6, 5], [8, 7]]:
+		for IS in range(1, Nx-7, 4):
 			IE=IS+8
 			for IG in [0, 1]:
-				for JG in [0, 1]:
-					for IR in [1, 2, 3, 4]:
-						for JR in [1, 2, 3, 4]:
-							# CreateOne(SIN=SampleIndex, IS=IS, IE=IE, SC=SC, IG=IG, JG=JG, IR=IR, JR=JR, AVTP=8)
-							SampleIndex+=1
-							# CreateOne(SIN=SampleIndex, IS=IS, IE=IE, SC=SC, IG=IG, JG=JG, IR=IR, JR=JR, AHTP=8)
-							SampleIndex+=1
-							# CreateOne(SIN=SampleIndex, IS=IS, IE=IE, SC=SC, IG=IG, JG=JG, IR=IR, JR=JR, AVTP=9, AHTP=9)
-							SampleIndex+=1
-		for JS in range(1, Ny-7, 1):
+				for IR in [1, 3]:
+					for JR in [2, 4]:
+						# CreateOne(SIN=SampleIndex, IS=IS, IE=IE, SC=SC, IG=IG, IR=IR, JR=JR, AVTP=8)
+						SampleIndex+=1
+						# CreateOne(SIN=SampleIndex, IS=IS, IE=IE, SC=SC, IG=IG, IR=IR, JR=JR, AHTP=8)
+						SampleIndex+=1
+						# CreateOne(SIN=SampleIndex, IS=IS, IE=IE, SC=SC, IG=IG, IR=IR, JR=JR, AVTP=9, AHTP=9)
+						SampleIndex+=1
+		for JS in range(1, Ny-7, 4):
 			JE=JS+8
-			for IG in [0, 1]:
-				for JG in [0, 1]:
-					for IR in [1, 2, 3, 4]:
-						for JR in [1, 2, 3, 4]:
-							# CreateOne(SIN=SampleIndex, JS=JS, JE=JE, SC=SC, IG=IG, JG=JG, IR=IR, JR=JR, AVTP=8)
-							SampleIndex+=1
-							# CreateOne(SIN=SampleIndex, JS=JS, JE=JE, SC=SC, IG=IG, JG=JG, IR=IR, JR=JR, AHTP=8)
-							SampleIndex+=1
-							# CreateOne(SIN=SampleIndex, JS=JS, JE=JE, SC=SC, IG=IG, JG=JG, IR=IR, JR=JR, AVTP=9, AHTP=9)
-							SampleIndex+=1
-		for IS in range(1, Nx-7, 1):
+			for JG in [0, 1]:
+				for IR in [2, 3]:
+					for JR in [1, 3]:
+						# CreateOne(SIN=SampleIndex, JS=JS, JE=JE, SC=SC, JG=JG, IR=IR, JR=JR, AVTP=8)
+						SampleIndex+=1
+						# CreateOne(SIN=SampleIndex, JS=JS, JE=JE, SC=SC, JG=JG, IR=IR, JR=JR, AHTP=8)
+						SampleIndex+=1
+						# CreateOne(SIN=SampleIndex, JS=JS, JE=JE, SC=SC, JG=JG, IR=IR, JR=JR, AVTP=9, AHTP=9)
+						SampleIndex+=1
+		for IS in range(1, Nx-7, 4):
 			IE=IS+8
-			for JS in range(1, Ny-7, 1):
+			for JS in range(1, Ny-7, 4):
 				JE=JS+8
-				for IG in [0, 1]:
-					for JG in [0, 1]:
-						for IR in [1, 2, 3, 4]:
-							for JR in [1, 2, 3, 4]:
-								# CreateOne(SIN=SampleIndex, IS=IS, IE=IE, JS=JS, JE=JE, SC=SC, IG=IG, JG=JG, IR=IR, JR=JR, AVTP=8)
-								SampleIndex+=1
-								# CreateOne(SIN=SampleIndex, IS=IS, IE=IE, JS=JS, JE=JE, SC=SC, IG=IG, JG=JG, IR=IR, JR=JR, AHTP=8)
-								SampleIndex+=1
-								# CreateOne(SIN=SampleIndex, IS=IS, IE=IE, JS=JS, JE=JE, SC=SC, IG=IG, JG=JG, IR=IR, JR=JR, AVTP=9, AHTP=9)
-								SampleIndex+=1
+				IG=1
+				JG=1
+				for IR in [1, 2, 3, 4]:
+					for JR in [1, 2, 3, 4]:
+						# CreateTwo(SIN=SampleIndex, IS=IS, IE=IE, JS=JS, JE=JE, SC=SC, IG=IG, JG=JG, IR=IR, JR=JR, AVTP=8)
+						SampleIndex+=1
+						# CreateTwo(SIN=SampleIndex, IS=IS, IE=IE, JS=JS, JE=JE, SC=SC, IG=IG, JG=JG, IR=IR, JR=JR, AHTP=8)
+						SampleIndex+=1
+						# CreateOne(SIN=SampleIndex, IS=IS, IE=IE, JS=JS, JE=JE, SC=SC, IG=IG, JG=JG, IR=IR, JR=JR, AVTP=9, AHTP=9)
+						SampleIndex+=1
 		for IB in [1, 2, 3, 4]:
 			for IG in [0, 1]:
-				for JG in [0, 1]:
-					for IR in [1, 2, 3, 4]:
-						for JR in [1, 2, 3, 4]:
-							# CreateOne(SIN=SampleIndex, IB=IB, SC=SC, IG=IG, JG=JG, IR=IR, JR=JR, AVTP=8)
-							SampleIndex+=1
-							# CreateOne(SIN=SampleIndex, IB=IB, SC=SC, IG=IG, JG=JG, IR=IR, JR=JR, AHTP=8)
-							SampleIndex+=1
-							# CreateOne(SIN=SampleIndex, IB=IB, SC=SC, IG=IG, JG=JG, IR=IR, JR=JR, AVTP=9, AHTP=9)
-							SampleIndex+=1
+				for IR in [2, 4]:
+					for JR in [1, 3]:
+						# CreateOne(SIN=SampleIndex, IB=IB, SC=SC, IG=IG, IR=IR, JR=JR, AVTP=8)
+						SampleIndex+=1
+						# CreateOne(SIN=SampleIndex, IB=IB, SC=SC, IG=IG, IR=IR, JR=JR, AHTP=8)
+						SampleIndex+=1
+						# CreateOne(SIN=SampleIndex, IB=IB, SC=SC, IG=IG, IR=IR, JR=JR, AVTP=9, AHTP=9)
+						SampleIndex+=1
 		for JB in [1, 2, 3, 4]:
-			for IG in [0, 1]:
-				for JG in [0, 1]:
+			for JG in [0, 1]:
+				for IR in [1, 3]:
+					for JR in [2, 4]:
+						# CreateOne(SIN=SampleIndex, JB=JB, SC=SC, JG=JG, IR=IR, JR=JR, AVTP=8)
+						SampleIndex+=1
+						# CreateOne(SIN=SampleIndex, JB=JB, SC=SC, JG=JG, IR=IR, JR=JR, AHTP=8)
+						SampleIndex+=1
+						# CreateOne(SIN=SampleIndex, JB=JB, SC=SC, JG=JG, IR=IR, JR=JR, AVTP=9, AHTP=9)
+						SampleIndex+=1
+	print('Group 1 of Pore-Networks Generated: ', SampleIndex, '---------------------------------')
+	print('Generating 2nd Group of Pore-Networks ------------------------------------------------')
+	for SC in [[0, 1, 2], [4, 3, 5], [8, 7, 6]]:
+		for IS in range(1, Nx-11, 4):
+			IE=IS+12
+			for JG in [0, 1, 2]:
+				for IR in [2, 3, 4]:
+					for JR in [2, 3, 4]:
+						# CreateOne(SIN=SampleIndex, IS=IS, IE=IE, SC=SC, JG=JG, IR=IR, JR=JR, AVTP=8)
+						SampleIndex+=1
+						# CreateOne(SIN=SampleIndex, IS=IS, IE=IE, SC=SC, JG=JG, IR=IR, JR=JR, AHTP=8)
+						SampleIndex+=1
+						# CreateOne(SIN=SampleIndex, IS=IS, IE=IE, SC=SC, JG=JG, IR=IR, JR=JR, AVTP=9, AHTP=9)
+						SampleIndex+=1
+		for JS in range(1, Ny-11, 4):
+			JE=JS+12
+			for IG in [0, 1, 2]:
+				for IR in [2, 3, 4]:
+					for JR in [2, 3, 4]:
+						# CreateOne(SIN=SampleIndex, JS=JS, JE=JE, SC=SC, IG=IG, IR=IR, JR=JR, AVTP=8)
+						SampleIndex+=1
+						# CreateOne(SIN=SampleIndex, JS=JS, JE=JE, SC=SC, IG=IG, IR=IR, JR=JR, AHTP=8)
+						SampleIndex+=1
+						# CreateOne(SIN=SampleIndex, JS=JS, JE=JE, SC=SC, IG=IG, IR=IR, JR=JR, AVTP=9, AHTP=9)
+						SampleIndex+=1
+		for IS in range(1, Nx-11, 4):
+			IE=IS+12
+			for JS in range(1, Ny-7, 4):
+				JE=JS+12
+				IG=1
+				JG=1
+				for IR in [2, 3, 4]:
+					for JR in [2, 3, 4]:
+						# CreateOne(SIN=SampleIndex, IS=IS, IE=IE, JS=JS, JE=JE, SC=SC, IG=IG, JG=JG, IR=IR, JR=JR, AVTP=8)
+						SampleIndex+=1
+						# CreateOne(SIN=SampleIndex, IS=IS, IE=IE, JS=JS, JE=JE, SC=SC, IG=IG, JG=JG, IR=IR, JR=JR, AHTP=8)
+						SampleIndex+=1
+						# CreateTwo(SIN=SampleIndex, IS=IS, IE=IE, JS=JS, JE=JE, SC=SC, IG=IG, JG=JG, IR=IR, JR=JR, AVTP=9, AHTP=9)
+						SampleIndex+=1
+		for IB in [1, 2, 3, 4]:
+			for JG in [0, 1, 2]:
+				for IR in [2, 3, 4]:
+					for JR in [2, 3, 4]:
+						# CreateOne(SIN=SampleIndex, IB=IB, SC=SC, JG=JG, IR=IR, JR=JR, AVTP=8)
+						SampleIndex+=1
+						# CreateOne(SIN=SampleIndex, IB=IB, SC=SC, JG=JG, IR=IR, JR=JR, AHTP=8)
+						SampleIndex+=1
+						# CreateOne(SIN=SampleIndex, IB=IB, SC=SC, JG=JG, IR=IR, JR=JR, AVTP=9, AHTP=9)
+						SampleIndex+=1
+		for JB in [1, 2, 3, 4]:
+			for IG in [0, 1, 2]:
+				for IR in [2, 3, 4]:
+					for JR in [2, 3, 4]:
+						# CreateOne(SIN=SampleIndex, JB=JB, SC=SC, IG=IG, IR=IR, JR=JR, AVTP=8)
+						SampleIndex+=1
+						# CreateOne(SIN=SampleIndex, JB=JB, SC=SC, IG=IG, IR=IR, JR=JR, AHTP=8)
+						SampleIndex+=1
+						# CreateOne(SIN=SampleIndex, JB=JB, SC=SC, IG=IG, IR=IR, JR=JR, AVTP=9, AHTP=9)
+						SampleIndex+=1
+	print('Group 2 of Pore-Networks Generated: ', SampleIndex, '---------------------------------')
+	print('Generating 3rd Group of Pore-Networks ------------------------------------------------')
+	for SC in [[3, 2, 1, 0], [5, 6, 7, 8], [0, 1, 5, 6], [8, 7, 3, 2]]:
+		for IS in range(1, Nx-15, 4):
+			IE=IS+16
+			IG=1
+			JG=1
+			for IR in [1, 2, 3, 4]:
+				for JR in [1, 2, 3, 4]:
+					# CreateOne(SIN=SampleIndex, IS=IS, IE=IE, SC=SC, IG=IG, JG=JG, IR=IR, JR=JR, AVTP=8)
+					SampleIndex+=1
+					# CreateOne(SIN=SampleIndex, IS=IS, IE=IE, SC=SC, IG=IG, JG=JG, IR=IR, JR=JR, AHTP=8)
+					SampleIndex+=1
+					# CreateOne(SIN=SampleIndex, IS=IS, IE=IE, SC=SC, IG=IG, JG=JG, IR=IR, JR=JR, AVTP=9, AHTP=9)
+					SampleIndex+=1
+		for JS in range(1, Ny-15, 4):
+			JE=JS+16
+			IG=1
+			JG=1
+			for IR in [1, 2, 3, 4]:
+				for JR in [1, 2, 3, 4]:
+					# CreateTwo(SIN=SampleIndex, JS=JS, JE=JE, SC=SC, IG=IG, JG=JG, IR=IR, JR=JR, AVTP=8)
+					SampleIndex+=1
+					# CreateTwo(SIN=SampleIndex, JS=JS, JE=JE, SC=SC, IG=IG, JG=JG, IR=IR, JR=JR, AHTP=8)
+					SampleIndex+=1
+					# CreateTwo(SIN=SampleIndex, JS=JS, JE=JE, SC=SC, IG=IG, JG=JG, IR=IR, JR=JR, AVTP=9, AHTP=9)
+					SampleIndex+=1
+		for IS in range(1, Nx-15, 4):
+			IE=IS+16
+			for JS in range(1, Ny-15, 4):
+				JE=JS+16
+				for IG in [0, 1, 2, 3]:
 					for IR in [1, 2, 3, 4]:
 						for JR in [1, 2, 3, 4]:
-							# CreateOne(SIN=SampleIndex, JB=JB, SC=SC, IG=IG, JG=JG, IR=IR, JR=JR, AVTP=8)
+							# CreateTwo(SIN=SampleIndex, IS=IS, IE=IE, JS=JS, JE=JE, SC=SC, IG=IG, IR=IR, JR=JR, AVTP=8)
 							SampleIndex+=1
-							# CreateOne(SIN=SampleIndex, JB=JB, SC=SC, IG=IG, JG=JG, IR=IR, JR=JR, AHTP=8)
+							# CreateTwo(SIN=SampleIndex, IS=IS, IE=IE, JS=JS, JE=JE, SC=SC, IG=IG, IR=IR, JR=JR, AHTP=8)
 							SampleIndex+=1
-							# CreateOne(SIN=SampleIndex, JB=JB, SC=SC, IG=IG, JG=JG, IR=IR, JR=JR, AVTP=9, AHTP=9)
+							# CreateTwo(SIN=SampleIndex, IS=IS, IE=IE, JS=JS, JE=JE, SC=SC, IG=IG, IR=IR, JR=JR, AVTP=9, AHTP=9)
 							SampleIndex+=1
-	print(SampleIndex)
+		for IS in range(1, Nx-15, 4):
+			IE=IS+16
+			for JS in range(1, Ny-15, 4):
+				JE=JS+16
+				for JG in [0, 1, 2, 3]:
+					for IR in [1, 2, 3, 4]:
+						for JR in [1, 2, 3, 4]:
+							# CreateTwo(SIN=SampleIndex, IS=IS, IE=IE, JS=JS, JE=JE, SC=SC, JG=JG, IR=IR, JR=JR, AVTP=8)
+							SampleIndex+=1
+							# CreateTwo(SIN=SampleIndex, IS=IS, IE=IE, JS=JS, JE=JE, SC=SC, JG=JG, IR=IR, JR=JR, AHTP=8)
+							SampleIndex+=1
+							# CreateTwo(SIN=SampleIndex, IS=IS, IE=IE, JS=JS, JE=JE, SC=SC, JG=JG, IR=IR, JR=JR, AVTP=9, AHTP=9)
+							SampleIndex+=1
+		for B in [1, 2, 3, 4]:
+			IB=B
+			JB=B
+			for RG in [0, 1, 2, 3]:
+				for RR in [1, 2, 3, 4]:
+					# CreateOne(SIN=SampleIndex, IB=IB, JB=JB, SC=SC, RG=RG, RR=RR, AVTP=8)
+					SampleIndex+=1
+					# CreateOne(SIN=SampleIndex, IB=IB, JB=JB, SC=SC, RG=RG, RR=RR, AHTP=8)
+					SampleIndex+=1
+					# CreateOne(SIN=SampleIndex, IB=IB, JB=JB, SC=SC, RG=RG, RR=RR, AVTP=9, AHTP=9)
+					SampleIndex+=1
+	print('Group 3 of Pore-Networks Generated: ', SampleIndex, '---------------------------------')
+	print('Generating 4th Group of Pore-Networks ------------------------------------------------')
+	for SC in [[4, 5, 3, 2, 6], [4, 1, 7, 8, 0], [5, 4, 3, 2, 1, 0], [3, 4, 5, 6, 7, 8]]:
+		for IS in range(1, Nx-17, 1):
+			IE=IS+18
+			for JS in range(1, Ny-17, 1):
+				JE=JS+18
+				for IG in [0, 1]:
+					for JG in [0, 1]:
+						for IR in [1, 2, 3]:
+							for JR in [1, 2, 3]:
+								# CreateTwo(SIN=SampleIndex, IS=IS, IE=IE, JS=JS, JE=JE, SC=SC, IG=IG, JG=JG, IR=IR, JR=JR, AVTP=8)
+								SampleIndex+=1
+								# CreateTwo(SIN=SampleIndex, IS=IS, IE=IE, JS=JS, JE=JE, SC=SC, IG=IG, JG=JG, IR=IR, JR=JR, AHTP=8)
+								SampleIndex+=1
+								# CreateTwo(SIN=SampleIndex, IS=IS, IE=IE, JS=JS, JE=JE, SC=SC, IG=IG, JG=JG, IR=IR, JR=JR, AVTP=9, AHTP=9)
+								SampleIndex+=1
 
-	# for SC in [[0, 1, 2], [4, 3, 5], [8, 7, 6], [4, 0, 8], [1, 3, 7], [6, 5, 2]]:
-
-
-	# for B in [0, 4, 8]:
-	# 	for SC in [[0, 1, 2], [4, 3, 5], [8, 7, 6], [2, 4, 6, 8], [7, 5, 3, 1]]:
-	# 		for IG in [0, 1, 2]:
-	# 			for JG in [0, 1, 2]:
-	# 				for IR in [1, 2, 3, 4]:
-	# 					for JR in [1, 2, 3, 4]:
-	# 						# CreateOne(SIN=SampleIndex, AVTP=8)
-	# 						SampleIndex+=1
-	# 						# CreateOne(SIN=SampleIndex, AHTP=8)
-	# 						SampleIndex+=1
-	# 						# CreateOne(SIN=SampleIndex, AVTP=9, AHTP=9)
-	# 						SampleIndex+=1
-	# 						# ---------------------------------------------------------------------
-	print(SampleIndex)
-	# ---------------------------------------------------------------------------------------------
-
-	# print('Generate Fixed Volume Network --------------------------------------------------------')
-	# SampleIndex=0
-	# for B in [0, 2, 4, 6, 8]:
-	# 	for SC in [[0, 1, 2, 3, 4], [8, 7, 6, 5, 4], [4, 0, 8, 2, 6], [4, 1, 7, 3, 5], [4, 5, 3, 6, 2]]:
-	# 		for IG in [1, 2, 3, 4]:
-	# 			for JG in [1, 2, 3, 4]:
-	# 				for IR in [1, 2, 3]:
-	# 					for JR in [1, 2, 3]:
-
-	# for B in [1, 3, 5, 7, 9]:
-	# 	for SC in [[0, 1, 2, 3, 4], [8, 7, 6, 5, 4], [4, 0, 8, 2, 6], [4, 1, 7, 3, 5], [4, 5, 3, 6, 2]]:
-	# 		for RG in [1, 2, 3, 4]:
-
-
-# #============================ Basic Functions =====================================================
-# def create_model():
-# 	model = tf.keras.models.Sequential([
-# 		keras.layers.Dense(512, activation=tf.keras.activations.relu, input_shape=(784,)),
-# 		keras.layers.Dropout(0.2),
-# 		keras.layers.Dense(10, activation=tf.keras.activations.softmax)])
-
-# 	model.compile(optimizer=tf.keras.optimizers.Adam(),
-#                 loss=tf.keras.losses.sparse_categorical_crossentropy,
-#                 metrics=['accuracy'])
-
-# 	return model
-
-# checkpoint_path = "training_1/cp.ckpt"
-# checkpoint_dir = os.path.dirname(checkpoint_path)
-
-# # Create checkpoint callback
-# cp_callback = tf.keras.callbacks.ModelCheckpoint(checkpoint_path,
-#                                                  save_weights_only=True,
-#                                                  verbose=1)
-
-# model = create_model()
-
-# model.fit(train_images, train_labels,  epochs = 10,
-#           validation_data = (test_images,test_labels),
-#           callbacks = [cp_callback])  # pass callback to training
-
-# # This may generate warnings related to saving the state of the optimizer.
-# # These warnings (and similar warnings throughout this notebook)
-# # are in place to discourage outdated usage, and can be ignored.
-
-
-# model = create_model()
-
-# loss, acc = model.evaluate(test_images, test_labels)
-# print("Untrained model, accuracy: {:5.2f}%".format(100*acc))
-
-# model.load_weights(checkpoint_path)
-# loss,acc = model.evaluate(test_images, test_labels)
-# print("Restored model, accuracy: {:5.2f}%".format(100*acc))
-
+	print('Group 4 of Pore-Networks Generated: ', SampleIndex, '---------------------------------')
 
 #============================ Main Program ========================================================
-CreatePoreNetworkSamples(Nx= 3, Ny= 3, Folder='/home/xu/work/PoreNetwork0303Samples')
+# CreatePoreNetworkSamples(Nx= 3, Ny= 3, Folder='/home/xu/work/PoreNetwork0303Samples')
 # CreatePoreNetworkSamples(Nx=10, Ny=10, Folder='/home/xu/work/PoreNetwork1010Samples/')
-# CreatePoreNetworkSamples(Nx=20, Ny=20, Folder='/home/xu/work/PoreNetwork2020Samples/')
+CreatePoreNetworkSamples(Nx=20, Ny=20, Folder='/home/xu/work/PoreNetwork2020Samples/')
 # CreatePoreNetworkSamples(Nx=40, Ny=40, Folder='/home/xu/work/PoreNetwork4040Samples/')
-# print(Pick(List=TT, Index=1, Method='Rotate'))
-# print(Pick(List=TT, Index=20, Method='Rotate'))
-# print(Pick(List=TT, Index=-2, Method='Rotate'))
 
-# pool=ThroatPool(ThroatType=TT, ThroatCount=[1 for i in range(len(TT))])
-# pool.Report()
-# a=pool.FetchOne(Index=1, Method='Rotate')
-# pool.Report()
-# b=pool.FetchOne()
-# pool.Report()
-# c=pool.FetchOne(Index=1, SubC=[1,2,3], Method='Rotate')
-# pool.Report()
-# c=pool.FetchOne(Index=2, SubC=[1,2,3], Method='Rotate')
-# pool.Report()
-# c=pool.FetchOne(Index=3, SubC=[1,2,3], Method='Rotate')
-# pool.Report()
-# c=pool.FetchOne(Index=1, SubC=[1,2,3], ExC=[1,2,3], Method='Rotate')
-# pool.Report()
-# c=pool.FetchOne(Index=2, SubC=[1,2,3], ExC=[1,2,3], Method='Rotate')
-# pool.Report()
-# c=pool.FetchOne(Index=3, SubC=[1,2,3], ExC=[1,2,3], Method='Rotate')
-# pool.Report()
