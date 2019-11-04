@@ -114,6 +114,12 @@ class ThroatPool(object):
 			if self.ThroatCount[i]>0:
 				eti.append(i)
 		return eti
+	# Report the pool -----------------------------------------------------------------------------
+	def Report(self):
+		print(self.Name, ':', self.OriginalTotal)
+		print([self.TypePool[i], self.ThroatType[i], self.ThroatCount[i]] for i in range(self.TypeCount))
+		print(self.ExistTotalCount(), self.ExistTypeCount(), self.ExistTypeIndex())
+		return True
 
 	# Throat in Pool or not -----------------------------------------------------------------------
 	def InPool(self, T):
@@ -133,7 +139,6 @@ class ThroatPool(object):
 	# Fetch one -----------------------------------------------------------------------------------
 	def FetchOne(self, Index=0, SubC=[], ExC=[], Method='Random'):
 		Base=self.ExistTypeIndex()
-		Selection=Index
 		if not Base:
 			print('Warning: Throat Pool Used Up!-------------------------------------------------')
 			return [0, 0]
@@ -143,26 +148,44 @@ class ThroatPool(object):
 				self.ThroatCount[Selection]-=1
 				return self.ThroatType[Selection]
 			elif Method=='Rotate':
-				Choice=SetJoint(Base=Base, SubC=SubC)
-				if Choice:
-					Selection=Pick(List=Choice, Index=Index, Method='Rotate')
+				if not SubC and not ExC:
+					Selection=Pick(List=Base, Index=Index, Method='Rotate')
 					self.ThroatCount[Selection]-=1
 					return self.ThroatType[Selection]
-				else:
-					Choice=SetDifference(Base=Base, ExC=ExC)
-					if Choice:
-						Selection=Pick(List=Choice)
+				elif SubC and not ExC:
+					Selection=Pick(List=SubC, Index=Index, Method='Rotate')
+					if Selection in Base:
 						self.ThroatCount[Selection]-=1
 						return self.ThroatType[Selection]
 					else:
 						Selection=Pick(List=Base)
-						self.ThroatCoutn[Selection]-=1
+						self.ThroatCount[Selection]-=1
+						return self.ThroatType[Selection]
+				elif not SubC and ExC:
+					Selection=Pick(List=Base, Index=Index, Method='Rotate')
+					if Selection in ExC:
+						if Base==ExC:
+							Selection=Pick(List=Base)
+						else:
+							Selection=Pick(List=SetDifference(Base, ExC))
+					self.ThroatCount[Selection]-=1
+					return self.ThroatType[Selection]
+				elif SubC and ExC:
+					Selection=Pick(List=SubC, Index=Index, Method='Rotate')
+					if Selection in Base:
+						self.ThroatCount[Selection]-=1
+						return self.ThroatType[Selection]
+					else:
+						if Base==ExC:
+							Selection=Pick(List=Base)
+						else:
+							Selection=Pick(List=SetDifference(Base, ExC))
+						self.ThroatCount[Selection]-=1
 						return self.ThroatType[Selection]
 
 	# Return One ----------------------------------------------------------------------------------
 	def ReturnOne(self, Index=0, T=[], Method='ByThroatType'):
 		Selection =Index
-		print('ReturnOne:', Index, Selection)
 		if Method=='ByIndex':
 			Selection =Pick(List=self.TypePool, Index=Index, Method='Rotate')
 		elif Method=='ByThroatType':
@@ -172,7 +195,6 @@ class ThroatPool(object):
 				print('Warning: cannot return, no throat type matched!')
 				return False
 		self.ThroatCount[Selection]+=1
-		print('ReturnOne:', Index, Selection)
 		return True
 
 #============================ Class PoreNetwork ===================================================
@@ -194,7 +216,6 @@ class PoreNetwork(object):
 		self.VTRange       =[[0, self.Nx], [1, self.Ny]]
 		self.HTRange       =[[1, self.Nx], [0, self.Ny]]
 		self.CTRange       =[[1, self.Nx], [1, self.Ny]] if self.Cross else []
-		# print(self.Matrix[2][1][1])
 		if 'W' in self.Open:
 			self.VTRange[0][0] =1
 			self.StrTCount    -=self.Ny
@@ -249,8 +270,6 @@ class PoreNetwork(object):
 			print('Warning: Straight Throat Pool Created but Not Enough!')
 		if self.Cross and self.CrsTCount>self.CrsTPool.ExistTotalCount():
 			print('Warning: Cross Throat Pool Created but Not Enough!')
-		# print('StrTPool', self.StrTPool.ThroatType, self.StrTPool.ThroatCount, self.StrTPool.ExistTypeIndex(), self.StrTPool.ExistThroatCount())
-		# print('CrsTPool', self.CrsTPool.ThroatType, self.CrsTPool.ThroatCount, self.CrsTPool.ExistTypeIndex(), self.CrsTPool.ExistThroatCount())
 		for i in range(self.Mx):
 			for j in range(self.My):
 				if  (i%2==0 and j%2==0):
@@ -272,10 +291,6 @@ class PoreNetwork(object):
 				else:
 					strthroat=self.StrTPool.FetchOne()
 					self.Matrix[j][i]=strthroat
-		# print('StrTPool', self.StrTPool.ThroatType, self.StrTPool.ThroatCount, self.StrTPool.ExistTypeIndex(), self.StrTPool.ExistThroatCount())
-		# print('CrsTPool', self.CrsTPool.ThroatType, self.CrsTPool.ThroatCount, self.CrsTPool.ExistTypeIndex(), self.CrsTPool.ExistThroatCount())
-		# print('StrTPool', self.StrTPool.ThroatType, self.StrTPool.ThroatCount)
-		# print('CrsTPool', self.CrsTPool.ThroatType, self.CrsTPool.ThroatCount)
 		self.TotTCount=self.StrTCount+self.CrsTCount
 
 	# set a new name ------------------------------------------------------------------------------
@@ -290,8 +305,10 @@ class PoreNetwork(object):
 		print('\tNx=', self.Nx, 'Ny=', self.Ny, 'Mx=', self.Mx, 'My=', self.My)
 		print('\tStrTCount=', self.StrTCount, 'CrsTCount=', self.CrsTCount, 'TotTCount=', self.TotTCount)
 		print('\tVTRange=', self.VTRange, 'HTRange=', self.HTRange, 'CTRange=', self.CTRange)
-		print('\tStrTType=', self.StrTType, 'StrTPool: ', self.StrTPool.ThroatType, self.StrTPool.ThroatCount)
-		if self.Cross: print('\tCrsTType=', self.CrsTType, 'CrsTPool: ', self.CrsTPool.ThroatType, self.CrsTPool.ThroatCount)
+		print('\tStrTType= ', self.StrTType)
+		print('\tStrTPool: ', self.StrTPool.ThroatType, self.StrTPool.ThroatCount)
+		print('\tCrsTType= ', self.CrsTType)
+		print('\tCrsTPool: ', self.CrsTPool.ThroatType, self.CrsTPool.ThroatCount)
 
 		return True
 
@@ -307,7 +324,6 @@ class PoreNetwork(object):
 
 	# Write PoreNetwork Pixel File ----------------------------------------------------------------
 	def Pixel(self, Folder='', Scale=1, Disp=False, Save=True):
-
 		D=[[0 for i in range(self.Mx)] for j in range(self.My)]
 		for j in range(self.My):
 			for i in range(self.Mx):
@@ -320,11 +336,9 @@ class PoreNetwork(object):
 		return True
 	
 	# Dump the foil into a binary file ------------------------------------------------------------
-	def Dump(self, Destination='', Disp=False):
-		if not Destination: Destination=self.Name+'.net'
-		pickle.dump(self, open(Destination, 'wb'))
+	def Dump(self, Folder='', Disp=False):
+		pickle.dump(self, open(Folder+self.Name+'.net', 'wb'))
 		if Disp: print('Successfully saved pore-network file.')
-
 		return True
 
 	# Get Information for a certain coordinate in Matrix ------------------------------------------
@@ -395,7 +409,6 @@ class PoreNetwork(object):
 	# Assign Throat at a certain coordinate in Matrix ---------------------------------------------
 	def AssignMC(self, i, j, T): # i, j is the index in Matrix, i in range [0, Mx), j in range [0, My)
 		self.Matrix[j][i]=T
-
 		return True
 
 	# Assign Throat at a certain position ---------------------------------------------------------
@@ -422,11 +435,10 @@ class PoreNetwork(object):
 			if pool.InPool(thro[3]):
 				return True
 			else:
-				print('Warning: Throat Found but Not a Certifed Type!', pool.Name, thro[3])
 				return False
 		else:
-			print('Warning: No Throat Found!')
-			return False
+			print('Warning: There should be no Throat, Donot Operate Me!', pool.Name)
+			return True
 	
 	# Return Throat at a certain position back to appropriate pool --------------------------------
 	def ReturnT(self, TP, I, J):
@@ -448,24 +460,28 @@ class PoreNetwork(object):
 
 	# Restore all throats back to appropriate pool ------------------------------------------------
 	def Restore(self, TPs=['VT', 'HT', 'CT']):
+		vt=0
+		ht=0
+		ct=0
 		if 'VT' in TPs:
 			for I in range(self.VTRange[0][0], self.VTRange[0][1]+1, 1):
 				for J in range(self.VTRange[1][0], self.VTRange[1][1]+1, 1):
-					self.ReturnT(TP='VT', I=I, J=J)
+					if self.ReturnT(TP='VT', I=I, J=J): vt+=1
 		if 'HT' in TPs:
 			for I in range(self.HTRange[0][0], self.HTRange[0][1]+1, 1):
 				for J in range(self.HTRange[1][0], self.HTRange[1][1]+1, 1):
-					self.ReturnT(TP='HT', I=I, J=J)
+					if self.ReturnT(TP='HT', I=I, J=J): ht+=1
 		if 'CT' in TPs and self.Cross:
 			for I in range(self.CTRange[0][0], self.CTRange[0][1]+1, 1):
 				for J in range(self.CTRange[1][0], self.CTRange[1][1]+1, 1):
-					self.ReturnT(TP='CT', I=I, J=J)
+					if self.ReturnT(TP='CT', I=I, J=J): ct+=1
+		print('Restore: ', vt+ht+ct, '\tVT: ', vt, '\tHT: ', ht, '\tCT: ', ct)
 		return True
 
 	# Assign Throat distribution in a box of certain position -------------------------------------
 	def AssignBox(self, TP='',
 		                Start=[0, 0], End=[0, 0], Band=[0, 0],
-		                SubC=[], Grad=[1, 1, 0], Repeat=[1, 1, 1], Flip=0):
+		                SubC=[], Grad=[0, 0, 0], Repeat=[1, 1, 1], Flip=0):
 		if   TP=='VT':
 			Range=self.VTRange
 			TypeChoice=self.StrTType
@@ -477,9 +493,9 @@ class PoreNetwork(object):
 			TypeChoice=self.CrsTType
 		if Start[0]==0 and End[0]==0:
 			Start[0]=Range[0][0]
-			End  [0]=Range[0][1]
+			End  [0]=Range[0][1]+1
 		if Start[1]==0 and End[1]==0:
-			Start[1]=Range[1][0]+1
+			Start[1]=Range[1][0]
 			End  [1]=Range[1][1]+1
 		if SubC==[]:
 			SubC=[i for i in range(len(TypeChoice))]
@@ -488,19 +504,17 @@ class PoreNetwork(object):
 			ExC =SubC
 
 		Count=0
+		Replace=0
 		for I in range(Start[0], End[0], 1):
 			for J in range(Start[1], End[1], 1):
-				print('1')
-				if Band==[0, 0] or (
-				   (Band[0]> 0 and Band[1]> 0) and not(I>=Start[0]+Band[0] and I<=End[0]-Band[0]-1 and 
-				                                       J>=Start[1]+Band[1] and J<=End[1]-Band[1]-1)) or (
-				   (Band[0]> 0 and Band[1]==0) and not(I>=Start[0]+Band[0] and I<=End[0]-Band[0]-1)) or (
+				if Band==[0, 0] or (\
+				   (Band[0]> 0 and Band[1]> 0) and not(I>=Start[0]+Band[0] and I<=End[0]-Band[0]-1 and \
+				                                       J>=Start[1]+Band[1] and J<=End[1]-Band[1]-1)) or (\
+				   (Band[0]> 0 and Band[1]==0) and not(I>=Start[0]+Band[0] and I<=End[0]-Band[0]-1)) or (\
 				   (Band[0]==0 and Band[1]> 0) and not(J>=Start[1]+Band[1] and J<=End[1]-Band[1]-1)):
-					print('1', TP, I, J)
 					if self.Assigned(TP, I, J):
 						self.ReturnT(TP, I, J)
-						print('1in', 'haha')
-					print('2', TP, I, J)
+						Replace+=1
 
 					for ring in range(min(Band[0], Band[1])+1):
 						if not (I>=Start[0]+ring+1 and I<=End[0]-ring-2 and 
@@ -508,19 +522,14 @@ class PoreNetwork(object):
 							I>=Start[0]+ring   and I<=End[0]-ring-1 and 
 							J>=Start[1]+ring   and J<=End[1]-ring-1):
 							RingIndex=ring
-					print('3', RingIndex, TP, I, J)
-					Index=Pick(List=SubC, Index=(I-Start[0])//Repeat[0]*Grad[0]+
-						                        (J-Start[1])//Repeat[1]*Grad[1]+
-						                        RingIndex   //Repeat[2]*Grad[2], Method='Rotate')
-					print('4', Index, TP, I, J)
+					Selection=Pick(List=SubC, Index=(I-Start[0])//Repeat[0]*Grad[0]+\
+						                            (J-Start[1])//Repeat[1]*Grad[1]+\
+						                             RingIndex  //Repeat[2]*Grad[2], Method='Rotate')
 					if TP=='VT' or TP=='HT':
-						T=self.StrTPool.FetchOne(Index=Index, SubC=SubC, ExC=ExC, Method='Rotate')
-						print('5S', T, TP, I, J)
+						T=self.StrTPool.FetchOne(Index=Selection, SubC=SubC, ExC=ExC, Method='Rotate')
 					elif TP=='CT':
-						# print('ExC=', ExC)
-						t=self.CrsTPool.FetchOne(Index=Index, SubC=SubC, ExC=ExC, Method='Rotate')
+						t=self.CrsTPool.FetchOne(Index=Selection, SubC=SubC, ExC=ExC, Method='Rotate')
 						T=t
-						print('5C', T, TP, I, J)
 						if not self.CrsTPool.InPool(t): print('Warning: Fuck it is impossible!')
 						if Flip==0:
 							T=[ t[0]*Pick(List=[-1, 1]), t[1]]
@@ -531,30 +540,29 @@ class PoreNetwork(object):
 						elif Flip==-1 or Flip==1: # Flip= -1 or 1
 							T=[ t[0]*Flip ,              t[1]]
 						if not self.CrsTPool.InPool(T): print('Warning: Fuck! What happened here!', t, T)
-					print('6', T, TP, I, J)
 					succeed=self.AssignT(TP, I, J, T)
-					print('7', succeed, TP, I, J)
 					if not succeed: print('Warning: AssignT when AssignBox not succeed!')
 					Count+=1
-		print('8', 'AssignBox', Count)
+		print('AssignBox: ', TP, Start, End, '\tCount=', Count, '\tReplace=', Replace)
 		return Count
 
 	# Slice a Region from original Matrix ---------------------------------------------------------
 	def RandomRest(self):
-		print('RandomResting-----------')
-		Count=0
+		vt=0
+		ht=0
+		ct=0
 		for I in range(self.VTRange[0][0], self.VTRange[0][1]+1, 1):
 			for J in range(self.VTRange[1][0], self.VTRange[1][1]+1, 1):
 				if not self.Assigned('VT', I, J):
 					succeed=self.AssignT('VT', I, J, self.StrTPool.FetchOne())
 					if not succeed: print('Warning: AssignT when RandomRest not succeed!')
-					Count+=1
+					vt+=1
 		for I in range(self.HTRange[0][0], self.HTRange[0][1]+1, 1):
 			for J in range(self.HTRange[1][0], self.HTRange[1][1]+1, 1):
 				if not self.Assigned('HT', I, J):
 					succeed=self.AssignT('HT', I, J, self.StrTPool.FetchOne())
 					if not succeed: print('Warning: AssignT when RandomRest not succeed!')
-					Count+=1
+					ht+=1
 		if self.Cross:
 			for I in range(self.CTRange[0][0], self.CTRange[0][1]+1, 1):
 				for J in range(self.CTRange[1][0], self.CTRange[1][1]+1, 1):
@@ -563,8 +571,8 @@ class PoreNetwork(object):
 						T=[t[0]*Pick(List=[-1, 1]), t[1]]
 						succeed=self.AssignT('CT', I, J, T)
 						if not succeed: print('Warning: AssignT when RandomRest not succeed!')
-						Count+=1
-		print('RandomRest', Count)
+						ct+=1
+		print('RandomRest: ', vt+ht+ct, '\tVT: ', vt, '\tHT: ', ht, '\tCT: ', ct)
 		return Count
 
 #============================ Create Pore-Network Samples =========================================
@@ -594,453 +602,216 @@ def CreatePoreNetworkSamples(Nx=20, Ny=20, Folder=''):
 	FixVStrNet.Report()
 	FixVCrsNet.Report()
 
-	RandStrNet.Pixel()
-	RandCrsNet.Pixel()
-	FixVStrNet.Pixel()
-	FixVCrsNet.Pixel()
+	# Create one sample for each of the 4 kinds of networks =======================================
+	def CreateOne(SIN=0, PNW=['Rand', 'FixV'], AVTP=0, AHTP=0, \
+		          IS=0, JS=0, IE=0, JE=0, IB=0, JB=0, \
+		          SC=[], IG=0, JG=0, RG=0, IR=1, JR=1, RR=1):
+		if 'Rand' in PNW:
+			# -------------------------------------------------------------------------------------
+			RandStrNet.Restore()
+			if Pick(List=[0, 1, 2, 3, 4, 5, 6, 7, 8, 9])<AVTP:
+				RandStrNet.AssignBox(TP='VT', Start=[IS, JS], End=[IE, JE], Band=[IB, JB],
+					                 SubC=SC, Grad=[IG, JG, RG], Repeat=[IR, JR, RR])
+			if Pick(List=[0, 1, 2, 3, 4, 5, 6, 7, 8, 9])<AHTP:
+				RandStrNet.AssignBox(TP='HT', Start=[IS, JS], End=[IE, JE], Band=[IB, JB],
+					                 SubC=SC, Grad=[IG, JG, RG], Repeat=[IR, JR, RR])
+			RandStrNet.RandomRest()
+			name=Name(Prefix='RandStrNet', Index=SIN)
+			RandStrNet.SetName(Name=name)
+			RandStrNet.Write(Folder+'RandStrNet/')
+			RandStrNet.Pixel(Folder+'RandStrNet/')
+			print(name, 'Written!:\t', [IS, IE], [JS, JE], [IB, JB], SC, [IG, JG, RG], [IR, JR, RR])
+			# -------------------------------------------------------------------------------------
+			RandCrsNet.Restore()
+			if Pick(List=[0, 1, 2, 3, 4, 5, 6, 7, 8, 9])<AVTP:
+				RandCrsNet.AssignBox(TP='VT', Start=[IS, JS], End=[IE, JE], Band=[IB, JB],
+					                 SubC=SC, Grad=[IG, JG, RG], Repeat=[IR, JR, RR])
+			if Pick(List=[0, 1, 2, 3, 4, 5, 6, 7, 8, 9])<AHTP:
+				RandCrsNet.AssignBox(TP='HT', Start=[IS, JS], End=[IE, JE], Band=[IB, JB],
+					                 SubC=SC, Grad=[IG, JG, RG], Repeat=[IR, JR, RR])
+			CrsPick=Pick(List=[0, 1, 2, 3, 4, 5, 6, 7, 8, 9])
+			if CrsPick<2:
+				FixVCrsNet.AssignBox(TP='CT', Start=[IS, JS], End=[IE, JE], Band=[IB, JB],
+				                     SubC=SC, Grad=[IG, JG, RG], Repeat=[IR, JR, RR], Flip= 2)
+			elif CrsPick>7:
+				FixVCrsNet.AssignBox(TP='CT', Start=[IS, JS], End=[IE, JE], Band=[IB, JB],
+				                     SubC=SC, Grad=[IG, JG, RG], Repeat=[IR, JR, RR], Flip= 3)
+			elif CrsPick==3:
+				FixVCrsNet.AssignBox(TP='CT', Start=[IS, JS], End=[IE, JE], Band=[IB, JB],
+				                     SubC=SC, Grad=[IG, JG, RG], Repeat=[IR, JR, RR], Flip=-1)
+			elif CrsPick==6:
+				FixVCrsNet.AssignBox(TP='CT', Start=[IS, JS], End=[IE, JE], Band=[IB, JB],
+				                     SubC=SC, Grad=[IG, JG, RG], Repeat=[IR, JR, RR], Flip= 1)
+			elif CrsPick==4:
+				FixVCrsNet.AssignBox(TP='CT', Start=[IS, JS], End=[IE, JE], Band=[IB, JB],
+				                     SubC=[], Grad=[IG, JG, RG], Repeat=[IR, JR, RR], Flip=-1)
+			elif CrsPick==5:
+				FixVCrsNet.AssignBox(TP='CT', Start=[IS, JS], End=[IE, JE], Band=[IB, JB],
+				                     SubC=[], Grad=[IG, JG, RG], Repeat=[IR, JR, RR], Flip= 1)
+			else:
+				FixVCrsNet.AssignBox(TP='CT', Start=[IS, JS], End=[IE, JE], Band=[IB, JB],
+				                     SubC=SC, Grad=[IG, JG, RG], Repeat=[IR, JR, RR], Flip= 0)
+			RandCrsNet.RandomRest()
+			name=Name(Prefix='RandCrsNet', Index=SIN)
+			RandCrsNet.SetName(Name=name)
+			RandCrsNet.Write(Folder+'RandCrsNet/')
+			RandCrsNet.Pixel(Folder+'RandCrsNet/')
+			print(name, 'Written!:\t', [IS, IE], [JS, JE], [IB, JB], SC, [IG, JG, RG], [IR, JR, RR])
+			# -------------------------------------------------------------------------------------
+		if 'FixV' in PNW:
+			# -------------------------------------------------------------------------------------
+			FixVStrNet.Restore()
+			if Pick(List=[0, 1, 2, 3, 4, 5, 6, 7, 8, 9])<AVTP:
+				FixVStrNet.AssignBox(TP='VT', Start=[IS, JS], End=[IE, JE], Band=[IB, JB],
+					                 SubC=SC, Grad=[IG, JG, RG], Repeat=[IR, JR, RR])
+			if Pick(List=[0, 1, 2, 3, 4, 5, 6, 7, 8, 9])<AHTP:
+				FixVStrNet.AssignBox(TP='HT', Start=[IS, JS], End=[IE, JE], Band=[IB, JB],
+					                 SubC=SC, Grad=[IG, JG, RG], Repeat=[IR, JR, RR])
+			FixVStrNet.RandomRest()
+			name=Name(Prefix='FixVStrNet', Index=SIN)
+			FixVStrNet.SetName(Name=name)
+			FixVStrNet.Write(Folder+'FixVStrNet/')
+			FixVStrNet.Pixel(Folder+'FixVStrNet/')
+			print(name, 'Written!:\t', [IS, IE], [JS, JE], [IB, JB], SC, [IG, JG, RG], [IR, JR, RR])
+			# -------------------------------------------------------------------------------------
+			FixVCrsNet.Restore()
+			if Pick(List=[0, 1, 2, 3, 4, 5, 6, 7, 8, 9])<AVTP:
+				FixVCrsNet.AssignBox(TP='VT', Start=[IS, JS], End=[IE, JE], Band=[IB, JB],
+					                 SubC=SC, Grad=[IG, JG, RG], Repeat=[IR, JR, RR])
+			if Pick(List=[0, 1, 2, 3, 4, 5, 6, 7, 8, 9])<AHTP:
+				FixVCrsNet.AssignBox(TP='HT', Start=[IS, JS], End=[IE, JE], Band=[IB, JB],
+					                 SubC=SC, Grad=[IG, JG, RG], Repeat=[IR, JR, RR])
+			CrsPick=Pick(List=[0, 1, 2, 3, 4, 5, 6, 7, 8, 9])
+			if CrsPick<2:
+				FixVCrsNet.AssignBox(TP='CT', Start=[IS, JS], End=[IE, JE], Band=[IB, JB],
+				                     SubC=SC, Grad=[IG, JG, RG], Repeat=[IR, JR, RR], Flip= 2)
+			elif CrsPick>7:
+				FixVCrsNet.AssignBox(TP='CT', Start=[IS, JS], End=[IE, JE], Band=[IB, JB],
+				                     SubC=SC, Grad=[IG, JG, RG], Repeat=[IR, JR, RR], Flip= 3)
+			elif CrsPick==3:
+				FixVCrsNet.AssignBox(TP='CT', Start=[IS, JS], End=[IE, JE], Band=[IB, JB],
+				                     SubC=SC, Grad=[IG, JG, RG], Repeat=[IR, JR, RR], Flip=-1)
+			elif CrsPick==6:
+				FixVCrsNet.AssignBox(TP='CT', Start=[IS, JS], End=[IE, JE], Band=[IB, JB],
+				                     SubC=SC, Grad=[IG, JG, RG], Repeat=[IR, JR, RR], Flip= 1)
+			elif CrsPick==4:
+				FixVCrsNet.AssignBox(TP='CT', Start=[IS, JS], End=[IE, JE], Band=[IB, JB],
+				                     SubC=[], Grad=[IG, JG, RG], Repeat=[IR, JR, RR], Flip=-1)
+			elif CrsPick==5:
+				FixVCrsNet.AssignBox(TP='CT', Start=[IS, JS], End=[IE, JE], Band=[IB, JB],
+				                     SubC=[], Grad=[IG, JG, RG], Repeat=[IR, JR, RR], Flip= 1)
+			else:
+				FixVCrsNet.AssignBox(TP='CT', Start=[IS, JS], End=[IE, JE], Band=[IB, JB],
+				                     SubC=SC, Grad=[IG, JG, RG], Repeat=[IR, JR, RR], Flip= 0)
+			FixVCrsNet.RandomRest()
+			name=Name(Prefix='FixVCrsNet', Index=SIN)
+			FixVCrsNet.SetName(Name=name)
+			FixVCrsNet.Write(Folder+'FixVCrsNet/')
+			FixVCrsNet.Pixel(Folder+'FixVCrsNet/')
+			print(name, 'Written!:\t', [IS, IE], [JS, JE], [IB, JB], SC, [IG, JG, RG], [IR, JR, RR])
+			# -------------------------------------------------------------------------------------
+		return True
+	# =============================================================================================
 
-	print('Generate Random Volume Network -------------------------------------------------------')
+
+	print('Generate Pore-Networks ---------------------------------------------------------------')
 	SampleIndex=0
-	for B in [0, 4, 8]:
-		for SC in [[0, 1, 2], [4, 3, 5], [8, 7, 6], [2, 4, 6, 8], [7, 5, 3, 1]]:
-			for IG in [0, 1, 2]:
-				for JG in [0, 1, 2]:
-					for IR in [1, 2, 3, 4, 5]:
-						for JR in [1, 2, 3, 4, 5]:
-							IS=0
-							JS=0
-							IE=0
-							JE=0
-							IB=B
-							JB=B
-							RG=0
-							RR=1
-							# ---------------------------------------------------------------------
-							RandStrNet.Restore()
-							if Pick(List=[0, 1, 2, 3, 4, 5, 6, 7, 8, 9])<8:
-								RandStrNet.AssignBox(TP='VT', Start=[IS, JS], End=[IE, JE], Band=[IB, JB],
-									                 SubC=SC, Grad=[IG, JG, RG], Repeat=[IR, JR, RR])
-							RandStrNet.RandomRest()
-							name=Name(Prefix='RandStrNet', Index=SampleIndex)
-							RandStrNet.SetName(Name=name)
-							RandStrNet.Write(Folder+'RandStrNet/')
-							RandStrNet.Pixel(Folder+'RandStrNet/')
 
-							print(name, 'Written!:\t', B, SC, IG, JG, IR, JR)
-
-							RandCrsNet.Restore()
-							if Pick(List=[0, 1, 2, 3, 4, 5, 6, 7, 8, 9])<8:
-								RandCrsNet.AssignBox(TP='VT', Start=[IS, JS], End=[IE, JE], Band=[IB, JB],
-								                     SubC=SC, Grad=[IG, JG, RG], Repeat=[IR, JR, RR])
-							CrsPick=Pick(List=[0, 1, 2, 3, 4, 5, 6, 7, 8, 9])
-							if CrsPick<2:
-								RandCrsNet.AssignBox(TP='CT', Start=[IS, JS], End=[IE, JE], Band=[IB, JB],
-								                     SubC=SC, Grad=[IG, JG, RG], Repeat=[IR, JR, RR], Flip= 2)
-							elif CrsPick>7:
-								RandCrsNet.AssignBox(TP='CT', Start=[IS, JS], End=[IE, JE], Band=[IB, JB],
-								                     SubC=SC, Grad=[IG, JG, RG], Repeat=[IR, JR, RR], Flip= 3)
-							elif CrsPick==3 or CrsPick==4:
-								RandCrsNet.AssignBox(TP='CT', Start=[IS, JS], End=[IE, JE], Band=[IB, JB],
-								                     SubC=SC, Grad=[IG, JG, RG], Repeat=[IR, JR, RR], Flip=-1)
-							elif CrsPick==5 or CrsPick==6:
-								RandCrsNet.AssignBox(TP='CT', Start=[IS, JS], End=[IE, JE], Band=[IB, JB],
-								                     SubC=SC, Grad=[IG, JG, RG], Repeat=[IR, JR, RR], Flip= 1)
-							else:
-								RandCrsNet.AssignBox(TP='CT', Start=[IS, JS], End=[IE, JE], Band=[IB, JB],
-								                     SubC=SC, Grad=[IG, JG, RG], Repeat=[IR, JR, RR], Flip= 0)
-							RandCrsNet.RandomRest()
-							name=Name(Prefix='RandCrsNet', Index=SampleIndex)
-							RandCrsNet.SetName(Name=name)
-							RandCrsNet.Write(Folder+'RandCrsNet/')
-							RandCrsNet.Pixel(Folder+'RandCrsNet/')
-							print(name, 'Written!:\t', B, SC, IG, JG, IR, JR)
+	for SC in [[0, 1], [2, 3], [6, 5], [8, 7], [0, 8], [7, 1], [6, 2], [3, 5]]:
+		for IS in range(1, Nx-7, 1):
+			IE=IS+8
+			for IG in [0, 1]:
+				for JG in [0, 1]:
+					for IR in [1, 2, 3, 4]:
+						for JR in [1, 2, 3, 4]:
+							# CreateOne(SIN=SampleIndex, IS=IS, IE=IE, SC=SC, IG=IG, JG=JG, IR=IR, JR=JR, AVTP=8)
 							SampleIndex+=1
-							# ---------------------------------------------------------------------
-
-							# ---------------------------------------------------------------------
-							RandStrNet.Restore()
-							if Pick(List=[0, 1, 2, 3, 4, 5, 6, 7, 8, 9])<8:
-								RandStrNet.AssignBox(TP='HT', Start=[IS, JS], End=[IE, JE], Band=[IB, JB],
-									                 SubC=SC, Grad=[IG, JG, RG], Repeat=[IR, JR, RR])
-							RandStrNet.RandomRest()
-							name=Name(Prefix='RandStrNet', Index=SampleIndex)
-							RandStrNet.SetName(Name=name)
-							RandStrNet.Write(Folder+'RandStrNet/')
-							RandStrNet.Pixel(Folder+'RandStrNet/')
-							print(name, 'Written!:\t', B, SC, IG, JG, IR, JR)
-
-							RandCrsNet.Restore()
-							if Pick(List=[0, 1, 2, 3, 4, 5, 6, 7, 8, 9])<8:
-								RandCrsNet.AssignBox(TP='HT', Start=[IS, JS], End=[IE, JE], Band=[IB, JB],
-									                 SubC=SC, Grad=[IG, JG, RG], Repeat=[IR, JR, RR])
-							CrsPick=Pick(List=[0, 1, 2, 3, 4, 5, 6, 7, 8, 9])
-							if CrsPick<2:
-								RandCrsNet.AssignBox(TP='CT', Start=[IS, JS], End=[IE, JE], Band=[IB, JB],
-								                     SubC=SC, Grad=[IG, JG, RG], Repeat=[IR, JR, RR], Flip= 2)
-							elif CrsPick>7:
-								RandCrsNet.AssignBox(TP='CT', Start=[IS, JS], End=[IE, JE], Band=[IB, JB],
-								                     SubC=SC, Grad=[IG, JG, RG], Repeat=[IR, JR, RR], Flip= 3)
-							elif CrsPick==3 or CrsPick==4:
-								RandCrsNet.AssignBox(TP='CT', Start=[IS, JS], End=[IE, JE], Band=[IB, JB],
-								                     SubC=SC, Grad=[IG, JG, RG], Repeat=[IR, JR, RR], Flip=-1)
-							elif CrsPick==5 or CrsPick==6:
-								RandCrsNet.AssignBox(TP='CT', Start=[IS, JS], End=[IE, JE], Band=[IB, JB],
-								                     SubC=SC, Grad=[IG, JG, RG], Repeat=[IR, JR, RR], Flip= 1)
-							else:
-								RandCrsNet.AssignBox(TP='CT', Start=[IS, JS], End=[IE, JE], Band=[IB, JB],
-								                     SubC=SC, Grad=[IG, JG, RG], Repeat=[IR, JR, RR], Flip= 0)
-							RandCrsNet.RandomRest()
-							name=Name(Prefix='RandCrsNet', Index=SampleIndex)
-							RandCrsNet.SetName(Name=name)
-							RandCrsNet.Write(Folder+'RandCrsNet/')
-							RandCrsNet.Pixel(Folder+'RandCrsNet/')
-							print(name, 'Written!:\t', B, SC, IG, JG, IR, JR)
+							# CreateOne(SIN=SampleIndex, IS=IS, IE=IE, SC=SC, IG=IG, JG=JG, IR=IR, JR=JR, AHTP=8)
 							SampleIndex+=1
-							# ---------------------------------------------------------------------
-
-							# ---------------------------------------------------------------------
-							RandStrNet.Restore()
-							if Pick(List=[0, 1, 2, 3, 4, 5, 6, 7, 8, 9])<1:
-								RandStrNet.AssignBox(TP='VT', Start=[IS, JS], End=[IE, JE], Band=[IB, JB],
-									                 SubC=SC, Grad=[IG, JG, RG], Repeat=[IR, JR, RR])
-							if Pick(List=[0, 1, 2, 3, 4, 5, 6, 7, 8, 9])<1:
-								RandStrNet.AssignBox(TP='HT', Start=[IS, JS], End=[IE, JE], Band=[IB, JB],
-									                 SubC=SC, Grad=[IG, JG, RG], Repeat=[IR, JR, RR])
-							RandStrNet.RandomRest()
-							name=Name(Prefix='RandStrNet', Index=SampleIndex)
-							RandStrNet.SetName(Name=name)
-							RandStrNet.Write(Folder+'RandStrNet/')
-							RandStrNet.Pixel(Folder+'RandStrNet/')
-							print(name, 'Written!:\t', B, SC, IG, JG, IR, JR)
-
-							RandCrsNet.Restore()
-							if Pick(List=[0, 1, 2, 3, 4, 5, 6, 7, 8, 9])<1:
-								RandCrsNet.AssignBox(TP='VT', Start=[IS, JS], End=[IE, JE], Band=[IB, JB],
-									                 SubC=SC, Grad=[IG, JG, RG], Repeat=[IR, JR, RR])
-							if Pick(List=[0, 1, 2, 3, 4, 5, 6, 7, 8, 9])<1:
-								RandCrsNet.AssignBox(TP='HT', Start=[IS, JS], End=[IE, JE], Band=[IB, JB],
-									                 SubC=SC, Grad=[IG, JG, RG], Repeat=[IR, JR, RR])
-							CrsPick=Pick(List=[0, 1, 2, 3, 4, 5, 6, 7, 8, 9])
-							if CrsPick<2:
-								RandCrsNet.AssignBox(TP='CT', Start=[IS, JS], End=[IE, JE], Band=[IB, JB],
-								                     SubC=SC, Grad=[IG, JG, RG], Repeat=[IR, JR, RR], Flip= 2)
-							elif CrsPick>7:
-								RandCrsNet.AssignBox(TP='CT', Start=[IS, JS], End=[IE, JE], Band=[IB, JB],
-								                     SubC=SC, Grad=[IG, JG, RG], Repeat=[IR, JR, RR], Flip= 3)
-							elif CrsPick==3 or CrsPick==4:
-								RandCrsNet.AssignBox(TP='CT', Start=[IS, JS], End=[IE, JE], Band=[IB, JB],
-								                     SubC=SC, Grad=[IG, JG, RG], Repeat=[IR, JR, RR], Flip=-1)
-							elif CrsPick==5 or CrsPick==6:
-								RandCrsNet.AssignBox(TP='CT', Start=[IS, JS], End=[IE, JE], Band=[IB, JB],
-								                     SubC=SC, Grad=[IG, JG, RG], Repeat=[IR, JR, RR], Flip= 1)
-							else:
-								RandCrsNet.AssignBox(TP='CT', Start=[IS, JS], End=[IE, JE], Band=[IB, JB],
-								                     SubC=SC, Grad=[IG, JG, RG], Repeat=[IR, JR, RR], Flip= 0)
-							RandCrsNet.RandomRest()
-							name=Name(Prefix='RandCrsNet', Index=SampleIndex)
-							RandCrsNet.SetName(Name=name)
-							RandCrsNet.Write(Folder+'RandCrsNet/')
-							RandCrsNet.Pixel(Folder+'RandCrsNet/')
-							print(name, 'Written!:\t', B, SC, IG, JG, IR, JR)
+							# CreateOne(SIN=SampleIndex, IS=IS, IE=IE, SC=SC, IG=IG, JG=JG, IR=IR, JR=JR, AVTP=9, AHTP=9)
 							SampleIndex+=1
-							# ---------------------------------------------------------------------
+		for JS in range(1, Ny-7, 1):
+			JE=JS+8
+			for IG in [0, 1]:
+				for JG in [0, 1]:
+					for IR in [1, 2, 3, 4]:
+						for JR in [1, 2, 3, 4]:
+							# CreateOne(SIN=SampleIndex, JS=JS, JE=JE, SC=SC, IG=IG, JG=JG, IR=IR, JR=JR, AVTP=8)
+							SampleIndex+=1
+							# CreateOne(SIN=SampleIndex, JS=JS, JE=JE, SC=SC, IG=IG, JG=JG, IR=IR, JR=JR, AHTP=8)
+							SampleIndex+=1
+							# CreateOne(SIN=SampleIndex, JS=JS, JE=JE, SC=SC, IG=IG, JG=JG, IR=IR, JR=JR, AVTP=9, AHTP=9)
+							SampleIndex+=1
+		for IS in range(1, Nx-7, 1):
+			IE=IS+8
+			for JS in range(1, Ny-7, 1):
+				JE=JS+8
+				for IG in [0, 1]:
+					for JG in [0, 1]:
+						for IR in [1, 2, 3, 4]:
+							for JR in [1, 2, 3, 4]:
+								# CreateOne(SIN=SampleIndex, IS=IS, IE=IE, JS=JS, JE=JE, SC=SC, IG=IG, JG=JG, IR=IR, JR=JR, AVTP=8)
+								SampleIndex+=1
+								# CreateOne(SIN=SampleIndex, IS=IS, IE=IE, JS=JS, JE=JE, SC=SC, IG=IG, JG=JG, IR=IR, JR=JR, AHTP=8)
+								SampleIndex+=1
+								# CreateOne(SIN=SampleIndex, IS=IS, IE=IE, JS=JS, JE=JE, SC=SC, IG=IG, JG=JG, IR=IR, JR=JR, AVTP=9, AHTP=9)
+								SampleIndex+=1
+		for IB in [1, 2, 3, 4]:
+			for IG in [0, 1]:
+				for JG in [0, 1]:
+					for IR in [1, 2, 3, 4]:
+						for JR in [1, 2, 3, 4]:
+							# CreateOne(SIN=SampleIndex, IB=IB, SC=SC, IG=IG, JG=JG, IR=IR, JR=JR, AVTP=8)
+							SampleIndex+=1
+							# CreateOne(SIN=SampleIndex, IB=IB, SC=SC, IG=IG, JG=JG, IR=IR, JR=JR, AHTP=8)
+							SampleIndex+=1
+							# CreateOne(SIN=SampleIndex, IB=IB, SC=SC, IG=IG, JG=JG, IR=IR, JR=JR, AVTP=9, AHTP=9)
+							SampleIndex+=1
+		for JB in [1, 2, 3, 4]:
+			for IG in [0, 1]:
+				for JG in [0, 1]:
+					for IR in [1, 2, 3, 4]:
+						for JR in [1, 2, 3, 4]:
+							# CreateOne(SIN=SampleIndex, JB=JB, SC=SC, IG=IG, JG=JG, IR=IR, JR=JR, AVTP=8)
+							SampleIndex+=1
+							# CreateOne(SIN=SampleIndex, JB=JB, SC=SC, IG=IG, JG=JG, IR=IR, JR=JR, AHTP=8)
+							SampleIndex+=1
+							# CreateOne(SIN=SampleIndex, JB=JB, SC=SC, IG=IG, JG=JG, IR=IR, JR=JR, AVTP=9, AHTP=9)
+							SampleIndex+=1
+	print(SampleIndex)
+
+	# for SC in [[0, 1, 2], [4, 3, 5], [8, 7, 6], [4, 0, 8], [1, 3, 7], [6, 5, 2]]:
+
+
+	# for B in [0, 4, 8]:
+	# 	for SC in [[0, 1, 2], [4, 3, 5], [8, 7, 6], [2, 4, 6, 8], [7, 5, 3, 1]]:
+	# 		for IG in [0, 1, 2]:
+	# 			for JG in [0, 1, 2]:
+	# 				for IR in [1, 2, 3, 4]:
+	# 					for JR in [1, 2, 3, 4]:
+	# 						# CreateOne(SIN=SampleIndex, AVTP=8)
+	# 						SampleIndex+=1
+	# 						# CreateOne(SIN=SampleIndex, AHTP=8)
+	# 						SampleIndex+=1
+	# 						# CreateOne(SIN=SampleIndex, AVTP=9, AHTP=9)
+	# 						SampleIndex+=1
+	# 						# ---------------------------------------------------------------------
 	print(SampleIndex)
 	# ---------------------------------------------------------------------------------------------
 
-	print('Generate Fixed Volume Network --------------------------------------------------------')
-	SampleIndex=0
-	for B in [0, 2, 4, 6, 8]:
-		for SC in [[0, 1, 2, 3, 4], [8, 7, 6, 5, 4], [4, 0, 8, 2, 6], [4, 1, 7, 3, 5], [4, 5, 3, 6, 2]]:
-			for IG in [1, 2, 3, 4]:
-				for JG in [1, 2, 3, 4]:
-					for IR in [1, 2, 3]:
-						for JR in [1, 2, 3]:
-							IS=0
-							JS=0
-							IE=0
-							JE=0
-							IB=B
-							JB=B
-							RG=0
-							RR=1
-							# ---------------------------------------------------------------------
-							FixVStrNet.Restore()
-							if Pick(List=[0, 1, 2, 3, 4, 5, 6, 7, 8, 9])<8:
-								FixVStrNet.AssignBox(TP='VT', Start=[IS, JS], End=[IE, JE], Band=[IB, JB],
-									                 SubC=SC, Grad=[IG, JG, RG], Repeat=[IR, JR, RR])
-							FixVStrNet.RandomRest()
-							name=Name(Prefix='FixVStrNet', Index=SampleIndex)
-							FixVStrNet.SetName(Name=name)
-							FixVStrNet.Write(Folder+'FixVStrNet/')
-							FixVStrNet.Pixel(Folder+'FixVStrNet/')
-							print(name, 'Written!:\t', B, SC, IG, JG, IR, JR)
+	# print('Generate Fixed Volume Network --------------------------------------------------------')
+	# SampleIndex=0
+	# for B in [0, 2, 4, 6, 8]:
+	# 	for SC in [[0, 1, 2, 3, 4], [8, 7, 6, 5, 4], [4, 0, 8, 2, 6], [4, 1, 7, 3, 5], [4, 5, 3, 6, 2]]:
+	# 		for IG in [1, 2, 3, 4]:
+	# 			for JG in [1, 2, 3, 4]:
+	# 				for IR in [1, 2, 3]:
+	# 					for JR in [1, 2, 3]:
 
-							FixVCrsNet.Restore()
-							if Pick(List=[0, 1, 2, 3, 4, 5, 6, 7, 8, 9])<8:
-								FixVCrsNet.AssignBox(TP='VT', Start=[IS, JS], End=[IE, JE], Band=[IB, JB],
-								                     SubC=SC, Grad=[IG, JG, RG], Repeat=[IR, JR, RR])
-							CrsPick=Pick(List=[0, 1, 2, 3, 4, 5, 6, 7, 8, 9])
-							if CrsPick<2:
-								FixVCrsNet.AssignBox(TP='CT', Start=[IS, JS], End=[IE, JE], Band=[IB, JB],
-								                     SubC=SC, Grad=[IG, JG, RG], Repeat=[IR, JR, RR], Flip= 2)
-							elif CrsPick>7:
-								FixVCrsNet.AssignBox(TP='CT', Start=[IS, JS], End=[IE, JE], Band=[IB, JB],
-								                     SubC=SC, Grad=[IG, JG, RG], Repeat=[IR, JR, RR], Flip= 3)
-							elif CrsPick==3 or CrsPick==4:
-								FixVCrsNet.AssignBox(TP='CT', Start=[IS, JS], End=[IE, JE], Band=[IB, JB],
-								                     SubC=SC, Grad=[IG, JG, RG], Repeat=[IR, JR, RR], Flip=-1)
-							elif CrsPick==5 or CrsPick==6:
-								FixVCrsNet.AssignBox(TP='CT', Start=[IS, JS], End=[IE, JE], Band=[IB, JB],
-								                     SubC=SC, Grad=[IG, JG, RG], Repeat=[IR, JR, RR], Flip= 1)
-							else:
-								FixVCrsNet.AssignBox(TP='CT', Start=[IS, JS], End=[IE, JE], Band=[IB, JB],
-								                     SubC=SC, Grad=[IG, JG, RG], Repeat=[IR, JR, RR], Flip= 0)
-							FixVCrsNet.RandomRest()
-							name=Name(Prefix='FixVCrsNet', Index=SampleIndex)
-							FixVCrsNet.SetName(Name=name)
-							FixVCrsNet.Write(Folder+'FixVCrsNet/')
-							FixVCrsNet.Pixel(Folder+'FixVCrsNet/')
-							print(name, 'Written!:\t', B, SC, IG, JG, IR, JR)
+	# for B in [1, 3, 5, 7, 9]:
+	# 	for SC in [[0, 1, 2, 3, 4], [8, 7, 6, 5, 4], [4, 0, 8, 2, 6], [4, 1, 7, 3, 5], [4, 5, 3, 6, 2]]:
+	# 		for RG in [1, 2, 3, 4]:
 
-							SampleIndex+=1
-							# ---------------------------------------------------------------------
-
-							# ---------------------------------------------------------------------
-							FixVStrNet.Restore()
-							if Pick(List=[0, 1, 2, 3, 4, 5, 6, 7, 8, 9])<8:
-								FixVStrNet.AssignBox(TP='HT', Start=[IS, JS], End=[IE, JE], Band=[IB, JB],
-									                 SubC=SC, Grad=[IG, JG, RG], Repeat=[IR, JR, RR])
-							FixVStrNet.RandomRest()
-							name=Name(Prefix='FixVStrNet', Index=SampleIndex)
-							FixVStrNet.SetName(Name=name)
-							FixVStrNet.Write(Folder+'FixVStrNet/')
-							FixVStrNet.Pixel(Folder+'FixVStrNet/')
-							print(name, 'Written!:\t', B, SC, IG, JG, IR, JR)
-
-							FixVCrsNet.Restore()
-							if Pick(List=[0, 1, 2, 3, 4, 5, 6, 7, 8, 9])<8:
-								FixVCrsNet.AssignBox(TP='HT', Start=[IS, JS], End=[IE, JE], Band=[IB, JB],
-									                 SubC=SC, Grad=[IG, JG, RG], Repeat=[IR, JR, RR])
-							CrsPick=Pick(List=[0, 1, 2, 3, 4, 5, 6, 7, 8, 9])
-							if CrsPick<2:
-								FixVCrsNet.AssignBox(TP='CT', Start=[IS, JS], End=[IE, JE], Band=[IB, JB],
-								                     SubC=SC, Grad=[IG, JG, RG], Repeat=[IR, JR, RR], Flip= 2)
-							elif CrsPick>7:
-								FixVCrsNet.AssignBox(TP='CT', Start=[IS, JS], End=[IE, JE], Band=[IB, JB],
-								                     SubC=SC, Grad=[IG, JG, RG], Repeat=[IR, JR, RR], Flip= 3)
-							elif CrsPick==3 or CrsPick==4:
-								FixVCrsNet.AssignBox(TP='CT', Start=[IS, JS], End=[IE, JE], Band=[IB, JB],
-								                     SubC=SC, Grad=[IG, JG, RG], Repeat=[IR, JR, RR], Flip=-1)
-							elif CrsPick==5 or CrsPick==6:
-								FixVCrsNet.AssignBox(TP='CT', Start=[IS, JS], End=[IE, JE], Band=[IB, JB],
-								                     SubC=SC, Grad=[IG, JG, RG], Repeat=[IR, JR, RR], Flip= 1)
-							else:
-								FixVCrsNet.AssignBox(TP='CT', Start=[IS, JS], End=[IE, JE], Band=[IB, JB],
-								                     SubC=SC, Grad=[IG, JG, RG], Repeat=[IR, JR, RR], Flip= 0)
-							FixVCrsNet.RandomRest()
-							name=Name(Prefix='FixVCrsNet', Index=SampleIndex)
-							FixVCrsNet.SetName(Name=name)
-							FixVCrsNet.Write(Folder+'FixVCrsNet/')
-							FixVCrsNet.Pixel(Folder+'FixVCrsNet/')
-							print(name, 'Written!:\t', B, SC, IG, JG, IR, JR)
-
-							SampleIndex+=1
-							# ---------------------------------------------------------------------
-
-							# ---------------------------------------------------------------------
-							FixVStrNet.Restore()
-							if Pick(List=[0, 1, 2, 3, 4, 5, 6, 7, 8, 9])<1:
-								FixVStrNet.AssignBox(TP='VT', Start=[IS, JS], End=[IE, JE], Band=[IB, JB],
-									                 SubC=SC, Grad=[IG, JG, RG], Repeat=[IR, JR, RR])
-							if Pick(List=[0, 1, 2, 3, 4, 5, 6, 7, 8, 9])<1:
-								FixVStrNet.AssignBox(TP='HT', Start=[IS, JS], End=[IE, JE], Band=[IB, JB],
-									                 SubC=SC, Grad=[IG, JG, RG], Repeat=[IR, JR, RR])
-							FixVStrNet.RandomRest()
-							name=Name(Prefix='FixVStrNet', Index=SampleIndex)
-							FixVStrNet.SetName(Name=name)
-							FixVStrNet.Write(Folder+'FixVStrNet/')
-							FixVStrNet.Pixel(Folder+'FixVStrNet/')
-							print(name, 'Written!:\t', B, SC, IG, JG, IR, JR)
-
-							FixVCrsNet.Restore()
-							if Pick(List=[0, 1, 2, 3, 4, 5, 6, 7, 8, 9])<1:
-								FixVCrsNet.AssignBox(TP='VT', Start=[IS, JS], End=[IE, JE], Band=[IB, JB],
-									                 SubC=SC, Grad=[IG, JG, RG], Repeat=[IR, JR, RR])
-							if Pick(List=[0, 1, 2, 3, 4, 5, 6, 7, 8, 9])<1:
-								FixVCrsNet.AssignBox(TP='HT', Start=[IS, JS], End=[IE, JE], Band=[IB, JB],
-									                 SubC=SC, Grad=[IG, JG, RG], Repeat=[IR, JR, RR])
-							CrsPick=Pick(List=[0, 1, 2, 3, 4, 5, 6, 7, 8, 9])
-							if CrsPick<2:
-								FixVCrsNet.AssignBox(TP='CT', Start=[IS, JS], End=[IE, JE], Band=[IB, JB],
-								                     SubC=SC, Grad=[IG, JG, RG], Repeat=[IR, JR, RR], Flip= 2)
-							elif CrsPick>7:
-								FixVCrsNet.AssignBox(TP='CT', Start=[IS, JS], End=[IE, JE], Band=[IB, JB],
-								                     SubC=SC, Grad=[IG, JG, RG], Repeat=[IR, JR, RR], Flip= 3)
-							elif CrsPick==3 or CrsPick==4:
-								FixVCrsNet.AssignBox(TP='CT', Start=[IS, JS], End=[IE, JE], Band=[IB, JB],
-								                     SubC=SC, Grad=[IG, JG, RG], Repeat=[IR, JR, RR], Flip=-1)
-							elif CrsPick==5 or CrsPick==6:
-								FixVCrsNet.AssignBox(TP='CT', Start=[IS, JS], End=[IE, JE], Band=[IB, JB],
-								                     SubC=SC, Grad=[IG, JG, RG], Repeat=[IR, JR, RR], Flip= 1)
-							else:
-								FixVCrsNet.AssignBox(TP='CT', Start=[IS, JS], End=[IE, JE], Band=[IB, JB],
-								                     SubC=SC, Grad=[IG, JG, RG], Repeat=[IR, JR, RR], Flip= 0)
-							FixVCrsNet.RandomRest()
-							name=Name(Prefix='FixVCrsNet', Index=SampleIndex)
-							FixVCrsNet.SetName(Name=name)
-							FixVCrsNet.Write(Folder+'FixVCrsNet/')
-							FixVCrsNet.Pixel(Folder+'FixVCrsNet/')
-							print(name, 'Written!:\t', B, SC, IG, JG, IR, JR)
-
-							SampleIndex+=1
-							# ---------------------------------------------------------------------
-	print(SampleIndex)
-	for B in [1, 3, 5, 7, 9]:
-		for SC in [[0, 1, 2, 3, 4], [8, 7, 6, 5, 4], [4, 0, 8, 2, 6], [4, 1, 7, 3, 5], [4, 5, 3, 6, 2]]:
-			for RG in [1, 2, 3, 4]:
-							IB=B
-							JB=B
-							IS=0
-							JS=0
-							IE=0
-							JE=0
-							IG=0
-							JG=0
-							IR=1
-							JR=1
-							RR=1
-							# ---------------------------------------------------------------------
-							FixVStrNet.Restore()
-							if Pick(List=[0, 1, 2, 3, 4, 5, 6, 7, 8, 9])<8:
-								FixVStrNet.AssignBox(TP='VT', Start=[IS, JS], End=[IE, JE], Band=[IB, JB],
-									                 SubC=SC, Grad=[IG, JG, RG], Repeat=[IR, JR, RR])
-							FixVStrNet.RandomRest()
-							name=Name(Prefix='FixVStrNet', Index=SampleIndex)
-							FixVStrNet.SetName(Name=name)
-							FixVStrNet.Write(Folder+'FixVStrNet/')
-							FixVStrNet.Pixel(Folder+'FixVStrNet/')
-							print(name, 'Written!:\t', B, SC, RG)
-
-							FixVCrsNet.Restore()
-							if Pick(List=[0, 1, 2, 3, 4, 5, 6, 7, 8, 9])<8:
-								FixVCrsNet.AssignBox(TP='VT', Start=[IS, JS], End=[IE, JE], Band=[IB, JB],
-								                     SubC=SC, Grad=[IG, JG, RG], Repeat=[IR, JR, RR])
-							CrsPick=Pick(List=[0, 1, 2, 3, 4, 5, 6, 7, 8, 9])
-							if CrsPick<2:
-								FixVCrsNet.AssignBox(TP='CT', Start=[IS, JS], End=[IE, JE], Band=[IB, JB],
-								                     SubC=SC, Grad=[IG, JG, RG], Repeat=[IR, JR, RR], Flip= 2)
-							elif CrsPick>7:
-								FixVCrsNet.AssignBox(TP='CT', Start=[IS, JS], End=[IE, JE], Band=[IB, JB],
-								                     SubC=SC, Grad=[IG, JG, RG], Repeat=[IR, JR, RR], Flip= 3)
-							elif CrsPick==3 or CrsPick==4:
-								FixVCrsNet.AssignBox(TP='CT', Start=[IS, JS], End=[IE, JE], Band=[IB, JB],
-								                     SubC=SC, Grad=[IG, JG, RG], Repeat=[IR, JR, RR], Flip=-1)
-							elif CrsPick==5 or CrsPick==6:
-								FixVCrsNet.AssignBox(TP='CT', Start=[IS, JS], End=[IE, JE], Band=[IB, JB],
-								                     SubC=SC, Grad=[IG, JG, RG], Repeat=[IR, JR, RR], Flip= 1)
-							else:
-								FixVCrsNet.AssignBox(TP='CT', Start=[IS, JS], End=[IE, JE], Band=[IB, JB],
-								                     SubC=SC, Grad=[IG, JG, RG], Repeat=[IR, JR, RR], Flip= 0)
-							FixVCrsNet.RandomRest()
-							name=Name(Prefix='FixVCrsNet', Index=SampleIndex)
-							FixVCrsNet.SetName(Name=name)
-							FixVCrsNet.Write(Folder+'FixVCrsNet/')
-							FixVCrsNet.Pixel(Folder+'FixVCrsNet/')
-							print(name, 'Written!:\t', B, SC, RG)
-
-							SampleIndex+=1
-							# ---------------------------------------------------------------------
-
-							# ---------------------------------------------------------------------
-							FixVStrNet.Restore()
-							if Pick(List=[0, 1, 2, 3, 4, 5, 6, 7, 8, 9])<8:
-								FixVStrNet.AssignBox(TP='HT', Start=[IS, JS], End=[IE, JE], Band=[IB, JB],
-									                 SubC=SC, Grad=[IG, JG, RG], Repeat=[IR, JR, RR])
-							FixVStrNet.RandomRest()
-							name=Name(Prefix='FixVStrNet', Index=SampleIndex)
-							FixVStrNet.SetName(Name=name)
-							FixVStrNet.Write(Folder+'FixVStrNet/')
-							FixVStrNet.Pixel(Folder+'FixVStrNet/')
-							print(name, 'Written!:\t', B, SC, RG)
-
-							FixVCrsNet.Restore()
-							if Pick(List=[0, 1, 2, 3, 4, 5, 6, 7, 8, 9])<8:
-								FixVCrsNet.AssignBox(TP='HT', Start=[IS, JS], End=[IE, JE], Band=[IB, JB],
-									                 SubC=SC, Grad=[IG, JG, RG], Repeat=[IR, JR, RR])
-							CrsPick=Pick(List=[0, 1, 2, 3, 4, 5, 6, 7, 8, 9])
-							if CrsPick<2:
-								FixVCrsNet.AssignBox(TP='CT', Start=[IS, JS], End=[IE, JE], Band=[IB, JB],
-								                     SubC=SC, Grad=[IG, JG, RG], Repeat=[IR, JR, RR], Flip= 2)
-							elif CrsPick>7:
-								FixVCrsNet.AssignBox(TP='CT', Start=[IS, JS], End=[IE, JE], Band=[IB, JB],
-								                     SubC=SC, Grad=[IG, JG, RG], Repeat=[IR, JR, RR], Flip= 3)
-							elif CrsPick==3 or CrsPick==4:
-								FixVCrsNet.AssignBox(TP='CT', Start=[IS, JS], End=[IE, JE], Band=[IB, JB],
-								                     SubC=SC, Grad=[IG, JG, RG], Repeat=[IR, JR, RR], Flip=-1)
-							elif CrsPick==5 or CrsPick==6:
-								FixVCrsNet.AssignBox(TP='CT', Start=[IS, JS], End=[IE, JE], Band=[IB, JB],
-								                     SubC=SC, Grad=[IG, JG, RG], Repeat=[IR, JR, RR], Flip= 1)
-							else:
-								FixVCrsNet.AssignBox(TP='CT', Start=[IS, JS], End=[IE, JE], Band=[IB, JB],
-								                     SubC=SC, Grad=[IG, JG, RG], Repeat=[IR, JR, RR], Flip= 0)
-							FixVCrsNet.RandomRest()
-							name=Name(Prefix='FixVCrsNet', Index=SampleIndex)
-							FixVCrsNet.SetName(Name=name)
-							FixVCrsNet.Write(Folder+'FixVCrsNet/')
-							FixVCrsNet.Pixel(Folder+'FixVCrsNet/')
-							print(name, 'Written!:\t', B, SC, RG)
-
-							SampleIndex+=1
-							# ---------------------------------------------------------------------
-
-							# ---------------------------------------------------------------------
-							FixVStrNet.Restore()
-							if Pick(List=[0, 1, 2, 3, 4, 5, 6, 7, 8, 9])<1:
-								FixVStrNet.AssignBox(TP='VT', Start=[IS, JS], End=[IE, JE], Band=[IB, JB],
-									                 SubC=SC, Grad=[IG, JG, RG], Repeat=[IR, JR, RR])
-							if Pick(List=[0, 1, 2, 3, 4, 5, 6, 7, 8, 9])<1:
-								FixVStrNet.AssignBox(TP='HT', Start=[IS, JS], End=[IE, JE], Band=[IB, JB],
-									                 SubC=SC, Grad=[IG, JG, RG], Repeat=[IR, JR, RR])
-							FixVStrNet.RandomRest()
-							name=Name(Prefix='FixVStrNet', Index=SampleIndex)
-							FixVStrNet.SetName(Name=name)
-							FixVStrNet.Write(Folder+'FixVStrNet/')
-							FixVStrNet.Pixel(Folder+'FixVStrNet/')
-							print(name, 'Written!:\t', B, SC, RG)
-
-							FixVCrsNet.Restore()
-							if Pick(List=[0, 1, 2, 3, 4, 5, 6, 7, 8, 9])<1:
-								FixVCrsNet.AssignBox(TP='VT', Start=[IS, JS], End=[IE, JE], Band=[IB, JB],
-									                 SubC=SC, Grad=[IG, JG, RG], Repeat=[IR, JR, RR])
-							if Pick(List=[0, 1, 2, 3, 4, 5, 6, 7, 8, 9])<1:
-								FixVCrsNet.AssignBox(TP='HT', Start=[IS, JS], End=[IE, JE], Band=[IB, JB],
-									                 SubC=SC, Grad=[IG, JG, RG], Repeat=[IR, JR, RR])
-							CrsPick=Pick(List=[0, 1, 2, 3, 4, 5, 6, 7, 8, 9])
-							if CrsPick<2:
-								FixVCrsNet.AssignBox(TP='CT', Start=[IS, JS], End=[IE, JE], Band=[IB, JB],
-								                     SubC=SC, Grad=[IG, JG, RG], Repeat=[IR, JR, RR], Flip= 2)
-							elif CrsPick>7:
-								FixVCrsNet.AssignBox(TP='CT', Start=[IS, JS], End=[IE, JE], Band=[IB, JB],
-								                     SubC=SC, Grad=[IG, JG, RG], Repeat=[IR, JR, RR], Flip= 3)
-							elif CrsPick==3 or CrsPick==4:
-								FixVCrsNet.AssignBox(TP='CT', Start=[IS, JS], End=[IE, JE], Band=[IB, JB],
-								                     SubC=SC, Grad=[IG, JG, RG], Repeat=[IR, JR, RR], Flip=-1)
-							elif CrsPick==5 or CrsPick==6:
-								FixVCrsNet.AssignBox(TP='CT', Start=[IS, JS], End=[IE, JE], Band=[IB, JB],
-								                     SubC=SC, Grad=[IG, JG, RG], Repeat=[IR, JR, RR], Flip= 1)
-							else:
-								FixVCrsNet.AssignBox(TP='CT', Start=[IS, JS], End=[IE, JE], Band=[IB, JB],
-								                     SubC=SC, Grad=[IG, JG, RG], Repeat=[IR, JR, RR], Flip= 0)
-							FixVCrsNet.RandomRest()
-							name=Name(Prefix='FixVCrsNet', Index=SampleIndex)
-							FixVCrsNet.SetName(Name=name)
-							FixVCrsNet.Write(Folder+'FixVCrsNet/')
-							FixVCrsNet.Pixel(Folder+'FixVCrsNet/')
-							print(name, 'Written!:\t', B, SC, RG)
-
-							SampleIndex+=1
-							# ---------------------------------------------------------------------
-	print(SampleIndex)
 
 # #============================ Basic Functions =====================================================
 # def create_model():
@@ -1089,3 +860,25 @@ CreatePoreNetworkSamples(Nx= 3, Ny= 3, Folder='/home/xu/work/PoreNetwork0303Samp
 # CreatePoreNetworkSamples(Nx=10, Ny=10, Folder='/home/xu/work/PoreNetwork1010Samples/')
 # CreatePoreNetworkSamples(Nx=20, Ny=20, Folder='/home/xu/work/PoreNetwork2020Samples/')
 # CreatePoreNetworkSamples(Nx=40, Ny=40, Folder='/home/xu/work/PoreNetwork4040Samples/')
+# print(Pick(List=TT, Index=1, Method='Rotate'))
+# print(Pick(List=TT, Index=20, Method='Rotate'))
+# print(Pick(List=TT, Index=-2, Method='Rotate'))
+
+# pool=ThroatPool(ThroatType=TT, ThroatCount=[1 for i in range(len(TT))])
+# pool.Report()
+# a=pool.FetchOne(Index=1, Method='Rotate')
+# pool.Report()
+# b=pool.FetchOne()
+# pool.Report()
+# c=pool.FetchOne(Index=1, SubC=[1,2,3], Method='Rotate')
+# pool.Report()
+# c=pool.FetchOne(Index=2, SubC=[1,2,3], Method='Rotate')
+# pool.Report()
+# c=pool.FetchOne(Index=3, SubC=[1,2,3], Method='Rotate')
+# pool.Report()
+# c=pool.FetchOne(Index=1, SubC=[1,2,3], ExC=[1,2,3], Method='Rotate')
+# pool.Report()
+# c=pool.FetchOne(Index=2, SubC=[1,2,3], ExC=[1,2,3], Method='Rotate')
+# pool.Report()
+# c=pool.FetchOne(Index=3, SubC=[1,2,3], ExC=[1,2,3], Method='Rotate')
+# pool.Report()
