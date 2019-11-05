@@ -323,10 +323,12 @@ class PoreNetwork(object):
 	# Write PoreNetwork Pixel File ----------------------------------------------------------------
 	def Pixel(self, Folder='', Scale=1, Disp=False, Save=True):
 		D=[[0 for i in range(self.Mx)] for j in range(self.My)]
+		ttd={1e-6:225, -1e-6:220, 2e-6:200, -2e-6:195, 3e-6:175, -3e-6:170, 4e-6:150, -4e-6:145, 5e-6:125, -5e-6:120, \
+		     6e-6:100, -6e-6: 95, 7e-6: 75, -7e-6: 70, 8e-6: 50, -8e-6: 45, 9e-6: 25, -9e-6: 20, 0:0}
 		for j in range(self.My):
 			for i in range(self.Mx):
 				T=self.Matrix[j][i]
-				D[j][i]=T[0]
+				D[j][i]=ttd[T[0]]
 		plt.imshow(D, cmap="gray")
 		if Disp: plt.show()
 		if Save: plt.savefig(Folder+self.Name+'.png')
@@ -864,208 +866,208 @@ def CreatePoreNetworkSamples(Nx=20, Ny=20, Folder=''):
 			# -------------------------------------------------------------------------------------
 		return True
 	# =============================================================================================
-	# print('Generate Pore-Networks ---------------------------------------------------------------')
-	# SampleIndex=0
-	# print('Generating 1st Group of Pore-Networks ------------------------------------------------')
-	# for SC in [[0, 1], [2, 3], [6, 5], [8, 7]]:
-	# 	for IS in range(1, Nx-7, 4):
-	# 		IE=IS+8
-	# 		for IG in [0, 1]:
-	# 			for IR in [1, 3]:
-	# 				for JR in [2, 4]:
-	# 					CreateOne(SIN=SampleIndex, IS=IS, IE=IE, SC=SC, IG=IG, IR=IR, JR=JR, AVTP=8)
-	# 					SampleIndex+=1
-	# 					CreateOne(SIN=SampleIndex, IS=IS, IE=IE, SC=SC, IG=IG, IR=IR, JR=JR, AHTP=8)
-	# 					SampleIndex+=1
-	# 					CreateOne(SIN=SampleIndex, IS=IS, IE=IE, SC=SC, IG=IG, IR=IR, JR=JR, AVTP=9, AHTP=9)
-	# 					SampleIndex+=1
-	# 	for JS in range(1, Ny-7, 4):
-	# 		JE=JS+8
-	# 		for JG in [0, 1]:
-	# 			for IR in [2, 3]:
-	# 				for JR in [1, 3]:
-	# 					CreateOne(SIN=SampleIndex, JS=JS, JE=JE, SC=SC, JG=JG, IR=IR, JR=JR, AVTP=8)
-	# 					SampleIndex+=1
-	# 					CreateOne(SIN=SampleIndex, JS=JS, JE=JE, SC=SC, JG=JG, IR=IR, JR=JR, AHTP=8)
-	# 					SampleIndex+=1
-	# 					CreateOne(SIN=SampleIndex, JS=JS, JE=JE, SC=SC, JG=JG, IR=IR, JR=JR, AVTP=9, AHTP=9)
-	# 					SampleIndex+=1
-	# 	for IS in range(1, Nx-7, 4):
-	# 		IE=IS+8
-	# 		for JS in range(1, Ny-7, 4):
-	# 			JE=JS+8
-	# 			IG=1
-	# 			JG=1
-	# 			for IR in [1, 2, 3, 4]:
-	# 				for JR in [1, 2, 3, 4]:
-	# 					CreateTwo(SIN=SampleIndex, IS=IS, IE=IE, JS=JS, JE=JE, SC=SC, IG=IG, JG=JG, IR=IR, JR=JR, AVTP=8)
-	# 					SampleIndex+=1
-	# 					CreateTwo(SIN=SampleIndex, IS=IS, IE=IE, JS=JS, JE=JE, SC=SC, IG=IG, JG=JG, IR=IR, JR=JR, AHTP=8)
-	# 					SampleIndex+=1
-	# 					CreateOne(SIN=SampleIndex, IS=IS, IE=IE, JS=JS, JE=JE, SC=SC, IG=IG, JG=JG, IR=IR, JR=JR, AVTP=9, AHTP=9)
-	# 					SampleIndex+=1
-	# 	for IB in [1, 2, 3, 4]:
-	# 		for IG in [0, 1]:
-	# 			for IR in [2, 4]:
-	# 				for JR in [1, 3]:
-	# 					CreateOne(SIN=SampleIndex, IB=IB, SC=SC, IG=IG, IR=IR, JR=JR, AVTP=8)
-	# 					SampleIndex+=1
-	# 					CreateOne(SIN=SampleIndex, IB=IB, SC=SC, IG=IG, IR=IR, JR=JR, AHTP=8)
-	# 					SampleIndex+=1
-	# 					CreateOne(SIN=SampleIndex, IB=IB, SC=SC, IG=IG, IR=IR, JR=JR, AVTP=9, AHTP=9)
-	# 					SampleIndex+=1
-	# 	for JB in [1, 2, 3, 4]:
-	# 		for JG in [0, 1]:
-	# 			for IR in [1, 3]:
-	# 				for JR in [2, 4]:
-	# 					CreateOne(SIN=SampleIndex, JB=JB, SC=SC, JG=JG, IR=IR, JR=JR, AVTP=8)
-	# 					SampleIndex+=1
-	# 					CreateOne(SIN=SampleIndex, JB=JB, SC=SC, JG=JG, IR=IR, JR=JR, AHTP=8)
-	# 					SampleIndex+=1
-	# 					CreateOne(SIN=SampleIndex, JB=JB, SC=SC, JG=JG, IR=IR, JR=JR, AVTP=9, AHTP=9)
-	# 					SampleIndex+=1
-	# print('Group 1 of Pore-Networks Generated: ', SampleIndex, '---------------------------------')
-	# print('Generating 2nd Group of Pore-Networks ------------------------------------------------')
-	# for SC in [[0, 1, 2], [4, 3, 5], [8, 7, 6]]:
-	# 	for IS in range(1, Nx-11, 4):
-	# 		IE=IS+12
-	# 		for JG in [0, 1, 2]:
-	# 			for IR in [2, 3, 4]:
-	# 				for JR in [2, 3, 4]:
-	# 					CreateOne(SIN=SampleIndex, IS=IS, IE=IE, SC=SC, JG=JG, IR=IR, JR=JR, AVTP=8)
-	# 					SampleIndex+=1
-	# 					CreateOne(SIN=SampleIndex, IS=IS, IE=IE, SC=SC, JG=JG, IR=IR, JR=JR, AHTP=8)
-	# 					SampleIndex+=1
-	# 					CreateOne(SIN=SampleIndex, IS=IS, IE=IE, SC=SC, JG=JG, IR=IR, JR=JR, AVTP=9, AHTP=9)
-	# 					SampleIndex+=1
-	# 	for JS in range(1, Ny-11, 4):
-	# 		JE=JS+12
-	# 		for IG in [0, 1, 2]:
-	# 			for IR in [2, 3, 4]:
-	# 				for JR in [2, 3, 4]:
-	# 					CreateOne(SIN=SampleIndex, JS=JS, JE=JE, SC=SC, IG=IG, IR=IR, JR=JR, AVTP=8)
-	# 					SampleIndex+=1
-	# 					CreateOne(SIN=SampleIndex, JS=JS, JE=JE, SC=SC, IG=IG, IR=IR, JR=JR, AHTP=8)
-	# 					SampleIndex+=1
-	# 					CreateOne(SIN=SampleIndex, JS=JS, JE=JE, SC=SC, IG=IG, IR=IR, JR=JR, AVTP=9, AHTP=9)
-	# 					SampleIndex+=1
-	# 	for IS in range(1, Nx-11, 4):
-	# 		IE=IS+12
-	# 		for JS in range(1, Ny-7, 4):
-	# 			JE=JS+12
-	# 			IG=1
-	# 			JG=1
-	# 			for IR in [2, 3, 4]:
-	# 				for JR in [2, 3, 4]:
-	# 					CreateOne(SIN=SampleIndex, IS=IS, IE=IE, JS=JS, JE=JE, SC=SC, IG=IG, JG=JG, IR=IR, JR=JR, AVTP=8)
-	# 					SampleIndex+=1
-	# 					CreateOne(SIN=SampleIndex, IS=IS, IE=IE, JS=JS, JE=JE, SC=SC, IG=IG, JG=JG, IR=IR, JR=JR, AHTP=8)
-	# 					SampleIndex+=1
-	# 					CreateTwo(SIN=SampleIndex, IS=IS, IE=IE, JS=JS, JE=JE, SC=SC, IG=IG, JG=JG, IR=IR, JR=JR, AVTP=9, AHTP=9)
-	# 					SampleIndex+=1
-	# 	for IB in [1, 2, 3, 4]:
-	# 		for JG in [0, 1, 2]:
-	# 			for IR in [2, 3, 4]:
-	# 				for JR in [2, 3, 4]:
-	# 					CreateOne(SIN=SampleIndex, IB=IB, SC=SC, JG=JG, IR=IR, JR=JR, AVTP=8)
-	# 					SampleIndex+=1
-	# 					CreateOne(SIN=SampleIndex, IB=IB, SC=SC, JG=JG, IR=IR, JR=JR, AHTP=8)
-	# 					SampleIndex+=1
-	# 					CreateOne(SIN=SampleIndex, IB=IB, SC=SC, JG=JG, IR=IR, JR=JR, AVTP=9, AHTP=9)
-	# 					SampleIndex+=1
-	# 	for JB in [1, 2, 3, 4]:
-	# 		for IG in [0, 1, 2]:
-	# 			for IR in [2, 3, 4]:
-	# 				for JR in [2, 3, 4]:
-	# 					CreateOne(SIN=SampleIndex, JB=JB, SC=SC, IG=IG, IR=IR, JR=JR, AVTP=8)
-	# 					SampleIndex+=1
-	# 					CreateOne(SIN=SampleIndex, JB=JB, SC=SC, IG=IG, IR=IR, JR=JR, AHTP=8)
-	# 					SampleIndex+=1
-	# 					CreateOne(SIN=SampleIndex, JB=JB, SC=SC, IG=IG, IR=IR, JR=JR, AVTP=9, AHTP=9)
-	# 					SampleIndex+=1
-	# print('Group 2 of Pore-Networks Generated: ', SampleIndex, '---------------------------------')
-	# print('Generating 3rd Group of Pore-Networks ------------------------------------------------')
-	# for SC in [[3, 2, 1, 0], [5, 6, 7, 8], [0, 1, 5, 6], [8, 7, 3, 2]]:
-	# 	for IS in range(1, Nx-15, 4):
-	# 		IE=IS+16
-	# 		IG=1
-	# 		JG=1
-	# 		for IR in [1, 2, 3, 4]:
-	# 			for JR in [1, 2, 3, 4]:
-	# 				CreateOne(SIN=SampleIndex, IS=IS, IE=IE, SC=SC, IG=IG, JG=JG, IR=IR, JR=JR, AVTP=8)
-	# 				SampleIndex+=1
-	# 				CreateOne(SIN=SampleIndex, IS=IS, IE=IE, SC=SC, IG=IG, JG=JG, IR=IR, JR=JR, AHTP=8)
-	# 				SampleIndex+=1
-	# 				CreateOne(SIN=SampleIndex, IS=IS, IE=IE, SC=SC, IG=IG, JG=JG, IR=IR, JR=JR, AVTP=9, AHTP=9)
-	# 				SampleIndex+=1
-	# 	for JS in range(1, Ny-15, 4):
-	# 		JE=JS+16
-	# 		IG=1
-	# 		JG=1
-	# 		for IR in [1, 2, 3, 4]:
-	# 			for JR in [1, 2, 3, 4]:
-	# 				CreateTwo(SIN=SampleIndex, JS=JS, JE=JE, SC=SC, IG=IG, JG=JG, IR=IR, JR=JR, AVTP=8)
-	# 				SampleIndex+=1
-	# 				CreateTwo(SIN=SampleIndex, JS=JS, JE=JE, SC=SC, IG=IG, JG=JG, IR=IR, JR=JR, AHTP=8)
-	# 				SampleIndex+=1
-	# 				CreateTwo(SIN=SampleIndex, JS=JS, JE=JE, SC=SC, IG=IG, JG=JG, IR=IR, JR=JR, AVTP=9, AHTP=9)
-	# 				SampleIndex+=1
-	# 	for IS in range(1, Nx-15, 4):
-	# 		IE=IS+16
-	# 		for JS in range(1, Ny-15, 4):
-	# 			JE=JS+16
-	# 			for IG in [0, 1, 2, 3]:
-	# 				for IR in [1, 2, 3, 4]:
-	# 					for JR in [1, 2, 3, 4]:
-	# 						CreateTwo(SIN=SampleIndex, IS=IS, IE=IE, JS=JS, JE=JE, SC=SC, IG=IG, IR=IR, JR=JR, AVTP=8)
-	# 						SampleIndex+=1
-	# 						CreateTwo(SIN=SampleIndex, IS=IS, IE=IE, JS=JS, JE=JE, SC=SC, IG=IG, IR=IR, JR=JR, AHTP=8)
-	# 						SampleIndex+=1
-	# 						CreateTwo(SIN=SampleIndex, IS=IS, IE=IE, JS=JS, JE=JE, SC=SC, IG=IG, IR=IR, JR=JR, AVTP=9, AHTP=9)
-	# 						SampleIndex+=1
-	# 	for IS in range(1, Nx-15, 4):
-	# 		IE=IS+16
-	# 		for JS in range(1, Ny-15, 4):
-	# 			JE=JS+16
-	# 			for JG in [0, 1, 2, 3]:
-	# 				for IR in [1, 2, 3, 4]:
-	# 					for JR in [1, 2, 3, 4]:
-	# 						CreateTwo(SIN=SampleIndex, IS=IS, IE=IE, JS=JS, JE=JE, SC=SC, JG=JG, IR=IR, JR=JR, AVTP=8)
-	# 						SampleIndex+=1
-	# 						CreateTwo(SIN=SampleIndex, IS=IS, IE=IE, JS=JS, JE=JE, SC=SC, JG=JG, IR=IR, JR=JR, AHTP=8)
-	# 						SampleIndex+=1
-	# 						CreateTwo(SIN=SampleIndex, IS=IS, IE=IE, JS=JS, JE=JE, SC=SC, JG=JG, IR=IR, JR=JR, AVTP=9, AHTP=9)
-	# 						SampleIndex+=1
-	# 	for B in [1, 2, 3, 4]:
-	# 		IB=B
-	# 		JB=B
-	# 		for RG in [0, 1, 2, 3]:
-	# 			for RR in [1, 2, 3, 4]:
-	# 				CreateOne(SIN=SampleIndex, IB=IB, JB=JB, SC=SC, RG=RG, RR=RR, AVTP=8)
-	# 				SampleIndex+=1
-	# 				CreateOne(SIN=SampleIndex, IB=IB, JB=JB, SC=SC, RG=RG, RR=RR, AHTP=8)
-	# 				SampleIndex+=1
-	# 				CreateOne(SIN=SampleIndex, IB=IB, JB=JB, SC=SC, RG=RG, RR=RR, AVTP=9, AHTP=9)
-	# 				SampleIndex+=1
-	# print('Group 3 of Pore-Networks Generated: ', SampleIndex, '---------------------------------')
-	# print('Generating 4th Group of Pore-Networks ------------------------------------------------')
-	# for SC in [[4, 5, 3, 2, 6], [4, 1, 7, 8, 0], [5, 4, 3, 2, 1, 0], [3, 4, 5, 6, 7, 8]]:
-	# 	for IS in range(1, Nx-17, 1):
-	# 		IE=IS+18
-	# 		for JS in range(1, Ny-17, 1):
-	# 			JE=JS+18
-	# 			for IG in [0, 1]:
-	# 				for JG in [0, 1]:
-	# 					for IR in [1, 2, 3]:
-	# 						for JR in [1, 2, 3]:
-	# 							CreateTwo(SIN=SampleIndex, IS=IS, IE=IE, JS=JS, JE=JE, SC=SC, IG=IG, JG=JG, IR=IR, JR=JR, AVTP=8)
-	# 							SampleIndex+=1
-	# 							CreateTwo(SIN=SampleIndex, IS=IS, IE=IE, JS=JS, JE=JE, SC=SC, IG=IG, JG=JG, IR=IR, JR=JR, AHTP=8)
-	# 							SampleIndex+=1
-	# 							CreateTwo(SIN=SampleIndex, IS=IS, IE=IE, JS=JS, JE=JE, SC=SC, IG=IG, JG=JG, IR=IR, JR=JR, AVTP=9, AHTP=9)
-	# 							SampleIndex+=1
+	print('Generate Pore-Networks ---------------------------------------------------------------')
+	SampleIndex=0
+	print('Generating 1st Group of Pore-Networks ------------------------------------------------')
+	for SC in [[0, 1], [2, 3], [6, 5], [8, 7]]:
+		for IS in range(1, Nx-7, 4):
+			IE=IS+8
+			for IG in [0, 1]:
+				for IR in [1, 3]:
+					for JR in [2, 4]:
+						CreateOne(SIN=SampleIndex, IS=IS, IE=IE, SC=SC, IG=IG, IR=IR, JR=JR, AVTP=8)
+						SampleIndex+=1
+						CreateOne(SIN=SampleIndex, IS=IS, IE=IE, SC=SC, IG=IG, IR=IR, JR=JR, AHTP=8)
+						SampleIndex+=1
+						CreateOne(SIN=SampleIndex, IS=IS, IE=IE, SC=SC, IG=IG, IR=IR, JR=JR, AVTP=9, AHTP=9)
+						SampleIndex+=1
+		for JS in range(1, Ny-7, 4):
+			JE=JS+8
+			for JG in [0, 1]:
+				for IR in [2, 3]:
+					for JR in [1, 3]:
+						CreateOne(SIN=SampleIndex, JS=JS, JE=JE, SC=SC, JG=JG, IR=IR, JR=JR, AVTP=8)
+						SampleIndex+=1
+						CreateOne(SIN=SampleIndex, JS=JS, JE=JE, SC=SC, JG=JG, IR=IR, JR=JR, AHTP=8)
+						SampleIndex+=1
+						CreateOne(SIN=SampleIndex, JS=JS, JE=JE, SC=SC, JG=JG, IR=IR, JR=JR, AVTP=9, AHTP=9)
+						SampleIndex+=1
+		for IS in range(1, Nx-7, 4):
+			IE=IS+8
+			for JS in range(1, Ny-7, 4):
+				JE=JS+8
+				IG=1
+				JG=1
+				for IR in [1, 2, 3, 4]:
+					for JR in [1, 2, 3, 4]:
+						CreateTwo(SIN=SampleIndex, IS=IS, IE=IE, JS=JS, JE=JE, SC=SC, IG=IG, JG=JG, IR=IR, JR=JR, AVTP=8)
+						SampleIndex+=1
+						CreateTwo(SIN=SampleIndex, IS=IS, IE=IE, JS=JS, JE=JE, SC=SC, IG=IG, JG=JG, IR=IR, JR=JR, AHTP=8)
+						SampleIndex+=1
+						CreateOne(SIN=SampleIndex, IS=IS, IE=IE, JS=JS, JE=JE, SC=SC, IG=IG, JG=JG, IR=IR, JR=JR, AVTP=9, AHTP=9)
+						SampleIndex+=1
+		for IB in [1, 2, 3, 4]:
+			for IG in [0, 1]:
+				for IR in [2, 4]:
+					for JR in [1, 3]:
+						CreateOne(SIN=SampleIndex, IB=IB, SC=SC, IG=IG, IR=IR, JR=JR, AVTP=8)
+						SampleIndex+=1
+						CreateOne(SIN=SampleIndex, IB=IB, SC=SC, IG=IG, IR=IR, JR=JR, AHTP=8)
+						SampleIndex+=1
+						CreateOne(SIN=SampleIndex, IB=IB, SC=SC, IG=IG, IR=IR, JR=JR, AVTP=9, AHTP=9)
+						SampleIndex+=1
+		for JB in [1, 2, 3, 4]:
+			for JG in [0, 1]:
+				for IR in [1, 3]:
+					for JR in [2, 4]:
+						CreateOne(SIN=SampleIndex, JB=JB, SC=SC, JG=JG, IR=IR, JR=JR, AVTP=8)
+						SampleIndex+=1
+						CreateOne(SIN=SampleIndex, JB=JB, SC=SC, JG=JG, IR=IR, JR=JR, AHTP=8)
+						SampleIndex+=1
+						CreateOne(SIN=SampleIndex, JB=JB, SC=SC, JG=JG, IR=IR, JR=JR, AVTP=9, AHTP=9)
+						SampleIndex+=1
+	print('Group 1 of Pore-Networks Generated: ', SampleIndex, '---------------------------------')
+	print('Generating 2nd Group of Pore-Networks ------------------------------------------------')
+	for SC in [[0, 1, 2], [4, 3, 5], [8, 7, 6]]:
+		for IS in range(1, Nx-11, 4):
+			IE=IS+12
+			for JG in [0, 1, 2]:
+				for IR in [2, 3, 4]:
+					for JR in [2, 3, 4]:
+						CreateOne(SIN=SampleIndex, IS=IS, IE=IE, SC=SC, JG=JG, IR=IR, JR=JR, AVTP=8)
+						SampleIndex+=1
+						CreateOne(SIN=SampleIndex, IS=IS, IE=IE, SC=SC, JG=JG, IR=IR, JR=JR, AHTP=8)
+						SampleIndex+=1
+						CreateOne(SIN=SampleIndex, IS=IS, IE=IE, SC=SC, JG=JG, IR=IR, JR=JR, AVTP=9, AHTP=9)
+						SampleIndex+=1
+		for JS in range(1, Ny-11, 4):
+			JE=JS+12
+			for IG in [0, 1, 2]:
+				for IR in [2, 3, 4]:
+					for JR in [2, 3, 4]:
+						CreateOne(SIN=SampleIndex, JS=JS, JE=JE, SC=SC, IG=IG, IR=IR, JR=JR, AVTP=8)
+						SampleIndex+=1
+						CreateOne(SIN=SampleIndex, JS=JS, JE=JE, SC=SC, IG=IG, IR=IR, JR=JR, AHTP=8)
+						SampleIndex+=1
+						CreateOne(SIN=SampleIndex, JS=JS, JE=JE, SC=SC, IG=IG, IR=IR, JR=JR, AVTP=9, AHTP=9)
+						SampleIndex+=1
+		for IS in range(1, Nx-11, 4):
+			IE=IS+12
+			for JS in range(1, Ny-7, 4):
+				JE=JS+12
+				IG=1
+				JG=1
+				for IR in [2, 3, 4]:
+					for JR in [2, 3, 4]:
+						CreateOne(SIN=SampleIndex, IS=IS, IE=IE, JS=JS, JE=JE, SC=SC, IG=IG, JG=JG, IR=IR, JR=JR, AVTP=8)
+						SampleIndex+=1
+						CreateOne(SIN=SampleIndex, IS=IS, IE=IE, JS=JS, JE=JE, SC=SC, IG=IG, JG=JG, IR=IR, JR=JR, AHTP=8)
+						SampleIndex+=1
+						CreateTwo(SIN=SampleIndex, IS=IS, IE=IE, JS=JS, JE=JE, SC=SC, IG=IG, JG=JG, IR=IR, JR=JR, AVTP=9, AHTP=9)
+						SampleIndex+=1
+		for IB in [1, 2, 3, 4]:
+			for JG in [0, 1, 2]:
+				for IR in [2, 3, 4]:
+					for JR in [2, 3, 4]:
+						CreateOne(SIN=SampleIndex, IB=IB, SC=SC, JG=JG, IR=IR, JR=JR, AVTP=8)
+						SampleIndex+=1
+						CreateOne(SIN=SampleIndex, IB=IB, SC=SC, JG=JG, IR=IR, JR=JR, AHTP=8)
+						SampleIndex+=1
+						CreateOne(SIN=SampleIndex, IB=IB, SC=SC, JG=JG, IR=IR, JR=JR, AVTP=9, AHTP=9)
+						SampleIndex+=1
+		for JB in [1, 2, 3, 4]:
+			for IG in [0, 1, 2]:
+				for IR in [2, 3, 4]:
+					for JR in [2, 3, 4]:
+						CreateOne(SIN=SampleIndex, JB=JB, SC=SC, IG=IG, IR=IR, JR=JR, AVTP=8)
+						SampleIndex+=1
+						CreateOne(SIN=SampleIndex, JB=JB, SC=SC, IG=IG, IR=IR, JR=JR, AHTP=8)
+						SampleIndex+=1
+						CreateOne(SIN=SampleIndex, JB=JB, SC=SC, IG=IG, IR=IR, JR=JR, AVTP=9, AHTP=9)
+						SampleIndex+=1
+	print('Group 2 of Pore-Networks Generated: ', SampleIndex, '---------------------------------')
+	print('Generating 3rd Group of Pore-Networks ------------------------------------------------')
+	for SC in [[3, 2, 1, 0], [5, 6, 7, 8], [0, 1, 5, 6], [8, 7, 3, 2]]:
+		for IS in range(1, Nx-15, 4):
+			IE=IS+16
+			IG=1
+			JG=1
+			for IR in [1, 2, 3, 4]:
+				for JR in [1, 2, 3, 4]:
+					CreateOne(SIN=SampleIndex, IS=IS, IE=IE, SC=SC, IG=IG, JG=JG, IR=IR, JR=JR, AVTP=8)
+					SampleIndex+=1
+					CreateOne(SIN=SampleIndex, IS=IS, IE=IE, SC=SC, IG=IG, JG=JG, IR=IR, JR=JR, AHTP=8)
+					SampleIndex+=1
+					CreateOne(SIN=SampleIndex, IS=IS, IE=IE, SC=SC, IG=IG, JG=JG, IR=IR, JR=JR, AVTP=9, AHTP=9)
+					SampleIndex+=1
+		for JS in range(1, Ny-15, 4):
+			JE=JS+16
+			IG=1
+			JG=1
+			for IR in [1, 2, 3, 4]:
+				for JR in [1, 2, 3, 4]:
+					CreateTwo(SIN=SampleIndex, JS=JS, JE=JE, SC=SC, IG=IG, JG=JG, IR=IR, JR=JR, AVTP=8)
+					SampleIndex+=1
+					CreateTwo(SIN=SampleIndex, JS=JS, JE=JE, SC=SC, IG=IG, JG=JG, IR=IR, JR=JR, AHTP=8)
+					SampleIndex+=1
+					CreateTwo(SIN=SampleIndex, JS=JS, JE=JE, SC=SC, IG=IG, JG=JG, IR=IR, JR=JR, AVTP=9, AHTP=9)
+					SampleIndex+=1
+		for IS in range(1, Nx-15, 4):
+			IE=IS+16
+			for JS in range(1, Ny-15, 4):
+				JE=JS+16
+				for IG in [0, 1, 2, 3]:
+					for IR in [1, 2, 3, 4]:
+						for JR in [1, 2, 3, 4]:
+							CreateTwo(SIN=SampleIndex, IS=IS, IE=IE, JS=JS, JE=JE, SC=SC, IG=IG, IR=IR, JR=JR, AVTP=8)
+							SampleIndex+=1
+							CreateTwo(SIN=SampleIndex, IS=IS, IE=IE, JS=JS, JE=JE, SC=SC, IG=IG, IR=IR, JR=JR, AHTP=8)
+							SampleIndex+=1
+							CreateTwo(SIN=SampleIndex, IS=IS, IE=IE, JS=JS, JE=JE, SC=SC, IG=IG, IR=IR, JR=JR, AVTP=9, AHTP=9)
+							SampleIndex+=1
+		for IS in range(1, Nx-15, 4):
+			IE=IS+16
+			for JS in range(1, Ny-15, 4):
+				JE=JS+16
+				for JG in [0, 1, 2, 3]:
+					for IR in [1, 2, 3, 4]:
+						for JR in [1, 2, 3, 4]:
+							CreateTwo(SIN=SampleIndex, IS=IS, IE=IE, JS=JS, JE=JE, SC=SC, JG=JG, IR=IR, JR=JR, AVTP=8)
+							SampleIndex+=1
+							CreateTwo(SIN=SampleIndex, IS=IS, IE=IE, JS=JS, JE=JE, SC=SC, JG=JG, IR=IR, JR=JR, AHTP=8)
+							SampleIndex+=1
+							CreateTwo(SIN=SampleIndex, IS=IS, IE=IE, JS=JS, JE=JE, SC=SC, JG=JG, IR=IR, JR=JR, AVTP=9, AHTP=9)
+							SampleIndex+=1
+		for B in [1, 2, 3, 4]:
+			IB=B
+			JB=B
+			for RG in [0, 1, 2, 3]:
+				for RR in [1, 2, 3, 4]:
+					CreateOne(SIN=SampleIndex, IB=IB, JB=JB, SC=SC, RG=RG, RR=RR, AVTP=8)
+					SampleIndex+=1
+					CreateOne(SIN=SampleIndex, IB=IB, JB=JB, SC=SC, RG=RG, RR=RR, AHTP=8)
+					SampleIndex+=1
+					CreateOne(SIN=SampleIndex, IB=IB, JB=JB, SC=SC, RG=RG, RR=RR, AVTP=9, AHTP=9)
+					SampleIndex+=1
+	print('Group 3 of Pore-Networks Generated: ', SampleIndex, '---------------------------------')
+	print('Generating 4th Group of Pore-Networks ------------------------------------------------')
+	for SC in [[4, 5, 3, 2, 6], [4, 1, 7, 8, 0], [5, 4, 3, 2, 1, 0], [3, 4, 5, 6, 7, 8]]:
+		for IS in range(1, Nx-17, 1):
+			IE=IS+18
+			for JS in range(1, Ny-17, 1):
+				JE=JS+18
+				for IG in [0, 1]:
+					for JG in [0, 1]:
+						for IR in [1, 2, 3]:
+							for JR in [1, 2, 3]:
+								CreateTwo(SIN=SampleIndex, IS=IS, IE=IE, JS=JS, JE=JE, SC=SC, IG=IG, JG=JG, IR=IR, JR=JR, AVTP=8)
+								SampleIndex+=1
+								CreateTwo(SIN=SampleIndex, IS=IS, IE=IE, JS=JS, JE=JE, SC=SC, IG=IG, JG=JG, IR=IR, JR=JR, AHTP=8)
+								SampleIndex+=1
+								CreateTwo(SIN=SampleIndex, IS=IS, IE=IE, JS=JS, JE=JE, SC=SC, IG=IG, JG=JG, IR=IR, JR=JR, AVTP=9, AHTP=9)
+								SampleIndex+=1
 
-	# print('Group 4 of Pore-Networks Generated: ', SampleIndex, '---------------------------------')
+	print('Group 4 of Pore-Networks Generated: ', SampleIndex, '---------------------------------')
 
 #============================ Main Program ========================================================
 # CreatePoreNetworkSamples(Nx= 3, Ny= 3, Folder='/home/xu/work/PoreNetwork0303Samples')
