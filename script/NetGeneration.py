@@ -620,6 +620,7 @@ def CreatePoreNetworkSamples(Nx=20, Ny=20, Folder=''):
 			RandStrNet.SetName(Name=name)
 			RandStrNet.Write(Folder+'RandStrNet/')
 			RandStrNet.Pixel(Folder+'RandStrNet/')
+			RandStrNet.Dump(Folder+'RandStrNet/')
 			print(name, 'Written!:\t', [IS, IE], [JS, JE], [IB, JB], SC, [IG, JG, RG], [IR, JR, RR])
 			# -------------------------------------------------------------------------------------
 			RandCrsNet.Restore()
@@ -656,6 +657,7 @@ def CreatePoreNetworkSamples(Nx=20, Ny=20, Folder=''):
 			RandCrsNet.SetName(Name=name)
 			RandCrsNet.Write(Folder+'RandCrsNet/')
 			RandCrsNet.Pixel(Folder+'RandCrsNet/')
+			RandCrsNet.Dump(Folder+'RandCrsNet/')
 			print(name, 'Written!:\t', [IS, IE], [JS, JE], [IB, JB], SC, [IG, JG, RG], [IR, JR, RR])
 			# -------------------------------------------------------------------------------------
 		if 'FixV' in PNW:
@@ -672,6 +674,7 @@ def CreatePoreNetworkSamples(Nx=20, Ny=20, Folder=''):
 			FixVStrNet.SetName(Name=name)
 			FixVStrNet.Write(Folder+'FixVStrNet/')
 			FixVStrNet.Pixel(Folder+'FixVStrNet/')
+			FixVStrNet.Dump(Folder+'FixVStrNet/')
 			print(name, 'Written!:\t', [IS, IE], [JS, JE], [IB, JB], SC, [IG, JG, RG], [IR, JR, RR])
 			# -------------------------------------------------------------------------------------
 			FixVCrsNet.Restore()
@@ -708,6 +711,7 @@ def CreatePoreNetworkSamples(Nx=20, Ny=20, Folder=''):
 			FixVCrsNet.SetName(Name=name)
 			FixVCrsNet.Write(Folder+'FixVCrsNet/')
 			FixVCrsNet.Pixel(Folder+'FixVCrsNet/')
+			FixVCrsNet.Dump(Folder+'FixVCrsNet/')
 			print(name, 'Written!:\t', [IS, IE], [JS, JE], [IB, JB], SC, [IG, JG, RG], [IR, JR, RR])
 			# -------------------------------------------------------------------------------------
 		return True
@@ -734,6 +738,7 @@ def CreatePoreNetworkSamples(Nx=20, Ny=20, Folder=''):
 			RandStrNet.SetName(Name=name)
 			RandStrNet.Write(Folder+'RandStrNet/')
 			RandStrNet.Pixel(Folder+'RandStrNet/')
+			RandStrNet.Dump(Folder+'RandStrNet/')
 			print(name, 'Written!:\t', [IS, IE], [JS, JE], [IB, JB], SC, [IG, JG, RG], [IR, JR, RR])
 			# -------------------------------------------------------------------------------------
 			RandCrsNet.Restore()
@@ -788,6 +793,7 @@ def CreatePoreNetworkSamples(Nx=20, Ny=20, Folder=''):
 			RandCrsNet.SetName(Name=name)
 			RandCrsNet.Write(Folder+'RandCrsNet/')
 			RandCrsNet.Pixel(Folder+'RandCrsNet/')
+			RandCrsNet.Dump(Folder+'RandCrsNet/')
 			print(name, 'Written!:\t', [IS, IE], [JS, JE], [IB, JB], SC, [IG, JG, RG], [IR, JR, RR])
 			# -------------------------------------------------------------------------------------
 		if 'FixV' in PNW:
@@ -808,6 +814,7 @@ def CreatePoreNetworkSamples(Nx=20, Ny=20, Folder=''):
 			FixVStrNet.SetName(Name=name)
 			FixVStrNet.Write(Folder+'FixVStrNet/')
 			FixVStrNet.Pixel(Folder+'FixVStrNet/')
+			FixVStrNet.Dump(Folder+'FixVStrNet/')
 			print(name, 'Written!:\t', [IS, IE], [JS, JE], [IB, JB], SC, [IG, JG, RG], [IR, JR, RR])
 			# -------------------------------------------------------------------------------------
 			FixVCrsNet.Restore()
@@ -862,6 +869,7 @@ def CreatePoreNetworkSamples(Nx=20, Ny=20, Folder=''):
 			FixVCrsNet.SetName(Name=name)
 			FixVCrsNet.Write(Folder+'FixVCrsNet/')
 			FixVCrsNet.Pixel(Folder+'FixVCrsNet/')
+			FixVCrsNet.Dump(Folder+'FixVCrsNet/')
 			print(name, 'Written!:\t', [IS, IE], [JS, JE], [IB, JB], SC, [IG, JG, RG], [IR, JR, RR])
 			# -------------------------------------------------------------------------------------
 		return True
@@ -1074,4 +1082,4 @@ def CreatePoreNetworkSamples(Nx=20, Ny=20, Folder=''):
 # CreatePoreNetworkSamples(Nx=10, Ny=10, Folder='/home/xu/work/PoreNetwork1010Samples/')
 CreatePoreNetworkSamples(Nx=20, Ny=20, Folder='/home/xu/work/PoreNetwork2020Samples/')
 # CreatePoreNetworkSamples(Nx=40, Ny=40, Folder='/home/xu/work/PoreNetwork4040Samples/')
-
+# NewNet=pickle.load(open('RandStrNet.net', 'rb'))
