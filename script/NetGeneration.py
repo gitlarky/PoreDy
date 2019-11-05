@@ -329,7 +329,7 @@ class PoreNetwork(object):
 			for i in range(self.Mx):
 				T=self.Matrix[j][i]
 				D[j][i]=ttd[T[0]]
-		plt.imshow(D, cmap="gray", vmin=0, vmax=255)
+		plt.imshow(D, cmap="gray", vmin=0, vmax=225)
 		if Disp: plt.show()
 		if Save: plt.savefig(Folder+self.Name+'.png')
 
