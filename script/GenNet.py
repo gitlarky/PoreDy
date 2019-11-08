@@ -284,6 +284,8 @@ class PoreNetwork(object):
 						wat.write('\n')
 
 			if Pixel:
+				if ColorMap=='Gray':
+
 				D=[[0 for i in range(self.Mx)] for j in range(self.My)]
 
 				for j in range(self.My-1, -1, -1):
@@ -293,7 +295,7 @@ class PoreNetwork(object):
 				plt.imshow(D, cmap="gray", vmin=0, vmax=225)
 				if Disp: plt.show()
 				if Save: plt.savefig(Folder+self.Name+'.png')
-
+				elif ColorMap=='RGB':
 		return True
 
 	# Get Throat info at a certain position -------------------------------------------------------
