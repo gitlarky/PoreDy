@@ -4,34 +4,17 @@ import pyvista as pv
 import matplotlib.pyplot as plt
 from matplotlib.colors import ListedColormap
 import numpy as np
-# X = np.random.random((100, 100)) # sample 2D array
-# print(X)
-# mpl.pyplot.imshow(X, cmap="gray")
-# mpl.pyplot.show()
-mesh = examples.download_st_helens().warp_by_scalar()
-# Add scalar array with range (0, 100) taht correlates with elevation
-mesh['values'] = pv.plotting.normalize(mesh['Elevation']) * 100
-# Define the colors we want to use
-blue = np.array([12/256, 238/256, 246/256, 1])
-black = np.array([11/256, 11/256, 11/256, 1])
-grey = np.array([189/256, 189/256, 189/256, 1])
-yellow = np.array([255/256, 247/256, 0/256, 1])
-red = np.array([1, 0, 0, 1])
+import collections as co
+Throat=co.namedtuple('T', 'D, S')
+ThroatChoice={0:{1:Throat(1e-6,0), 2:Throat(2e-6,0), 3:Throat(3e-6,0), 4:Throat(4e-6,0), 5:Throat(5e-6,0), 6:Throat(6e-6,0), 7:Throat(7e-6,0), 8:Throat(8e-6,0), 9:Throat(9e-6,0)}\
+             ,3:{1:Throat(1e-6,3), 2:Throat(2e-6,3), 3:Throat(3e-6,3), 4:Throat(4e-6,3), 5:Throat(5e-6,3), 6:Throat(6e-6,3), 7:Throat(7e-6,3), 8:Throat(8e-6,3), 9:Throat(9e-6,3)}\
+             ,4:{1:Throat(1e-6,4), 2:Throat(2e-6,4), 3:Throat(3e-6,4), 4:Throat(4e-6,4), 5:Throat(5e-6,4), 6:Throat(6e-6,4), 7:Throat(7e-6,4), 8:Throat(8e-6,4), 9:Throat(9e-6,4)}\
+             ,5:{1:Throat(1e-6,5), 2:Throat(2e-6,5), 3:Throat(3e-6,5), 4:Throat(4e-6,5), 5:Throat(5e-6,5), 6:Throat(6e-6,5), 7:Throat(7e-6,5), 8:Throat(8e-6,5), 9:Throat(9e-6,5)}\
+             ,6:{1:Throat(1e-6,6), 2:Throat(2e-6,6), 3:Throat(3e-6,6), 4:Throat(4e-6,6), 5:Throat(5e-6,6), 6:Throat(6e-6,6), 7:Throat(7e-6,6), 8:Throat(8e-6,6), 9:Throat(9e-6,6)}}
 
-mapping = np.linspace(mesh['values'].min(), mesh['values'].max(), 256)
-newcolors = np.empty((256, 4))
-newcolors[mapping >= 80] = red
-newcolors[mapping < 80] = grey
-newcolors[mapping < 55] = yellow
-newcolors[mapping < 30] = blue
-newcolors[mapping < 1] = black
+ThroatChoice[5]
+ThroatChoice[4][4]
 
-# Make the colormap from the listed colors
-my_colormap = ListedColormap(newcolors)
-
-
-
-mesh.plot(scalars='values', cmap=my_colormap)
 # # List Operation ----------------------------------------------------------------------------------
 # def SetUnion(Base=[], SubC=[]):
 # 	final=[]
