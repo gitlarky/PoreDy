@@ -33,6 +33,9 @@ ThroatChoice={0:{1:Throat(1e-6,0), 2:Throat(2e-6,0), 3:Throat(3e-6,0), 4:Throat(
               5:{1:Throat(1e-6,5), 2:Throat(2e-6,5), 3:Throat(3e-6,5), 4:Throat(4e-6,5), 5:Throat(5e-6,5), 6:Throat(6e-6,5), 7:Throat(7e-6,5), 8:Throat(8e-6,5), 9:Throat(9e-6,5)}\
               6:{1:Throat(1e-6,6), 2:Throat(2e-6,6), 3:Throat(3e-6,6), 4:Throat(4e-6,6), 5:Throat(5e-6,6), 6:Throat(6e-6,6), 7:Throat(7e-6,6), 8:Throat(8e-6,6), 9:Throat(9e-6,6)}}
 TT=ThroatChoice[5] # -------------------------------------------------------------------Throat Type
+DToGray={1e-6:225, -1e-6:220, 2e-6:200, -2e-6:195, 3e-6:175, -3e-6:170, 4e-6:150, -4e-6:145, 5e-6:125, -5e-6:120, \
+         6e-6:100, -6e-6: 95, 7e-6: 75, -7e-6: 70, 8e-6: 50, -8e-6: 45, 9e-6: 25, -9e-6: 20, 0:0}
+TToRGB ={}
 
 #============================ Basic Functions =====================================================
 # Pick one from a list ----------------------------------------------------------------------------
@@ -248,9 +251,9 @@ class PoreNetwork(object):
 		return True
 
 	# Output the file binary and other related files ----------------------------------------------
-	def Dump(self, Folder='', Disp=False, Dump=True, Write=False, Pixel=False):
+	def Output(self, Folder='', Disp=False, Dump=False, Write=False, Pixel=False, ColorMap='Gray'):
 		if Dump: pickle.dump(self, open(Folder+self.Name+'.net', 'wb'))
-		if Disp: print('Successfully saved pore-network file.')
+		if Disp: print('Successfully saved pore-network binary file.')
 
 		if Write or Pixel:
 			Mx=2*self.Nx+1
@@ -266,59 +269,32 @@ class PoreNetwork(object):
 				for I in range(self.CTRange[0][0], self.CTRange[0][1], 1):
 					Matrix[J*2-1][I*2-1]=self.CT[J][I]
 
-		with open(Folder+self.Name+'.at', 'w') as wat:
-			for j in range(self.My-1, -1, -1):
-				for i in range(self.Mx):
-					d=
-					s=
-					wat.write('% 9.6e\t% 9d\t' % (d, s))
-				wat.write('\n')
+			if Write:
+				with open(Folder+self.Name+'.at', 'w') as wat:
+					for j in range(self.My-1, -1, -1):
+						for i in range(self.Mx):
+							if Matrix[j][i]==0:
+								wat.write('% 9.6e\t% 9d\t' % (0, 0))
+							else:
+								throattype=Matrix[j][i]
+								flip=throattype/abs(throattype)
+								row=throattype %10
+								col=throattype//10
+								wat.write('% 9.6e\t% 9d\t' % (ThroatChoice[row][col].D*flip, ThroatChoice[row][col].S))
+						wat.write('\n')
 
-		D=[[0 for i in range(self.Mx)] for j in range(self.My)]
-		ttd={1e-6:225, -1e-6:220, 2e-6:200, -2e-6:195, 3e-6:175, -3e-6:170, 4e-6:150, -4e-6:145, 5e-6:125, -5e-6:120, \
-		     6e-6:100, -6e-6: 95, 7e-6: 75, -7e-6: 70, 8e-6: 50, -8e-6: 45, 9e-6: 25, -9e-6: 20, 0:0}
-		for j in range(self.My):
-			for i in range(self.Mx):
-				T=self.Matrix[j][i]
-				D[j][i]=ttd[T[0]]
-		plt.imshow(D, cmap="gray", vmin=0, vmax=225)
-		if Disp: plt.show()
-		if Save: plt.savefig(Folder+self.Name+'.png')
+			if Pixel:
+				D=[[0 for i in range(self.Mx)] for j in range(self.My)]
+
+				for j in range(self.My-1, -1, -1):
+					for i in range(self.Mx):
+						T=self.Matrix[j][i]
+						D[j][i]=ttd[T[0]]
+				plt.imshow(D, cmap="gray", vmin=0, vmax=225)
+				if Disp: plt.show()
+				if Save: plt.savefig(Folder+self.Name+'.png')
 
 		return True
-
-	# Get Information for a certain coordinate in Matrix ------------------------------------------
-	def GetMC(self, i, j):
-		if i>=0 and i<self.Mx and j>=0 and j<self.My:
-			if   i%2==0 and j%2==0:
-				I=i/2
-				J=j/2
-				return ['Pore', I, J]
-			elif i%2==0 and j%2!=0:
-				I=i/2
-				J=(j+1)/2
-				if (I>=self.VTRange[0][0] and I<=self.VTRange[0][1] and 
-					J>=self.VTRange[1][0] and J<=self.VTRange[1][1]):
-					return ['VT'  , I, J, self.Matrix[j][i]]
-				else:
-					return ['VT'  , I, J]
-			elif i%2!=0 and j%2==0:
-				I=(i+1)/2
-				J=j/2
-				if (I>=self.HTRange[0][0] and I<=self.HTRange[0][1] and 
-					J>=self.HTRange[1][0] and J<=self.HTRange[1][1]):
-					return ['HT'  , I, J, self.Matrix[j][i]]
-				else:
-					return ['HT'  , I, J]
-			elif i%2!=0 and j%2!=0:
-				I=(i+1)/2
-				J=(j+1)/2
-				if self.Cross:
-					return ['CT'  , I, J, self.Matrix[j][i]]
-				else:
-					return ['CT'  , I, J]
-		else:
-			return []
 
 	# Get Throat info at a certain position -------------------------------------------------------
 	def GetT(self, TP, I, J):
@@ -351,11 +327,6 @@ class PoreNetwork(object):
 				return ['CT', i, j]
 		else:
 			return []
-
-	# Assign Throat at a certain coordinate in Matrix ---------------------------------------------
-	def AssignMC(self, i, j, T): # i, j is the index in Matrix, i in range [0, Mx), j in range [0, My)
-		self.Matrix[j][i]=T
-		return True
 
 	# Assign Throat at a certain position ---------------------------------------------------------
 	def AssignT(self, TP, I, J, T):
