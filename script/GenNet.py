@@ -45,6 +45,15 @@ def Pick(List=[], Index=0, Method='Random'):
 	elif Method=='Rotate':
 		return List[Index%len(List)]
 
+# Create file name --------------------------------------------------------------------------------
+def Name(Prefix='Sample', Index=0, Digit=6):
+	si=str(Index)
+	if Digit<len(si):
+		Digit=len(si)
+	for i in range(Digit-len(si)):
+		si='0'+si
+	return Prefix+si
+
 # List Operation ----------------------------------------------------------------------------------
 def SetUnion(Base=[], SubC=[]):
 	final=[]
@@ -73,14 +82,7 @@ def SetDifference(Base=[], ExC=[]):
 			final.append(item)
 	return final
 
-# Create file name --------------------------------------------------------------------------------
-def Name(Prefix='Sample', Index=0, Digit=6):
-	si=str(Index)
-	if Digit<len(si):
-		Digit=len(si)
-	for i in range(Digit-len(si)):
-		si='0'+si
-	return Prefix+si
+
 
 #============================ Class ThroatPool ====================================================
 class ThroatPool(object):
@@ -115,6 +117,10 @@ class ThroatPool(object):
 				et.append(throat)
 		return et
 
+	# Find out the existing throat pool -------------------------------------------------------
+	def ExistPool(self):
+		return {k:v for k, v in self.Pool.items() if v>0}
+
 	# Report the pool -----------------------------------------------------------------------------
 	def Report(self):
 		print(self.Name, ':', self.InitialTotal, self.ExistTotal(), self.UsedTotal()\
@@ -139,45 +145,43 @@ class ThroatPool(object):
 		else:
 			if Method=='Random':
 				Selection=Pick(List=Base)
-				self.ThroatCount[Selection]-=1
-				return self.ThroatType[Selection]
+				self.Pool[Selection]-=1
+				return Selection
 			elif Method=='Rotate':
 				if not Sub and not Exc:
 					Selection=Pick(List=Base, Index=Index, Method='Rotate')
-					self.ThroatCount[Selection]-=1
-					return self.ThroatType[Selection]
+					self.Pool[Selection]-=1
+					return Selection
 				elif Sub and not Exc:
 					Selection=Pick(List=Sub, Index=Index, Method='Rotate')
 					if Selection in Base:
-						self.ThroatCount[Selection]-=1
-						return self.ThroatType[Selection]
+						self.Pool[Selection]-=1
+						return self.Selection
 					else:
 						Selection=Pick(List=Base)
-						self.ThroatCount[Selection]-=1
-						return self.ThroatType[Selection]
+						self.Pool[Selection]-=1
+						return Selection
 				elif not Sub and Exc:
 					Selection=Pick(List=Base, Index=Index, Method='Rotate')
 					if Selection in Exc:
 						diff=SetDifference(Base, Exc)
 						if diff:
 							Selection=Pick(List=diff)
-						else:
-							Selection=Pick(List=Base)
-					self.ThroatCount[Selection]-=1
-					return self.ThroatType[Selection]
+					self.Pool[Selection]-=1
+					return Selection
 				elif Sub and Exc:
 					Selection=Pick(List=Sub, Index=Index, Method='Rotate')
 					if Selection in Base:
-						self.ThroatCount[Selection]-=1
-						return self.ThroatType[Selection]
+						self.Pool[Selection]-=1
+						return Selection
 					else:
 						diff=SetDifference(Base, Exc)
 						if diff:
 							Selection=Pick(List=diff)
 						else:
 							Selection=Pick(List=Base)
-						self.ThroatCount[Selection]-=1
-						return self.ThroatType[Selection]
+						self.Pool[Selection]-=1
+						return Selection
 
 	# Return One ----------------------------------------------------------------------------------
 	def ReturnOne(self, T):
@@ -285,12 +289,14 @@ class PoreNetwork(object):
 
 			if Pixel:
 				if ColorMap=='Gray':
-					D=[[0 for i in range(self.Mx)] for j in range(self.My)]
-
+					D=np.zeros((self.My, self.Mx), dtype=float)
 					for j in range(self.My-1, -1, -1):
 						for i in range(self.Mx):
-							T=self.Matrix[j][i]
-							D[j][i]=ttd[T[0]]
+							throattype=Matrix[j][i]
+							flip=throattype/abs(throattype)
+							row =throattype%10
+							col =throattype//10
+							D[j][i]=ThroatChoice[row][col].D*flip
 					plt.imshow(D, cmap="gray", vmin=0, vmax=225)
 					if Disp: plt.show()
 					if Save: plt.savefig(Folder+self.Name+'.png')
