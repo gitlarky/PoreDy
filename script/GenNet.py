@@ -254,7 +254,7 @@ class PoreNetwork(object):
 		return True
 
 	# Output the file binary and other related files ----------------------------------------------
-	def Output(self, Folder='', Disp=False, Dump=False, Write=False, Pixel=False, ColorMap='Gray'):
+	def Output(self, Folder='', Disp=False, Dump=True, Write=False, Pixel=False, ColorMap='Gray'):
 		if Dump: pickle.dump(self, open(Folder+self.Name+'.net', 'wb'))
 		if Disp: print('Successfully saved pore-network binary file.')
 
