@@ -140,48 +140,34 @@ class ThroatPool(object):
 	def FetchOne(self, Index=0, Sub=[], Exc=[], Method='Random'):
 		Base=self.ExistType()
 		if not Base:
-			print('Warning: Throat Pool Used Up!-------------------------------------------------')
+			print('Warning: -------------------------------------------------Throat Pool Used Up!')
 			return 0
 		else:
 			if Method=='Random':
 				Selection=Pick(List=Base)
-				self.Pool[Selection]-=1
-				return Selection
 			elif Method=='Rotate':
 				if not Sub and not Exc:
 					Selection=Pick(List=Base, Index=Index, Method='Rotate')
-					self.Pool[Selection]-=1
-					return Selection
 				elif Sub and not Exc:
 					Selection=Pick(List=Sub, Index=Index, Method='Rotate')
-					if Selection in Base:
-						self.Pool[Selection]-=1
-						return Selection
-					else:
+					if not Selection in Base:
 						Selection=Pick(List=Base)
-						self.Pool[Selection]-=1
-						return Selection
 				elif not Sub and Exc:
 					Selection=Pick(List=Base, Index=Index, Method='Rotate')
 					if Selection in Exc:
 						diff=SetDifference(Base, Exc)
 						if diff:
 							Selection=Pick(List=diff)
-					self.Pool[Selection]-=1
-					return Selection
 				elif Sub and Exc:
 					Selection=Pick(List=Sub, Index=Index, Method='Rotate')
-					if Selection in Base:
-						self.Pool[Selection]-=1
-						return Selection
-					else:
+					if not Selection in Base:
 						diff=SetDifference(Base, Exc)
 						if diff:
 							Selection=Pick(List=diff)
 						else:
 							Selection=Pick(List=Base)
-						self.Pool[Selection]-=1
-						return Selection
+			self.Pool[Selection]-=1
+			return Selection
 
 	# Return One ----------------------------------------------------------------------------------
 	def ReturnOne(self, T):
