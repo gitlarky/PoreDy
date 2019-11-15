@@ -82,8 +82,6 @@ def SetDifference(Base=[], Exc=[]):
 			final.append(item)
 	return final
 
-
-
 #============================ Class ThroatPool ====================================================
 class ThroatPool(object):
 	# Initialize ----------------------------------------------------------------------------------
@@ -94,9 +92,9 @@ class ThroatPool(object):
 		self.InitialPool ={}
 		self.InitialTotal=0
 		for i in range(self.TypeCount):
-			self.Pool[ThroatType[i]]=ThroatCount[i]
+			self.Pool       [ThroatType[i]]=ThroatCount[i]
 			self.InitialPool[ThroatType[i]]=ThroatCount[i]
-			self.InitialTotal+=ThroatCount[i]
+			self.InitialTotal             +=ThroatCount[i]
 
 	# Pool Total Throat Count ---------------------------------------------------------------------
 	def ExistTotal(self):
@@ -137,7 +135,7 @@ class ThroatPool(object):
 			return False
 
 	# Fetch one -----------------------------------------------------------------------------------
-	def FetchOne(self, Index=0, Sub=[], Exc=[], Method='Random'):
+	def FetchOne(self, Index=0, Sub=[], Exc=[], Method='Random', Install=1):
 		Base=self.ExistType()
 		if not Base:
 			print('Warning: -------------------------------------------------Throat Pool Used Up!')
@@ -167,7 +165,7 @@ class ThroatPool(object):
 						else:
 							Selection=Pick(List=Base)
 			self.Pool[Selection]-=1
-			return Selection
+			return Selection*Install
 
 	# Return One ----------------------------------------------------------------------------------
 	def ReturnOne(self, T):
@@ -176,7 +174,7 @@ class ThroatPool(object):
 			self.Pool[T]+=1
 			return True
 		else:
-			print('Warning: cannot return, no throat type matched!')
+			print('Warning: -------------------------------cannot return, no throat type matched!')
 			return False
 
 #============================ Class PoreNetwork ===================================================
@@ -190,7 +188,6 @@ class PoreNetwork(object):
 		self.Open     =Open
 		self.Cross    =Cross
 		self.FixV     =FixV
-
 		self.VT       =np.zeros((self.Ny+1, self.Nx+1), dtype=int)
 		self.HT       =np.zeros((self.Ny+1, self.Nx+1), dtype=int)
 		self.CT       =np.zeros((self.Ny+1, self.Nx+1), dtype=int)
@@ -199,19 +196,19 @@ class PoreNetwork(object):
 		self.CTRange  =[[1, self.Nx+1], [1, self.Ny+1]] if self.Cross else [[0, 0], [0, 0]]
 		self.StrTCount=self.Ny*(self.Nx+1)+self.Nx*(self.Ny+1)
 		self.CrsTCount=self.Nx*self.Ny if self.Cross else 0
-		self.TotTCount=self.StrTCount+self.CrsTCount
 		if 'W' in self.Open:
 			self.VTRange[0][0] =1
 			self.StrTCount    -=self.Ny
 		if 'E' in self.Open:
-			self.VTRange[0][1] =self.Nx-1
+			self.VTRange[0][1] =self.Nx
 			self.StrTCount    -=self.Ny
 		if 'S' in self.Open:
 			self.HTRange[1][0] =1
 			self.StrTCount    -=self.Nx
 		if 'N' in self.Open:
-			self.HTRange[1][1] =self.Ny-1
+			self.HTRange[1][1] =self.Ny
 			self.StrTCount    -=self.Nx
+		self.TotTCount=self.StrTCount+self.CrsTCount
 
 		STN=[self.StrTCount for i in range(len(StrTType))]
 		if self.FixV:
@@ -230,9 +227,9 @@ class PoreNetwork(object):
 			self.CrsTPool=ThroatPool(Name=self.Name+'.CrsTPool', ThroatType=CrsTType, ThroatCount=CTN)
 
 		if self.StrTCount>self.StrTPool.ExistTotal():
-			print('Warning: Straight Throat Pool Created but Not Enough!')
+			print('Warning: -------------------------Straight Throat Pool Created but Not Enough!')
 		if self.Cross and self.CrsTCount>self.CrsTPool.ExistTotal():
-			print('Warning: Cross Throat Pool Created but Not Enough!')
+			print('Warning: ----------------------------Cross Throat Pool Created but Not Enough!')
 
 	# set a new name ------------------------------------------------------------------------------
 	def SetName(self, Name):
@@ -260,8 +257,8 @@ class PoreNetwork(object):
 
 			if Write:
 				with open(Folder+self.Name+'.at', 'w') as wat:
-					for j in range(self.My-1, -1, -1):
-						for i in range(self.Mx):
+					for j in range(My-1, -1, -1):
+						for i in range(Mx):
 							if Matrix[j][i]==0:
 								wat.write('% 9.6e\t% 9d\t' % (0, 0))
 							else:
@@ -274,15 +271,15 @@ class PoreNetwork(object):
 
 			if Pixel:
 				if ColorMap=='Gray':
-					D=np.zeros((self.My, self.Mx), dtype=float)
-					for j in range(self.My-1, -1, -1):
-						for i in range(self.Mx):
+					D=np.zeros((My, Mx), dtype=float)
+					for j in range(My-1, -1, -1):
+						for i in range(Mx):
 							throattype=Matrix[j][i]
 							flip      =throattype/abs(throattype)
 							row       =throattype%10
 							col       =throattype//10
 							D[j][i]   =ThroatChoice[row][col].D*flip
-					plt.imshow(D, cmap="gray", vmin=0, vmax=225)
+					plt.imshow(D, cmap="gray", vmin=min(DToGray.values()), vmax=max(DToGray.values()))
 					if Disp: plt.show()
 					if Save: plt.savefig(Folder+self.Name+'.png')
 				elif ColorMap=='RGB':
@@ -294,91 +291,65 @@ class PoreNetwork(object):
 	def GetT(self, TP, I, J):
 		if TP=='VT':
 			if (I>=self.VTRange[0][0] and I<self.VTRange[0][1] and J>=self.VTRange[1][0] and J<self.VTRange[1][1]):
-				return ['VT', I, J, self.VT[J][I]]
+				if self.StrTPool.InPool(self.VT[J][I]):
+					return ['Exist&Assigned', self.VT[J][I]]
+				else:
+					return ['Exist&NotAssigned']
 			else:
-				return ['VT', I, J]
+				return ['NotExist']
 		elif TP=='HT':
 			if (I>=self.HTRange[0][0] and I<self.HTRange[0][1] and J>=self.HTRange[1][0] and J<self.HTRange[1][1]):
-				return ['HT', I, J, self.HT[J][I]]
+				if self.StrTPool.InPool(self.HT[J][I]):
+					return ['Exist&Assigned', self.HT[J][I]]
+				else:
+					return ['Exist&NotAssigned']
 			else:
-				return ['HT', I, J]
+				return ['NotExist']
 		elif TP=='CT':
 			if (I>=self.CTRange[0][0] and I<self.CTRange[0][1] and J>=self.CTRange[1][0] and J<self.CTRange[1][1]) and self.Cross:
-				return ['CT', I, J, self.CT[J][I]]
+				if self.CrsTPool.InPool(self.CT[J][I]):
+					return ['Exist&Assigned', self.CT[J][I]]
+				else:
+					return ['Exist&NotAssigned']
 			else:
-				return ['CT', I, J]
+				return ['NotExist']
 		else:
-			return []
+			return ['TotallyWrong']
 
-	# Assign Throat at a certain position ---------------------------------------------------------
-	def AssignT(self, TP, I, J, T):
-		if   TP=='VT' and I>=self.VTRange[0][0] and I<self.VTRange[0][1] and J>=self.VTRange[1][0] and J<self.VTRange[1][1]:
-			self.VT[J][I]=T
-		elif TP=='HT' and I>=self.HTRange[0][0] and I<self.HTRange[0][1] and J>=self.HTRange[1][0] and J<self.HTRange[1][1]:
-			self.HT[J][I]=T
-		elif TP=='CT' and I>=self.CTRange[0][0] and I<self.CTRange[0][1] and J>=self.CTRange[1][0] and J<self.CTRange[1][1] and self.Cross:
-			self.CT[J][I]=T
-		else:
-			return False
-		return True
-
-	# Judge if it is assigned or not --------------------------------------------------------------
-	def Assigned(self, TP, I, J):
-		thro=self.GetT(TP, I, J)
-		if len(thro)==4:
-			if TP=='VT' or TP=='HT':
-				if self.StrTPool.InPool(thro[3]):
-					return True
-				else:
-					return False
-			elif TP=='CT':
-				if self.Cross:
-					if self.CrsTPool.InPool(thro[3]):
-						return True
-					else:
-						return False
-				else:
-					return True
-		else:
-			print('Warning: There should be no Throat, Donot Operate Me!')
-			return True
-	
 	# Return Throat at a certain position back to appropriate pool --------------------------------
 	def ReturnT(self, TP, I, J):
-		T=self.GetT(TP, I, J)
-		if  (TP=='VT' or TP=='HT') and len(T)==4:
-			if T[3]==0: print('Warning: where is this throat coming from?: ', TP, I, J, T)
-			succeed=self.StrTPool.ReturnOne(T=T[3])
-			if not succeed: print('Warning: Returning Operation Failed!')
-			self.AssignT(TP=TP, I=I, J=J, T=0)
-		elif TP=='CT' and len(T)==4:
-			if T[3]==0: print('Warning: where is this throat coming from?: ', TP, I, J, T)
-			succeed=self.CrsTPool.ReturnOne(T=T[3])
-			if not succeed: print('Warning: Returning Operation Failed!')
-			self.AssignT(TP=TP, I=I, J=J, T=0)
+		InfoT=self.GetT(TP, I, J)
+		if InfoT[0]=='Exist&Assigned':
+			if   TP=='VT':
+				self.StrTPool.ReturnOne(InfoT[1])
+				self.VT[J][I]=0
+			elif TP=='HT':
+				self.StrTPool.ReturnOne(InfoT[1])
+				self.HT[J][I]=0
+			elif TP=='CT':
+				self.CrsTPool.ReturnOne(InfoT[1])
+				self.CT[J][I]=0
+			else:
+				print('Warning: No Throat to Return!')
+				return False
+			return True
 		else:
-			print('Warning: No Throat to Return!')
 			return False
-		return True
 
-	# Restore all throats back to appropriate pool ------------------------------------------------
-	def Restore(self, TPs=['VT', 'HT', 'CT']):
-		vt=0
-		ht=0
-		ct=0
-		if 'VT' in TPs:
-			for I in range(self.VTRange[0][0], self.VTRange[0][1], 1):
-				for J in range(self.VTRange[1][0], self.VTRange[1][1], 1):
-					if self.ReturnT('VT', I, J): vt+=1
-		if 'HT' in TPs:
-			for I in range(self.HTRange[0][0], self.HTRange[0][1], 1):
-				for J in range(self.HTRange[1][0], self.HTRange[1][1], 1):
-					if self.ReturnT('HT', I, J): ht+=1
-		if 'CT' in TPs and self.Cross:
-			for I in range(self.CTRange[0][0], self.CTRange[0][1], 1):
-				for J in range(self.CTRange[1][0], self.CTRange[1][1], 1):
-					if self.ReturnT('CT', I, J): ct+=1
-		print('Restore: ', vt+ht+ct, '\tVT: ', vt, '\tHT: ', ht, '\tCT: ', ct)
+	# Assign Throat at a certain position ---------------------------------------------------------
+	def AssignT(self, TP, I, J, Index=0, Sub=[], Exc=[], Method='Random', Install=1):
+		if   TP=='VT' and I>=self.VTRange[0][0] and I<self.VTRange[0][1] and J>=self.VTRange[1][0] and J<self.VTRange[1][1]:
+			self.ReturnT(TP, I, J)
+			self.VT[J][I]=self.StrTPool.FetchOne(Index, Sub, Exc, Method, Install)
+		elif TP=='HT' and I>=self.HTRange[0][0] and I<self.HTRange[0][1] and J>=self.HTRange[1][0] and J<self.HTRange[1][1]:
+			self.ReturnT(TP, I, J)
+			self.HT[J][I]=self.StrTPool.FetchOne(Index, Sub, Exc, Method, Install)
+		elif TP=='CT' and I>=self.CTRange[0][0] and I<self.CTRange[0][1] and J>=self.CTRange[1][0] and J<self.CTRange[1][1] and self.Cross:
+			self.ReturnT(TP, I, J)
+			self.CT[J][I]=self.CrsTPool.FetchOne(Index, Sub, Exc, Method, Install)
+		else:
+			print('Warning: -------------------------------------------------AssignT not succeed!')
+			return False
 		return True
 
 	# Assign Throat distribution in a box of certain position -------------------------------------
@@ -405,80 +376,95 @@ class PoreNetwork(object):
 			Exc=[]
 		else:
 			Exc=Sub
+		# print('AssignBox Before: ', TP, Start, End, Sub, Exc)
+		StrAdd       =0
+		StrReplace   =0
+		CrsAdd       =0
+		CrsReplace   =0
+		StrPoolBefore=self.StrTPool.ExistTotal()
+		if self.Cross: CrsPoolBefore=self.CrsTPool.ExistTotal()
 
-		Count=0
-		Replace=0
 		for I in range(Start[0], End[0], 1):
 			for J in range(Start[1], End[1], 1):
 				if Band==[0, 0] or (\
-				   (Band[0]> 0 and Band[1]> 0) and not(I>=Start[0]+Band[0] and I<=End[0]-Band[0]-1 and \
-				                                       J>=Start[1]+Band[1] and J<=End[1]-Band[1]-1)) or (\
-				   (Band[0]> 0 and Band[1]==0) and not(I>=Start[0]+Band[0] and I<=End[0]-Band[0]-1)) or (\
-				   (Band[0]==0 and Band[1]> 0) and not(J>=Start[1]+Band[1] and J<=End[1]-Band[1]-1)):
-					if self.Assigned(TP, I, J):
-						self.ReturnT(TP, I, J)
-						Replace+=1
+				   (Band[0]> 0 and Band[1]> 0) and not(I>=Start[0]+Band[0] and I<End[0]-Band[0] and \
+				                                       J>=Start[1]+Band[1] and J<End[1]-Band[1])) or (\
+				   (Band[0]> 0 and Band[1]==0) and not(I>=Start[0]+Band[0] and I<End[0]-Band[0])) or (\
+				   (Band[0]==0 and Band[1]> 0) and not(J>=Start[1]+Band[1] and J<End[1]-Band[1])):
+
+					InfoT=self.GetT(TP, I, J)
+					if InfoT[0]=='Exist&Assigned':
+						if TP=='VT' or TP=='HT':
+							StrReplace+=1
+						elif TP=='CT':
+							CrsReplace+=1
+					elif InfoT[0]=='Exist&NotAssigned':
+						if TP=='VT' or TP=='HT':
+							StrAdd    +=1
+						elif TP=='CT':
+							CrsAdd    +=1
 
 					for ring in range(min(Band[0], Band[1])+1):
-						if not (I>=Start[0]+ring+1 and I<=End[0]-ring-2 and 
-							J>=Start[1]+ring+1 and J<=End[1]-ring-2) and (
-							I>=Start[0]+ring   and I<=End[0]-ring-1 and 
-							J>=Start[1]+ring   and J<=End[1]-ring-1):
+						if not (I>=Start[0]+ring+1 and I<End[0]-ring-1 and \
+						        J>=Start[1]+ring+1 and J<End[1]-ring-1) \
+						   and (I>=Start[0]+ring   and I<End[0]-ring and \
+						        J>=Start[1]+ring   and J<End[1]-ring):
 							RingIndex=ring
-					Selection=Pick(List=Sub, Index=(I-Start[0])//Repeat[0]*Grad[0]+\
-						                            (J-Start[1])//Repeat[1]*Grad[1]+\
-						                             RingIndex  //Repeat[2]*Grad[2], Method='Rotate')
+					Selection=Pick(List=Sub, Index=Grad[0]*(I-Start[0])//Repeat[0]+\
+					                               Grad[1]*(J-Start[1])//Repeat[1]+\
+					                               Grad[2]* RingIndex  //Repeat[2], Method='Rotate')
+					Install=1
 					if TP=='VT' or TP=='HT':
-						T=self.StrTPool.FetchOne(Index=Selection, Sub=Sub, Exc=Exc, Method='Rotate')
+						pass
 					elif TP=='CT':
-						T=self.CrsTPool.FetchOne(Index=Selection, Sub=Sub, Exc=Exc, Method='Rotate')
-						if not self.CrsTPool.InPool(T): print('Warning: Fuck it is impossible!')
 						if Flip==0:
-							T= T*Pick(List=[-1, 1])
+							Install=Pick(List=[-1, 1])
 						elif Flip==2 and I%2==0:
-							T=-T
+							Install=-1
 						elif Flip==3 and J%2==0:
-							T=-T
+							Install=-1
 						elif Flip==-1 or Flip==1: # Flip= -1 or 1
-							T= T*Flip
-						if not self.CrsTPool.InPool(T): print('Warning: Fuck! What happened here!', t, T)
-					succeed=self.AssignT(TP, I, J, T)
-					if not succeed: print('Warning: AssignT when AssignBox not succeed!')
-					Count+=1
-		print('AssignBox: ', TP, Start, End, '\tCount=', Count, '\tReplace=', Replace)
-		return Count
+							Install=Flip
+					T=self.AssignT(TP, I, J, Selection, Sub, Exc, 'Rotate', Install)
+		if StrAdd!=StrPoolBefore-self.StrTPool.ExistTotal():
+			print('AssignBox Error: Straight Throat added in Net Not Equal diminished in Pool!')
+		if self.Cross:
+			if CrsAdd!=CrsPoolBefore-self.CrsTPool.ExistTotal():
+				print('AssignBox Error: Cross    Throat added in Net Not Equal diminished in Pool!')
+		return StrAdd+StrReplace+CrsAdd+CrsReplace
 
 	# Slice a Region from original Matrix ---------------------------------------------------------
 	def RandomRest(self):
 		vt=0
 		ht=0
+		StrPoolBefore=self.StrTPool.ExistTotal()
 		ct=0
+		if self.Cross: CrsPoolBefore=self.CrsTPool.ExistTotal()
 		for I in range(self.VTRange[0][0], self.VTRange[0][1], 1):
 			for J in range(self.VTRange[1][0], self.VTRange[1][1], 1):
-				if not self.Assigned('VT', I, J):
-					succeed=self.AssignT('VT', I, J, self.StrTPool.FetchOne())
-					if succeed:
-						vt+=1
-					else:
-						print('Warning: AssignT when RandomRest not succeed!')
+				InfoT=self.GetT('VT', I, J)
+				if InfoT[0]=='Exist&NotAssigned':
+					self.AssignT(TP='VT', I=I, J=J)
+					vt+=1
 		for I in range(self.HTRange[0][0], self.HTRange[0][1], 1):
 			for J in range(self.HTRange[1][0], self.HTRange[1][1], 1):
-				if not self.Assigned('HT', I, J):
-					succeed=self.AssignT('HT', I, J, self.StrTPool.FetchOne())
-					if succeed:
-						ht+=1
-					else:
-						print('Warning: AssignT when RandomRest not succeed!')
+				InfoT=self.GetT('HT', I, J)
+				if InfoT[0]=='Exist&NotAssigned':
+					self.AssignT(TP='HT', I=I, J=J)
+					ht+=1
 		if self.Cross:
 			for I in range(self.CTRange[0][0], self.CTRange[0][1], 1):
 				for J in range(self.CTRange[1][0], self.CTRange[1][1], 1):
-					if not self.Assigned('CT', I, J):
-						succeed=self.AssignT('CT', I, J, self.CrsTPool.FetchOne()*Pick(List=[-1, 1]))
-						if succeed:
-							ct+=1
-						else:
-							print('Warning: AssignT when RandomRest not succeed!')
-		print('RandomRest: ', vt+ht+ct, '\tVT: ', vt, '\tHT: ', ht, '\tCT: ', ct)
+					InfoT=self.GetT('CT', I, J)
+					if InfoT[0]=='Exist&NotAssigned':
+						self.AssignT(TP='CT', I=I, J=J)
+						ct+=1
+		if vt+ht!=StrPoolBefore-self.StrTPool.ExistTotal():
+			print('RandomRest Str Error: ', vt+ht+ct, '\tVT: ', vt, '\tHT: ', ht, '\tCT: ', ct)
+		
+		if self.Cross:
+			if ct   !=CrsPoolBefore-self.CrsTPool.ExistTotal():
+				print('RandomRest Str Error: ', vt+ht+ct, '\tVT: ', vt, '\tHT: ', ht, '\tCT: ', ct)
 		return vt+ht+ct
 
 	# Check if it is correct ----------------------------------------------------------------------
@@ -486,28 +472,49 @@ class PoreNetwork(object):
 		vt=0
 		ht=0
 		ct=0
-		for TP in ['HT', 'VT', 'CT']:
-			if TP=='VT':
-				for I in range(self.VTRange[0][0], self.VTRange[0][1], 1):
-					for J in range(self.VTRange[1][0], self.VTRange[1][1], 1):
-						throat=self.GetT(TP=TP, I=I, J=J)
-						if not self.StrTPool.InPool(throat[3]):
-							print('Error: throat not correctly assigned!---------------------------', TP, I, J, throat)
-							return False
-			if TP=='HT':
-				for I in range(self.HTRange[0][0], self.HTRange[0][1], 1):
-					for J in range(self.HTRange[1][0], self.HTRange[1][1], 1):
-						throat=self.GetT(TP=TP, I=I, J=J)
-						if not self.StrTPool.InPool(throat[3]):
-							print('Error: throat not correctly assigned!---------------------------', TP, I, J, throat)
-							return False
-			if TP=='CT' and self.Cross:
-				for I in range(self.CTRange[0][0], self.CTRange[0][1], 1):
-					for J in range(self.CTRange[1][0], self.CTRange[1][1], 1):
-						throat=self.GetT(TP=TP, I=I, J=J)
-						if not self.StrTPool.InPool(throat[3]):
-							print('Error: throat not correctly assigned!---------------------------', TP, I, J, throat)
-							return False
+		for I in range(self.Nx+1):
+			for J in range(self.Ny+1):
+				for TP in ['VT', 'HT', 'CT']:
+					InfoT=self.GetT(TP=TP, I=I, J=J)
+					if   TP=='VT':
+						if I>=self.VTRange[0][0] and I<self.VTRange[0][1] and J>=self.VTRange[1][0] and J<self.VTRange[1][1]:
+							if InfoT[0]=='Exist&Assigned':
+								vt+=1
+							else:
+								print('Error: ------------------In Range Not Assigned: ', TP, I, J)
+						else:
+							if InfoT[0]=='NotExist' and self.VT[J][I]==0:
+								pass
+							else:
+								print('Error: --------------Not In Range But Assigned: ', TP, I, J)
+
+					elif TP=='HT':
+						if I>=self.HTRange[0][0] and I<self.HTRange[0][1] and J>=self.HTRange[1][0] and J<self.HTRange[1][1]:
+							if InfoT[0]=='Exist&Assigned':
+								ht+=1
+							else:
+								print('Error: ------------------In Range Not Assigned: ', TP, I, J)
+						else:
+							if InfoT[0]=='NotExist' and self.HT[J][I]==0:
+								pass
+							else:
+								print('Error: --------------Not In Range But Assigned: ', TP, I, J)
+					elif TP=='CT':
+						if I>=self.CTRange[0][0] and I<self.CTRange[0][1] and J>=self.CTRange[1][0] and J<self.CTRange[1][1] and self.Cross:
+							if InfoT[0]=='Exist&Assigned':
+								ct+=1
+							else:
+								print('Error: ------------------In Range Not Assigned: ', TP, I, J)
+						else:
+							if InfoT[0]=='NotExist' and self.CT[J][I]==0:
+								pass
+							else:
+								print('Error: --------------Not In Range But Assigned: ', TP, I, J)
+		if vt+ht!=self.StrTPool.InitialTotal-self.StrTPool.ExistTotal():
+			print('Error: -------Total Straight Throat in Net is not equal to diminished in Pool!')
+		if self.Cross:
+			if ct   !=self.CrsTPool.InitialTotal-self.CrsTPool.ExistTotal():
+				print('Error: -------Total Cross    Throat in Net is not equal to diminished in Pool!')
 		return True
 
 	# Report information --------------------------------------------------------------------------
