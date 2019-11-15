@@ -35,7 +35,7 @@ haha=[]
 for tt in TT:
 	haha.append(tt)
 	haha.append(-tt)
-Dia=np.zeros(len(haha), float)
+Dia=np.zeros(len(haha), dtype=float)
 for ha in haha:
 	flip      =ha/abs(ha)
 	row       =abs(ha)%10
