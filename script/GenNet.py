@@ -284,7 +284,7 @@ class PoreNetwork(object):
 							Dia[j][i] =DToGray[ThroatChoice[row][col].D*flip]
 				plt.imshow(Dia, cmap="gray", vmin=min(DToGray.values()), vmax=max(DToGray.values()))
 				if Disp: plt.show()
-				plt.savefig(Folder+self.Name+'.png', dpi=MyDPI/10)
+				plt.savefig(Folder+self.Name+'.png')
 
 			if 'RGB' in Option:
 				pass
