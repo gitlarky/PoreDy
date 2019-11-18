@@ -389,7 +389,7 @@ bool meshing() {
 					size_t thePolyN(0); //0: Circle; 3: Traiangle; 4: Square; 5: Pentagon; 6: Hexagon
 					index_t i(0), I(0), j(0), J(0);
 
-					isn>>theDiameter>>thePolyN;
+					atIFS>>theDiameter>>thePolyN;
 
 					if((indexi%2==0 && indexj%2==0) || theDiameter==0) {
 						//Do nothing, no throats
