@@ -376,7 +376,9 @@ bool meshing() {
 
 			cout<<"Reading Throats Assignment......"<<endl;
 			string assignThroatsName=caseName+".at";
-			ifstream atIFS(assignThroatsName.c_str());
+			
+			ifstream atIFS;
+			atIFS.open(assignThroatsName.c_str())
 			
 			numeric_t totTLength(0), totWeighted(0); //total throat length, and total weighted throat length
 
@@ -428,7 +430,7 @@ bool meshing() {
 					}
 				}
 			}
-
+			atIFS.close();
 			Bk[k].avgTDiameter[0]=sqrt(totWeighted/totTLength);
 		} else {
 			cout<<"Creating Throats by connecting Pores using designated statistical parameters......"<<endl;

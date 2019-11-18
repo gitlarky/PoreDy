@@ -21,15 +21,18 @@ int main() {
     }
     of.close();
 
-    std::ifstream inf;
-    inf.open(filename.c_str());
+    // std::ifstream inf;
+    // inf.open(filename.c_str());
+    std::ifstream inf(filename.c_str());
     std::vector<std::vector<int> > PI;
     for(int j=0; j<=9; ++j) {
     	std::vector<int> line;
-        for(int i=0; i<=9; ++i) {
+        for(int i=0; i<=9; i+=2) {
         	int v(0);
-            inf>>v;
+            int u(0);
+            inf>>v>>u;
             line.push_back(v);
+            line.push_back(u);
         }
         PI.push_back(line);
     }
