@@ -378,7 +378,7 @@ bool meshing() {
 			string assignThroatsName=caseName+".at";
 			
 			ifstream atIFS;
-			atIFS.open(assignThroatsName.c_str())
+			atIFS.open(assignThroatsName.c_str());
 			
 			numeric_t totTLength(0), totWeighted(0); //total throat length, and total weighted throat length
 
