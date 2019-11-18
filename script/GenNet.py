@@ -800,7 +800,7 @@ def CreateTwo(Nx=20, Ny=20, Folder='', SIN=0, PNW=['Rand', 'FixV'], Open=['N'], 
 		# -------------------------------------------------------------------------------------
 	return True
 # =============================================================================================
-def CreatePoreNetworkSamples(Nx=20, Ny=20, Folder='', OutOpt=['Gray']):
+def CreatePoreNetworkSamples(Nx=20, Ny=20, Folder='', OutOpt=['Dump', 'Write']):
 	print('Prepare the folders ------------------------------------------------------------------')
 	cmd='mkdir '+Folder
 	subprocess.call(cmd, shell=True)
@@ -1025,6 +1025,6 @@ def CreatePoreNetworkSamples(Nx=20, Ny=20, Folder='', OutOpt=['Gray']):
 #============================ Main Program ========================================================
 # CreatePoreNetworkSamples(Nx= 3, Ny= 3, Folder='/home/xu/work/PoreNetwork0303Samples')
 # CreatePoreNetworkSamples(Nx=10, Ny=10, Folder='/home/xu/work/PoreNetwork1010Samples/')
-CreatePoreNetworkSamples(Nx=20, Ny=20, Folder='/home/xu/work/PoreNetwork2020Samples/')
-# CreatePoreNetworkSamples(Nx=40, Ny=40, Folder='/home/xu/work/PoreNetwork4040Samples/')
+# CreatePoreNetworkSamples(Nx=20, Ny=20, Folder='/home/xu/work/PoreNetwork2020Samples/')
+CreatePoreNetworkSamples(Nx=40, Ny=40, Folder='/home/xu/work/PoreNetwork4040Samples/')
 # NewNet=pickle.load(open('RandStrNet.net', 'rb'))
