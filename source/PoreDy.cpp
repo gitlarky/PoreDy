@@ -36,6 +36,7 @@ size_t UVsize(0), CPsize(0), ExtPtSize(0), NetworkPtSize(0);
  *                                        main Program
  *
   ====================================================================================================*/
+// int main(char* argc[], bitset<4> argv) {
 int main() {
 	cout<<scientific<<setprecision(3)<<setw(10);
 	cout<<"Please enter the name of the case: "<<endl;

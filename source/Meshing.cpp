@@ -381,8 +381,10 @@ bool meshing() {
 			atIFS.open(assignThroatsName.c_str());
 			
 			numeric_t totTLength(0), totWeighted(0); //total throat length, and total weighted throat length
+			
+			cout<<"OK-1: "<<k<<"\t"<<Bk[k].Ny<<"\t"<<Bk[k].Nx<<endl;
 
-			for(size_t indexj=Bk[k].Ny*2; indexj>=0; --indexj) {
+			for(index_t indexj=Bk[k].Ny*2; indexj>=0; --indexj) {
 				// string LineNumbers;
 				// getline(atIFS, LineNumbers);
 				// istringstream isn(myLine);
@@ -392,46 +394,64 @@ bool meshing() {
 					index_t i(0), I(0), j(0), J(0);
 
 					atIFS>>theDiameter>>thePolyN;
+					theDiameter/=cd_c::phy.RefLength;
 
-					if((indexi%2==0 && indexj%2==0) || theDiameter==0) {
-						//Do nothing, no throats
+					if (theDiameter!=0) {
+						cout<<"OK-1: "<<k<<"\t"<<Bk[k].Ny<<"\t"<<Bk[k].Nx<<endl;
+						cout<<"OK0: "<<indexj<<"\t"<<indexi<<"\t"<<theDiameter<<"\t"<<thePolyN<<endl;
 					} else {
-						if(indexi%2==0) {
+						cout<<"OK1: "<<indexj<<"\t"<<indexi<<"\t"<<theDiameter<<"\t"<<thePolyN<<endl;
+					}
+
+					if (theDiameter!=0) {
+						if       (indexi%2==0 && indexj%2==0) {
+							//Do nothing, no throats
+						} else if(indexi%2==0 && indexj%2!=0) {
 							i=indexi/2    ;
 							I=i           ;
 							j=(indexj-1)/2;
 							J=(indexj+1)/2;
-						} else if(indexj%2==0) {
+						} else if(indexi%2!=0 && indexj%2==0) {
 							i=(indexi-1)/2;
 							I=(indexi+1)/2;
 							j=indexj/2    ;
 							J=j           ;
-						} else {
-							if(theDiameter>0) {
+						} else if(indexi%2!=0 && indexj%2!=0) {
+							if       (theDiameter>0) {
 								i=(indexi-1)/2;
 								I=(indexi+1)/2;
 								j=(indexj-1)/2;
 								J=(indexj+1)/2;
-							} else {
+							} else if(theDiameter<0) {
 								i=(indexi+1)/2;
 								I=(indexi-1)/2;
 								j=(indexj-1)/2;
 								J=(indexj+1)/2;
+							} else {
+								//Do nothing
 							}
+						} else {
+							//Do Nothing
 						}
-
+						// cout<<"OK1";
 						Bk[k].TI.push_back(T.size());
 						P[Bk[k].PI[i][j]].TI.push_back(T.size());
 						P[Bk[k].PI[I][J]].TI.push_back(T.size());
 						T.push_back(throat_c(Bk[k].PI[i][j], Bk[k].PI[I][J], thePolyN, abs(theDiameter)/2, P[Bk[k].PI[i][j]].distance(P[Bk[k].PI[I][J]])));
-
+						// cout<<"OK2";
 						totTLength +=T[T.size()-1].L;
 						totWeighted+=T[T.size()-1].L*theDiameter*theDiameter;
+						// cout<<"OK3:\t"<<indexi<<"\t"<<indexj<<endl;
+					} else {
+						//Do Nothing
 					}
 				}
 			}
+			cout<<"OK4";
 			atIFS.close();
+			cout<<"OK5";
 			Bk[k].avgTDiameter[0]=sqrt(totWeighted/totTLength);
+			cout<<"OK6: AverageTDiameter"<<Bk[k].avgTDiameter[0]<<"\tTotLength"<<totTLength<<endl;
 		} else {
 			cout<<"Creating Throats by connecting Pores using designated statistical parameters......"<<endl;
 
