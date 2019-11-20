@@ -1438,8 +1438,6 @@ numeric_t cluster_c::maxMass() {
 	return minMass;
 }
 
-
-
 bool cluster_c::calctimeToEmptyMax() {
 	timeToEmptyMax=(maxMass()-cd_c::phy.EnvironmentConcentration*T[maxThroat[0]].V)/DividedMassOutFlux();
 	return true;
