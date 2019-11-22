@@ -1,0 +1,39 @@
+Physics Model:	isothermalEvaporationFilm Effect: 0	Viscosity Effect: 0
+Air:	Molar Density:2.897e-02[kg/mol]	Density:1.204e+00[kg/m^3]	Dynamic Viscosity:1.813e-05[Pa*s]
+Water:	Molar Density:1.802e-02[kg/mol]	Density:9.982e+02[kg/m^3]	Dynamic Viscosity:1.002e-03[Pa*s]	Mass Diffusivity:2.119e-05[m^2/s]	Contact Angle:0.000e+00[Radians]	Surface Tension:7.266e-02[N/m]	Saturated Concnetration:9.592e-01[mol/m^3]
+Round Corner Radius: 0.000e+00
+RefLength: 1.000e+00[m]	RefM: 1.802e-02[kg/mol]	RefDensity: 1.728e-02[kg/m^3]	RefViscosity: 1.002e-03[kg/m-s]	RefMassDiffusivity: 2.119e-05[m^2/s]	RefSurfaceTension: 7.266e-02[N/m]	RefConcentration: 9.592e-01[mol/m^3]	
+RefTime: 4.719e+04[s]	RefVelocity: 2.119e-05[m/s]	RefPressure: 7.761e-12[Pa]RefMass: 1.728e-02[kg]	RefMassFlux: 3.663e-07[kg/s]
+Reynolds Number: 3.655e-04	Peclet Number: 1.000e+00	Capillary Number: 2.922e-07
+Feature Length: 1.000e+00[m]	Feature Density: 1.204e+00[kg/m^3]	Feature Velocity: 0.000e+00[m/s]	Feature Pressure: 0.000e+00[Pa]
+Re Feature: 0.000e+00	Pe Feature: 0.000e+00	Ca Feature: 0.000e+00
+Environment Concentration: 0.000e+00
+Saturated Concentration: 9.592e-01
+Liquid Concentration: 5.539e+04
+Flowfield:	SIMPLER + Hybrid + Implicit
+Evaporation:	OperatorSplitting + Hybrid + Implicit
+FlowfieldMaxStep: 1000	EvaporationMaxStep: 1000
+FlowfieldConvergeCriteria: 1.000e-04	DryCriteria: 1.000e-04
+EvaporationSubStep: 1
+DryOutputFrequency: 1
+UVRelaxFactor: 1.000e+00	PRelaxFactor: 1.000e+00	CRelaxFactor: 1.000e+00
+FilmApproximationType: 1	FilmApproximationCoefficient: 3.000e+00
+InletFlowDeveloped: 1
+
+Cells Thickness dz=1.000e+00
+Blocks' relationships are as follows: 
+Lines information before filling......
+Lines information after filling and updating......
+Cells side is wall: 
+cCell, Checking relationships:
+uCell, Checking relationships:
+vCell, Checking relationships:
+fCell, Checking relationships:
+
+PorousOpen connection information:
+Cells dimensions information:
+cCell, Checking dimensions:
+uCell, Checking dimensions:
+vCell, Checking dimensions:
+Inlet cells:
+Outlet cells:

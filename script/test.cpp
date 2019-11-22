@@ -12,7 +12,8 @@ using namespace std;
 
 //     return 0;
 // }
-int main(string & caseName) {
+int main() {
+    string caseName;
     cout<<caseName<<endl;
 
     return 0;
