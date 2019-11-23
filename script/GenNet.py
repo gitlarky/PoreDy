@@ -536,7 +536,118 @@ class PoreNetwork(object):
 		return True		
 
 #============================ Create Pore-Network Samples =========================================
-# Create samples for One Assignment Region for each of the 4 kinds of networks ================
+#============================ Create Pore-Network Samples with Pure Features ======================
+def CreatePure(Nx=20, Ny=20, Folder='', SIN=0, PNW=['Rand'], Open=['N'], OutOpt=['Dump', 'Write', 'Gray', 'RGB'], AVTP=0, AHTP=0, \
+	          IS=0, JS=0, IE=0, JE=0, IB=0, JB=0, \
+	          VSC=[], HSC=[], CSC=[], IG=0, JG=0, RG=0, IR=1, JR=1, RR=1):
+	
+	if 'Rand' in PNW:
+		# -------------------------------------------------------------------------------------
+		RandVurNet =PoreNetwork(Name=Name(Prefix='RandVurNet', Index=SIN),\
+		                        Nx=Nx, Ny=Ny, Open=Open, Cross=False, FixV=False,\
+		                        StrTType=TT)
+		if Pick(List=[0, 1, 2, 3, 4, 5, 6, 7, 8, 9])<AVTP:
+			RandVurNet.AssignBox(TP='VT', Start=[IS, JS], End=[IE, JE], Band=[IB, JB],\
+				                 Sub=VSC, Grad=[IG, JG, RG], Repeat=[IR, JR, RR])
+		if Pick(List=[0, 1, 2, 3, 4, 5, 6, 7, 8, 9])<AHTP:
+			RandVurNet.AssignBox(TP='HT', Start=[IS, JS], End=[IE, JE], Band=[IB, JB],\
+				                 Sub=SC, Grad=[IG, JG, RG], Repeat=[IR, JR, RR])
+		RandVurNet.RandomRest()
+		RandVurNet.Output(Folder+'RandVurNet/', Option=OutOpt)
+		RandVurNet.Check()
+		print('RandVurNet', SIN, 'Written!:\t', [IS, IE], [JS, JE], [IB, JB], SC, [IG, JG, RG], [IR, JR, RR])
+
+		# -------------------------------------------------------------------------------------
+		RandCrsNet =PoreNetwork(Name=Name(Prefix='RandCrsNet', Index=SIN), \
+		                        Nx=Nx, Ny=Ny, Open=Open, Cross=True , FixV=False, \
+		                        StrTType=TT, CrsTType=TT)
+		if Pick(List=[0, 1, 2, 3, 4, 5, 6, 7, 8, 9])<AVTP:
+			RandCrsNet.AssignBox(TP='VT', Start=[IS, JS], End=[IE, JE], Band=[IB, JB],\
+				                 Sub=SC, Grad=[IG, JG, RG], Repeat=[IR, JR, RR])
+		if Pick(List=[0, 1, 2, 3, 4, 5, 6, 7, 8, 9])<AHTP:
+			RandCrsNet.AssignBox(TP='HT', Start=[IS, JS], End=[IE, JE], Band=[IB, JB],\
+				                 Sub=SC, Grad=[IG, JG, RG], Repeat=[IR, JR, RR])
+		CrsPick=Pick(List=[0, 1, 2, 3, 4, 5, 6, 7, 8, 9])
+		if CrsPick<2:
+			RandCrsNet.AssignBox(TP='CT', Start=[IS, JS], End=[IE, JE], Band=[IB, JB],\
+			                     Sub=SC, Grad=[IG, JG, RG], Repeat=[IR, JR, RR], Flip= 2)
+		elif CrsPick>7:
+			RandCrsNet.AssignBox(TP='CT', Start=[IS, JS], End=[IE, JE], Band=[IB, JB],\
+			                     Sub=SC, Grad=[IG, JG, RG], Repeat=[IR, JR, RR], Flip= 3)
+		elif CrsPick==3:
+			RandCrsNet.AssignBox(TP='CT', Start=[IS, JS], End=[IE, JE], Band=[IB, JB],\
+			                     Sub=SC, Grad=[IG, JG, RG], Repeat=[IR, JR, RR], Flip=-1)
+		elif CrsPick==6:
+			RandCrsNet.AssignBox(TP='CT', Start=[IS, JS], End=[IE, JE], Band=[IB, JB],\
+			                     Sub=SC, Grad=[IG, JG, RG], Repeat=[IR, JR, RR], Flip= 1)
+		elif CrsPick==4:
+			RandCrsNet.AssignBox(TP='CT', Start=[IS, JS], End=[IE, JE], Band=[IB, JB],\
+			                     Sub=[], Grad=[IG, JG, RG], Repeat=[IR, JR, RR], Flip=-1)
+		elif CrsPick==5:
+			RandCrsNet.AssignBox(TP='CT', Start=[IS, JS], End=[IE, JE], Band=[IB, JB],\
+			                     Sub=[], Grad=[IG, JG, RG], Repeat=[IR, JR, RR], Flip= 1)
+		else:
+			RandCrsNet.AssignBox(TP='CT', Start=[IS, JS], End=[IE, JE], Band=[IB, JB],\
+			                     Sub=SC, Grad=[IG, JG, RG], Repeat=[IR, JR, RR], Flip= 0)
+		RandCrsNet.RandomRest()
+		RandCrsNet.Output(Folder+'RandCrsNet/', Option=OutOpt)
+		RandCrsNet.Check()
+		print('RandCrsNet', SIN, 'Written!:\t', [IS, IE], [JS, JE], [IB, JB], SC, [IG, JG, RG], [IR, JR, RR])
+		# -------------------------------------------------------------------------------------
+	if 'FixV' in PNW:
+		# -------------------------------------------------------------------------------------
+		FixVStrNet =PoreNetwork(Name=Name(Prefix='FixVStrNet', Index=SIN),\
+		                        Nx=Nx, Ny=Ny, Open=Open, Cross=False, FixV=True,\
+		                        StrTType=TT)
+		if Pick(List=[0, 1, 2, 3, 4, 5, 6, 7, 8, 9])<AVTP:
+			FixVStrNet.AssignBox(TP='VT', Start=[IS, JS], End=[IE, JE], Band=[IB, JB],\
+				                 Sub=SC, Grad=[IG, JG, RG], Repeat=[IR, JR, RR])
+		if Pick(List=[0, 1, 2, 3, 4, 5, 6, 7, 8, 9])<AHTP:
+			FixVStrNet.AssignBox(TP='HT', Start=[IS, JS], End=[IE, JE], Band=[IB, JB],\
+				                 Sub=SC, Grad=[IG, JG, RG], Repeat=[IR, JR, RR])
+		FixVStrNet.RandomRest()
+		FixVStrNet.Output(Folder+'FixVStrNet/', Option=OutOpt)
+		FixVStrNet.Check()
+		print('FixVStrNet', SIN, 'Written!:\t', [IS, IE], [JS, JE], [IB, JB], SC, [IG, JG, RG], [IR, JR, RR])
+		# -------------------------------------------------------------------------------------
+		FixVCrsNet =PoreNetwork(Name=Name(Prefix='FixVCrsNet', Index=SIN), \
+		                        Nx=Nx, Ny=Ny, Open=Open, Cross=True , FixV=True, \
+		                        StrTType=TT, CrsTType=TT)
+		if Pick(List=[0, 1, 2, 3, 4, 5, 6, 7, 8, 9])<AVTP:
+			FixVCrsNet.AssignBox(TP='VT', Start=[IS, JS], End=[IE, JE], Band=[IB, JB],\
+				                 Sub=SC, Grad=[IG, JG, RG], Repeat=[IR, JR, RR])
+		if Pick(List=[0, 1, 2, 3, 4, 5, 6, 7, 8, 9])<AHTP:
+			FixVCrsNet.AssignBox(TP='HT', Start=[IS, JS], End=[IE, JE], Band=[IB, JB],\
+				                 Sub=SC, Grad=[IG, JG, RG], Repeat=[IR, JR, RR])
+		CrsPick=Pick(List=[0, 1, 2, 3, 4, 5, 6, 7, 8, 9])
+		if CrsPick<2:
+			FixVCrsNet.AssignBox(TP='CT', Start=[IS, JS], End=[IE, JE], Band=[IB, JB],\
+			                     Sub=SC, Grad=[IG, JG, RG], Repeat=[IR, JR, RR], Flip= 2)
+		elif CrsPick>7:
+			FixVCrsNet.AssignBox(TP='CT', Start=[IS, JS], End=[IE, JE], Band=[IB, JB],\
+			                     Sub=SC, Grad=[IG, JG, RG], Repeat=[IR, JR, RR], Flip= 3)
+		elif CrsPick==3:
+			FixVCrsNet.AssignBox(TP='CT', Start=[IS, JS], End=[IE, JE], Band=[IB, JB],\
+			                     Sub=SC, Grad=[IG, JG, RG], Repeat=[IR, JR, RR], Flip=-1)
+		elif CrsPick==6:
+			FixVCrsNet.AssignBox(TP='CT', Start=[IS, JS], End=[IE, JE], Band=[IB, JB],\
+			                     Sub=SC, Grad=[IG, JG, RG], Repeat=[IR, JR, RR], Flip= 1)
+		elif CrsPick==4:
+			FixVCrsNet.AssignBox(TP='CT', Start=[IS, JS], End=[IE, JE], Band=[IB, JB],\
+			                     Sub=[], Grad=[IG, JG, RG], Repeat=[IR, JR, RR], Flip=-1)
+		elif CrsPick==5:
+			FixVCrsNet.AssignBox(TP='CT', Start=[IS, JS], End=[IE, JE], Band=[IB, JB],\
+			                     Sub=[], Grad=[IG, JG, RG], Repeat=[IR, JR, RR], Flip= 1)
+		else:
+			FixVCrsNet.AssignBox(TP='CT', Start=[IS, JS], End=[IE, JE], Band=[IB, JB],\
+			                     Sub=SC, Grad=[IG, JG, RG], Repeat=[IR, JR, RR], Flip= 0)
+		FixVCrsNet.RandomRest()
+		FixVCrsNet.Output(Folder+'FixVCrsNet/', Option=OutOpt)
+		FixVCrsNet.Check()
+		print('FixVCrsNet', SIN, 'Written!:\t', [IS, IE], [JS, JE], [IB, JB], SC, [IG, JG, RG], [IR, JR, RR])
+		# -------------------------------------------------------------------------------------
+	return True
+# Create samples for One Assignment Region for each of the 4 kinds of networks ====================
 def CreateOne(Nx=20, Ny=20, Folder='', SIN=0, PNW=['Rand', 'FixV'], Open=['N'], OutOpt=['Dump', 'Write', 'Gray', 'RGB'], AVTP=0, AHTP=0, \
 	          IS=0, JS=0, IE=0, JE=0, IB=0, JB=0, \
 	          SC=[], IG=0, JG=0, RG=0, IR=1, JR=1, RR=1):
@@ -800,7 +911,7 @@ def CreateTwo(Nx=20, Ny=20, Folder='', SIN=0, PNW=['Rand', 'FixV'], Open=['N'], 
 		# -------------------------------------------------------------------------------------
 	return True
 # =============================================================================================
-def CreatePoreNetworkSamples(Nx=20, Ny=20, Folder='', OutOpt=['Dump', 'Write']):
+def CreatePoreNetworkSamples(Nx=20, Ny=20, Folder='', OutOpt=['Dump', 'Write', 'Gray']):
 	print('Prepare the folders ------------------------------------------------------------------')
 	cmd='mkdir '+Folder
 	subprocess.call(cmd, shell=True)
@@ -1021,10 +1132,13 @@ def CreatePoreNetworkSamples(Nx=20, Ny=20, Folder='', OutOpt=['Dump', 'Write']):
 								CreateTwo(Nx=Nx, Ny=Ny, Folder=Folder, OutOpt=OutOpt, SIN=SampleIndex, IS=IS, IE=IE, JS=JS, JE=JE, SC=SC, IG=IG, JG=JG, IR=IR, JR=JR, AVTP=9, AHTP=9)
 								# SampleIndex+=1
 	print('Group 4 of Pore-Networks Generated: ', SampleIndex, '---------------------------------')
+	print('Generating 5th Group of Pore-Networks ------------------------------------------------')
+	# for SC in [[15], [25], [35], [45], [55], [65], [75], [85], [95]]:
+
 
 #============================ Main Program ========================================================
 # CreatePoreNetworkSamples(Nx= 3, Ny= 3, Folder='/home/xu/work/PoreNetwork0303Samples')
 # CreatePoreNetworkSamples(Nx=10, Ny=10, Folder='/home/xu/work/PoreNetwork1010Samples/')
-# CreatePoreNetworkSamples(Nx=20, Ny=20, Folder='/home/xu/work/PoreNetwork2020Samples/')
-CreatePoreNetworkSamples(Nx=40, Ny=40, Folder='/home/xu/work/PoreNetwork4040Samples/')
+CreatePoreNetworkSamples(Nx=20, Ny=20, Folder='/home/xu/work/PoreNetwork2020Samples/')
+# CreatePoreNetworkSamples(Nx=40, Ny=40, Folder='/home/xu/work/PoreNetwork4040Samples/')
 # NewNet=pickle.load(open('RandStrNet.net', 'rb'))
