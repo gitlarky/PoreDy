@@ -537,7 +537,7 @@ class PoreNetwork(object):
 
 #============================ Create Pore-Network Samples =========================================
 #============================ Create Pore-Network Samples with Pure Features ======================
-def CreatePure(Nx=20, Ny=20, Folder='', SIN=0, PNW=['Rand'], Open=['N'], OutOpt=['Dump', 'Write', 'Gray', 'RGB'], AVTP=0, AHTP=0, \
+def CreatePure(Nx=20, Ny=20, Folder='', SIN=0, OutOpt=['Dump', 'Write', 'Gray', 'RGB'], AVTP=0, AHTP=0, \
 	          IS=0, JS=0, IE=0, JE=0, IB=0, JB=0, \
 	          VSC=[], HSC=[], CSC=[], IG=0, JG=0, RG=0, IR=1, JR=1, RR=1):
 	
