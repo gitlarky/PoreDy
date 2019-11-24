@@ -13,7 +13,7 @@ You are encouraged to use this code in any academic or industrial work, my resea
 
 PoreDy is a tool originally designed for simulating porous media drying problems, which is capable of couple solving the pore-scale porous media interior and lab-scale outside field simultaneously. Based on which, the deep learning fast prediction and optimization design functions are added. Right now, PoreDy is mainly used in 5 categories of problems: general fluid flow, porous media interior transportation, transportation between porous media and external flow field, fast evaluation of microstructures, fast optimization design of microstructures. The results can be output in VTK format, which can be post-processed with ParaView.
 
-PoreDy is written in C++ and python with OOP technology, which make it easier to extend to include more physical models, algorithms and schemes. Open source linear library Eigen is used for the linear equations solver, which keeps the cost low and is the only module currently capable of parallel computing. Open source Deep learning framework PyTorch is used as the basis for fast prediction and optimization design. 
+PoreDy is written in C++ and Python with OOP technology, which make it easier to extend to include more physical models, algorithms and schemes. Open source linear library Eigen is used for the linear equations solver, which keeps the cost low and is the only module currently capable of parallel computing. Open source Deep learning framework PyTorch is used as the basis for fast prediction and optimization design. 
 
 #### Major Features for Pore-Scale Porous Media Interior Solver:
 1. Implicit time marching solver for 2D/3D pore network evaporation model with invasion-percolation rule and film effect considered
