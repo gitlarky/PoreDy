@@ -99,6 +99,7 @@ const numeric_t ThroatAverageLength(5.0e-4), ThroatAverageDiameter(9.0e-5);
 const numeric_t Psat(2.333e3), Csat(0.9592), Cliquid(55394.01);
 const numeric_t Pa(1.01325e5), Pout(0);
 const numeric_t dryCriteria(1e-6);
+const numeric_t VarianceRateTolerance(1e-12);
 
 const numeric_t MinDisplayThroatRadius(25e-6), MaxDisplayThroatRadius(50e-6);
 

@@ -396,14 +396,15 @@ bool meshing() {
 					atIFS>>theDiameter>>thePolyN;
 					theDiameter/=cd_c::phy.RefLength;
 
-					if (theDiameter!=0) {
-						cout<<"OK-1: "<<k<<"\t"<<Bk[k].Ny<<"\t"<<Bk[k].Nx<<endl;
-						cout<<"OK0: "<<indexj<<"\t"<<indexi<<"\t"<<theDiameter<<"\t"<<thePolyN<<endl;
-					} else {
-						cout<<"OK1: "<<indexj<<"\t"<<indexi<<"\t"<<theDiameter<<"\t"<<thePolyN<<endl;
-					}
+					// if (theDiameter!=0) {
+					// 	cout<<"OK-1: "<<k<<"\t"<<Bk[k].Ny<<"\t"<<Bk[k].Nx<<endl;
+					// 	cout<<"OK0: "<<indexj<<"\t"<<indexi<<"\t"<<theDiameter<<"\t"<<thePolyN<<endl;
+					// } else {
+					// 	cout<<"OK1: "<<indexj<<"\t"<<indexi<<"\t"<<theDiameter<<"\t"<<thePolyN<<endl;
+					// }
 
-					if (theDiameter!=0) {
+					// if (theDiameter!=0) {
+					if (abs(theDiameter)>=1e-12) {
 						if       (indexi%2==0 && indexj%2==0) {
 							//Do nothing, no throats
 						} else if(indexi%2==0 && indexj%2!=0) {
@@ -434,9 +435,17 @@ bool meshing() {
 							//Do Nothing
 						}
 						// cout<<"OK1";
+
 						Bk[k].TI.push_back(T.size());
 						P[Bk[k].PI[i][j]].TI.push_back(T.size());
 						P[Bk[k].PI[I][J]].TI.push_back(T.size());
+
+						// When there are many identical throats the program tends to collapse
+						// Here opens a door to alter the diameter in an ignorable way to avoid program collapse
+						// The TDVarianceRate is critical which should usually be lower than 1e-13
+						size_t theSeed=(T.size()+1)*Bk[k].RandomRealization;
+						theDiameter*=(1+Bk[k].TDVarianceRate[0]*(RandomPercentage(theSeed)-0.5));
+						
 						T.push_back(throat_c(Bk[k].PI[i][j], Bk[k].PI[I][J], thePolyN, abs(theDiameter)/2, P[Bk[k].PI[i][j]].distance(P[Bk[k].PI[I][J]])));
 						// cout<<"OK2";
 						totTLength +=T[T.size()-1].L;
@@ -447,11 +456,11 @@ bool meshing() {
 					}
 				}
 			}
-			cout<<"OK4";
+			// cout<<"OK4";
 			atIFS.close();
-			cout<<"OK5";
+			// cout<<"OK5";
 			Bk[k].avgTDiameter[0]=sqrt(totWeighted/totTLength);
-			cout<<"OK6: AverageTDiameter"<<Bk[k].avgTDiameter[0]<<"\tTotLength"<<totTLength<<endl;
+			// cout<<"OK6: AverageTDiameter"<<Bk[k].avgTDiameter[0]<<"\tTotLength"<<totTLength<<endl;
 		} else {
 			cout<<"Creating Throats by connecting Pores using designated statistical parameters......"<<endl;
 

@@ -609,6 +609,7 @@ istream & operator >> (istream & is, block_c & b) {
 		b.TDisplayScale.resize(theSize, 1);
 		for(size_t i=0; i<theSize; ++i) {
 			is>>b.PolyN[i]>>b.avgTDiameter[i]>>b.TDVarianceRate[i];
+			b.TDVarianceRate[i]=b.TDVarianceRate[i]>=VarianceRateTolerance?b.TDVarianceRate[i]:VarianceRateTolerance;
 		}
 		is>>b.RandomRealization;
 
