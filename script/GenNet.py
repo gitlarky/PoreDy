@@ -360,7 +360,7 @@ class PoreNetwork(object):
 
 	# Assign Throat distribution in a box of certain position -------------------------------------
 	def AssignBox(self, TP='',
-		                Start=[0, 0], End=[0, 0], Band=[0, 0],
+		                Start=[0, 0], End=[0, 0], Band=[0, 0], , Jump=[0, 0]
 		                Sub=[], Grad=[0, 0, 0], Repeat=[1, 1, 1], Flip=0):
 		if   TP=='VT':
 			Range=self.VTRange
@@ -394,8 +394,8 @@ class PoreNetwork(object):
 		StrPoolBefore=self.StrTPool.ExistTotal()
 		if self.Cross: CrsPoolBefore=self.CrsTPool.ExistTotal()
 
-		for I in range(Start[0], End[0], 1):
-			for J in range(Start[1], End[1], 1):
+		for I in range(Start[0], End[0], 1+Jump[0]):
+			for J in range(Start[1], End[1], 1+Jump[1]):
 				if Band==[0, 0] or (\
 				   (Band[0]> 0 and Band[1]> 0) and not(I>=Start[0]+Band[0] and I<End[0]-Band[0] and \
 				                                       J>=Start[1]+Band[1] and J<End[1]-Band[1])) or (\
@@ -541,12 +541,13 @@ class PoreNetwork(object):
 # Create samples for One Assignment Region for each of the 4 kinds of networks ====================
 def Create(Nx=20, Ny=20, Folder='', SIN=0, OutOpt=['Dump', 'Write'], \
 	       Cross=[False, True], FixV=[False, True], AVTP=0, AHTP=0, ACTP=0, \
-	       VIS=0, VJS=0, VIE=0, VJE=0, VIB=0, VJB=0, SplitRangeV=False, \
-	       HIS=0, HJS=0, HIE=0, HJE=0, HIB=0, HJB=0, SplitRangeH=False, \
-	       CIS=0, CJS=0, CIE=0, CJE=0, CIB=0, CJB=0, SplitRangeC=False, \
+	       VIS=0, VJS=0, VIE=0, VJE=0, VIB=0, VJB=0, VIJ=0, VJJ=0, SplitRangeV=False, \
+	       HIS=0, HJS=0, HIE=0, HJE=0, HIB=0, HJB=0, HIJ=0, HJJ=0, SplitRangeH=False, \
+	       CIS=0, CJS=0, CIE=0, CJE=0, CIB=0, CJB=0, CIJ=0, CJJ=0, SplitRangeC=False, \
 	       SubV=[], SubH=[], SubC=[], \
 	       VIG=0, VJG=0, VRG=0, HIG=0, HJG=0, HRG=0, CIG=0, CJG=0, CRG=0, \
-	       VIR=1, VJR=1, VRR=1, HIR=1, HJR=1, HRR=1, CIR=1, CJR=1, CRR=1):
+	       VIR=1, VJR=1, VRR=1, HIR=1, HJR=1, HRR=1, CIR=1, CJR=1, CRR=1, \
+	       CFlip=0):
 	for openkey, openvalue in OpenMap.items():
 		for cross in Cross:
 			for fixv in FixV:
@@ -562,7 +563,7 @@ def Create(Nx=20, Ny=20, Folder='', SIN=0, OutOpt=['Dump', 'Write'], \
 					if SplitRangeV:
 						STAND=Pick(List=[[[[VIS, 0], [VIE, 0]], [[0, VJS], [0, VJE]]], [[[0, VJS], [0, VJE]], [[VIS, 0], [VIE, 0]]]])
 					for stnd in STAND:
-						PN.AssignBox(TP='VT', Start=stnd[0], End=stnd[1], Band=[VIB, VJB], \
+						PN.AssignBox(TP='VT', Start=stnd[0], End=stnd[1], Band=[VIB, VJB], Jump=[VIJ, VJJ]\
 						             Sub=SubV, Grad=[VIG, VJG, VRG], Repeat=[VIR, VJR, VRR])
 						print('\t', stnd[0], stnd[1], [VIB, VJB], SubV, [VIG, VJG, VRG], [VIR, VJR, VRR])
 				if Pick(List=[0, 1, 2, 3, 4, 5, 6, 7, 8, 9])<AHTP:
@@ -570,7 +571,7 @@ def Create(Nx=20, Ny=20, Folder='', SIN=0, OutOpt=['Dump', 'Write'], \
 					if SplitRangeH:
 						STAND=Pick(List=[[[[HIS, 0], [HIE, 0]], [[0, HJS], [0, HJE]]], [[[0, HJS], [0, HJE]], [[HIS, 0], [HIE, 0]]]])
 					for stnd in STAND:
-						PN.AssignBox(TP='HT', Start=stnd[0], End=stnd[1], Band=[HIB, HJB], \
+						PN.AssignBox(TP='HT', Start=stnd[0], End=stnd[1], Band=[HIB, HJB], Jump=[HIJ, HJJ]\
 						             Sub=SubH, Grad=[HIG, HJG, HRG], Repeat=[HIR, HJR, HRR])
 						print('\t', stnd[0], stnd[1], [HIB, HJB], SubH, [HIG, HJG, HRG], [HIR, HJR, HRR])
 				if cross and Pick(List=[0, 1, 2, 3, 4, 5, 6, 7, 8, 9])<ACTP:
@@ -578,9 +579,9 @@ def Create(Nx=20, Ny=20, Folder='', SIN=0, OutOpt=['Dump', 'Write'], \
 					if SplitRangeC:
 						STAND=Pick(List=[[[[CIS, 0], [CIE, 0]], [[0, CJS], [0, CJE]]], [[[0, CJS], [0, CJE]], [[CIS, 0], [CIE, 0]]]])
 					for stnd in STAND:
-						PN.AssignBox(TP='CT', Start=stnd[0], End=stnd[1], Band=[CIB, CJB], \
+						PN.AssignBox(TP='CT', Start=stnd[0], End=stnd[1], Band=[CIB, CJB], Jump=[CIJ, CJJ]\
 						             Sub=SubC, Grad=[CIG, CJG, CRG], Repeat=[CIR, CJR, CRR], \
-						             Flip=Pick(List=[-1, 0, 1, 2, 3]))
+						             Flip=CFlip)
 						print('\t', stnd[0], stnd[1], [CIB, CJB], SubC, [CIG, CJG, CRG], [CIR, CJR, CRR])
 				PN.RandomRest()
 				PN.Output(Folder+prefix+'/', Option=OutOpt)
@@ -599,36 +600,64 @@ def CreatePoreNetworkSamples(Nx=20, Ny=20, Folder='', OutOpt=['Dump', 'Write']):
 				cmd='mkdir '+Folder+CrossMap[cross]+FixVMap[fixv]+openkey+'/'
 				subprocess.call(cmd, shell=True)
 
+	print('Initialize Sample Index --------------------------------------------------------------')
+	SampleIndex    =0
+	RandBreakPoints=[]
+	RandSampleIndex=SampleIndex
+	RandBreakPoints.append(RandSampleIndex)
+	FixVBreakPoints=[]
+	FixVSampleIndex=SampleIndex
+	FixVBreakPoints.append(FixVSampleIndex)
+
 	print('Generating Pore-Network Samples ------------------------------------------------------')
-	SampleIndex=0
-	print('Generating 1st Group of Pore-Networks ------------------------------------------------')
-	for SC in [[15, 25], [35, 45], [75, 65], [95, 85]]:
-		for IS in range(1, Nx-7, 4):
-			IE=IS+8
-			for IG in [0, 1]:
-				for IR in [1, 3]:
-					for JR in [2, 4]:
-						CreateOne(Nx=Nx, Ny=Ny, Folder=Folder, OutOpt=OutOpt, SIN=SampleIndex, IS=IS, IE=IE, SC=SC, IG=IG, IR=IR, JR=JR, AVTP=8)
+	for sub1 in [[15], [25], [35], [45], [55], [65], [75], [85], [95]]:
+		for sub2 in [[15], [25], [35], [45], [55], [65], [75], [85], [95]]:
+			for jump in [0, 1, 2, 3, 4]:
+				Create(Nx=Nx, Ny=Ny, Folder=Folder, OutOpt=OutOpt, SIN=RandSampleIndex, FixV=[False], AVTP=10, VIJ=jump, SubV=sub1)
+				RandSampleIndex+=1
+				Create(Nx=Nx, Ny=Ny, Folder=Folder, OutOpt=OutOpt, SIN=RandSampleIndex, FixV=[False], AHTP=10, HJJ=jump, SubH=sub1)
+				RandSampleIndex+=1
+				Create(Nx=Nx, Ny=Ny, Folder=Folder, OutOpt=OutOpt, SIN=RandSampleIndex, FixV=[False], Cross=[False], AVTP=10, SubV=sub1, AHTP=10, HJJ=jump, SubC=sub2)
+				Create(Nx=Nx, Ny=Ny, Folder=Folder, OutOpt=OutOpt, SIN=RandSampleIndex, FixV=[False], Cross=[True ], AVTP=10, SubV=sub1, ACTP=10, CJJ=jump, SubC=sub2, CFlip=2)
+				RandSampleIndex+=1
+				Create(Nx=Nx, Ny=Ny, Folder=Folder, OutOpt=OutOpt, SIN=RandSampleIndex, FixV=[False], Cross=[False], AHTP=10, SubV=sub1, AVTP=10, VJJ=jump, SubC=sub2)
+				Create(Nx=Nx, Ny=Ny, Folder=Folder, OutOpt=OutOpt, SIN=RandSampleIndex, FixV=[False], Cross=[True ], AHTP=10, SubH=sub1, ACTP=10, CIJ=jump, SubC=sub2, CFlip=3)
+				RandSampleIndex+=1
+	RandBreakPoints.append(RandSampleIndex)
+	print('Pore-Network Samples Random Group No.', len(RandBreakPoints)-1, ': ', RandBreakPoints[-1], '---------------------')
+	# FixVBreakPoints.append(FixVSampleIndex)
+	# print('Pore-Network Samples Fixed  Group No.', len(FixVBreakPoints)-1, ': ', FixVBreakPoints[-1], '---------------------')
+
+	for b in range(1, min(Nx, Ny)//2, 1):
+
+	for sub1 in [[15, 25], [35, 45], [75, 65], [95, 85], [25, 55], [45, 55], [65, 55], [85, 55]]:
+		for sub2 in [[15, 25, 35, 45, 55, 65, 75, 85, 95], [95, 85, 75, 65, 55, 45, 35, 25, 15]]:
+			for r1 in [1, 2, 3, 4]:
+				for r2 in [1, 2, 3, 4]:
+					for IS in range(0, Nx-7, 4):
+						IE=IS+8
+
+						Create(Nx=Nx, Ny=Ny, Folder=Folder, OutOpt=OutOpt, SIN=SampleIndex, AVTP=10, SubV=sub1, VIG=1, VIR=r1)
 						SampleIndex+=1
-						CreateOne(Nx=Nx, Ny=Ny, Folder=Folder, OutOpt=OutOpt, SIN=SampleIndex, IS=IS, IE=IE, SC=SC, IG=IG, IR=IR, JR=JR, AHTP=8)
+						Create(Nx=Nx, Ny=Ny, Folder=Folder, OutOpt=OutOpt, SIN=SampleIndex, AVTP=10, SubV=sub1, VIG=1, VIR=r1)
 						SampleIndex+=1
-						CreateOne(Nx=Nx, Ny=Ny, Folder=Folder, OutOpt=OutOpt, SIN=SampleIndex, IS=IS, IE=IE, SC=SC, IG=IG, IR=IR, JR=JR, AVTP=9, AHTP=9)
+						Create(Nx=Nx, Ny=Ny, Folder=Folder, OutOpt=OutOpt, SIN=SampleIndex, IS=IS, IE=IE, SC=SC, IG=IG, IR=IR, JR=JR, AVTP=9, AHTP=9)
 						SampleIndex+=1
-		for JS in range(1, Ny-7, 4):
-			JE=JS+8
-			for JG in [0, 1]:
-				for IR in [2, 3]:
-					for JR in [1, 3]:
+			for JS in range(0, Ny-7, 4):
+				JE=JS+8
+				for JG in [0, 1]:
+					for IR in [2, 3]:
+						for JR in [1, 3]:
 						CreateOne(Nx=Nx, Ny=Ny, Folder=Folder, OutOpt=OutOpt, SIN=SampleIndex, JS=JS, JE=JE, SC=SC, JG=JG, IR=IR, JR=JR, AVTP=8)
 						SampleIndex+=1
 						CreateOne(Nx=Nx, Ny=Ny, Folder=Folder, OutOpt=OutOpt, SIN=SampleIndex, JS=JS, JE=JE, SC=SC, JG=JG, IR=IR, JR=JR, AHTP=8)
 						SampleIndex+=1
 						CreateOne(Nx=Nx, Ny=Ny, Folder=Folder, OutOpt=OutOpt, SIN=SampleIndex, JS=JS, JE=JE, SC=SC, JG=JG, IR=IR, JR=JR, AVTP=9, AHTP=9)
 						SampleIndex+=1
-		for IS in range(1, Nx-7, 4):
-			IE=IS+8
-			for JS in range(1, Ny-7, 4):
-				JE=JS+8
+		for IS in range(1, Nx-3, 4):
+			IE=IS+4
+			for JS in range(1, Ny-3, 4):
+				JE=JS+4
 				IG=1
 				JG=1
 				for IR in [1, 2, 3, 4]:
