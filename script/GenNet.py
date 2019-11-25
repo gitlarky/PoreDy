@@ -610,39 +610,17 @@ def CreatePoreNetworkSamples(Nx=20, Ny=20, Folder='', OutOpt=['Dump', 'Write']):
 	FixVBreakPoints.append(FixVSampleIndex)
 
 	print('Generating Pore-Network Samples ------------------------------------------------------')
-	for sub1 in [[15], [25], [35], [45], [55], [65], [75], [85], [95]]:
-		for sub2 in [[15], [25], [35], [45], [55], [65], [75], [85], [95]]:
-			for jump in [0, 1, 2, 3, 4]:
-				Create(Nx=Nx, Ny=Ny, Folder=Folder, OutOpt=OutOpt, SIN=RandSampleIndex, FixV=[False], AVTP=10, VIJ=jump, SubV=sub1)
-				RandSampleIndex+=1
-				Create(Nx=Nx, Ny=Ny, Folder=Folder, OutOpt=OutOpt, SIN=RandSampleIndex, FixV=[False], AHTP=10, HJJ=jump, SubH=sub1)
-				RandSampleIndex+=1
-				Create(Nx=Nx, Ny=Ny, Folder=Folder, OutOpt=OutOpt, SIN=RandSampleIndex, FixV=[False], Cross=[False], AVTP=10, SubV=sub1, AHTP=10, HJJ=jump, SubC=sub2)
-				Create(Nx=Nx, Ny=Ny, Folder=Folder, OutOpt=OutOpt, SIN=RandSampleIndex, FixV=[False], Cross=[True ], AVTP=10, SubV=sub1, ACTP=10, CJJ=jump, SubC=sub2, CFlip=2)
-				RandSampleIndex+=1
-				Create(Nx=Nx, Ny=Ny, Folder=Folder, OutOpt=OutOpt, SIN=RandSampleIndex, FixV=[False], Cross=[False], AHTP=10, SubV=sub1, AVTP=10, VJJ=jump, SubC=sub2)
-				Create(Nx=Nx, Ny=Ny, Folder=Folder, OutOpt=OutOpt, SIN=RandSampleIndex, FixV=[False], Cross=[True ], AHTP=10, SubH=sub1, ACTP=10, CIJ=jump, SubC=sub2, CFlip=3)
-				RandSampleIndex+=1
-	RandBreakPoints.append(RandSampleIndex)
-	print('Pore-Network Samples Random Group No.', len(RandBreakPoints)-1, ': ', RandBreakPoints[-1], '---------------------')
-	# FixVBreakPoints.append(FixVSampleIndex)
-	# print('Pore-Network Samples Fixed  Group No.', len(FixVBreakPoints)-1, ': ', FixVBreakPoints[-1], '---------------------')
-
-	for b in range(1, min(Nx, Ny)//2, 1):
-
-	for sub1 in [[15, 25], [35, 45], [75, 65], [95, 85], [25, 55], [45, 55], [65, 55], [85, 55]]:
-		for sub2 in [[15, 25, 35, 45, 55, 65, 75, 85, 95], [95, 85, 75, 65, 55, 45, 35, 25, 15]]:
-			for r1 in [1, 2, 3, 4]:
-				for r2 in [1, 2, 3, 4]:
-					for IS in range(0, Nx-7, 4):
-						IE=IS+8
-
-						Create(Nx=Nx, Ny=Ny, Folder=Folder, OutOpt=OutOpt, SIN=SampleIndex, AVTP=10, SubV=sub1, VIG=1, VIR=r1)
-						SampleIndex+=1
-						Create(Nx=Nx, Ny=Ny, Folder=Folder, OutOpt=OutOpt, SIN=SampleIndex, AVTP=10, SubV=sub1, VIG=1, VIR=r1)
-						SampleIndex+=1
-						Create(Nx=Nx, Ny=Ny, Folder=Folder, OutOpt=OutOpt, SIN=SampleIndex, IS=IS, IE=IE, SC=SC, IG=IG, IR=IR, JR=JR, AVTP=9, AHTP=9)
-						SampleIndex+=1
+	for r1 in [1, 2, 3, 4]:
+		for r2 in [1, 2, 3, 4]:
+			for IS in range(0, Nx-7, 4):
+				IE=IS+8
+				for sub1 in [[15, 25], [35, 45], [75, 65], [95, 85], [25, 55], [45, 55], [65, 55], [85, 55]]:
+					Create(Nx=Nx, Ny=Ny, Folder=Folder, OutOpt=OutOpt, SIN=SampleIndex, AVTP=10, VIS=IS, VIE=IE, SubV=sub1, VIG=1, VIR=r1, AHTP=10, SubH=sub2, HIG=Pick(List=[-1, 0, 1]), HJG=Pick(List=[-1, 0, 1]), HIR=Pick(List=[r2, 0]), HJR=Pick(List=[r2, 0]))
+					SampleIndex+=1
+					Create(Nx=Nx, Ny=Ny, Folder=Folder, OutOpt=OutOpt, SIN=SampleIndex, AVTP=10, VIS=IS, VIE=IE, SubV=sub1, VIG=1, VIR=r1, AHTP=10, HIS=IS, HIE=IE, SubH=sub2, HIG=Pick(List=[-1, 0, 1]), HJG=Pick(List=[-1, 0, 1]), HIR=Pick(List=[r2, 0]), HJR=Pick(List=[r2, 0]))
+					SampleIndex+=1
+					Create(Nx=Nx, Ny=Ny, Folder=Folder, OutOpt=OutOpt, SIN=SampleIndex, AVTP=10, VIS=IS, VIE=IE, SubV=sub2, VJG=1, VJR=r1, ACTP=10, SubC=sub2, CIG=Pick(List=[-1, 0, 1]), CJG=Pick(List=[-1, 0, 1]), CIR=Pick(List=[r2, 0]), CJR=Pick(List=[r2, 0]))
+					SampleIndex+=1
 			for JS in range(0, Ny-7, 4):
 				JE=JS+8
 				for JG in [0, 1]:
@@ -690,6 +668,7 @@ def CreatePoreNetworkSamples(Nx=20, Ny=20, Folder='', OutOpt=['Dump', 'Write']):
 						SampleIndex+=1
 	print('Group 1 of Pore-Networks Generated: ', SampleIndex, '---------------------------------')
 	SampleIndex=3072
+		for sub2 in [[15, 25, 35, 45, 55, 65, 75, 85, 95], [95, 85, 75, 65, 55, 45, 35, 25, 15]]:
 	print('Generating 2nd Group of Pore-Networks ------------------------------------------------')
 	for SC in [[15, 25, 35], [55, 45, 65], [95, 85, 75]]:
 		for IS in range(1, Nx-11, 4):
@@ -838,7 +817,23 @@ def CreatePoreNetworkSamples(Nx=20, Ny=20, Folder='', OutOpt=['Dump', 'Write']):
 	print('Group 4 of Pore-Networks Generated: ', SampleIndex, '---------------------------------')
 	print('Generating 5th Group of Pore-Networks ------------------------------------------------')
 	# for SC in [[15], [25], [35], [45], [55], [65], [75], [85], [95]]:
-
+	for sub1 in [[15], [25], [35], [45], [55], [65], [75], [85], [95]]:
+		for sub2 in [[15], [25], [35], [45], [55], [65], [75], [85], [95]]:
+			for jump in [0, 1, 2, 3, 4]:
+				Create(Nx=Nx, Ny=Ny, Folder=Folder, OutOpt=OutOpt, SIN=RandSampleIndex, FixV=[False], AVTP=10, VIJ=jump, SubV=sub1)
+				RandSampleIndex+=1
+				Create(Nx=Nx, Ny=Ny, Folder=Folder, OutOpt=OutOpt, SIN=RandSampleIndex, FixV=[False], AHTP=10, HJJ=jump, SubH=sub1)
+				RandSampleIndex+=1
+				Create(Nx=Nx, Ny=Ny, Folder=Folder, OutOpt=OutOpt, SIN=RandSampleIndex, FixV=[False], Cross=[False], AVTP=10, SubV=sub1, AHTP=10, HJJ=jump, SubC=sub2)
+				Create(Nx=Nx, Ny=Ny, Folder=Folder, OutOpt=OutOpt, SIN=RandSampleIndex, FixV=[False], Cross=[True ], AVTP=10, SubV=sub1, ACTP=10, CJJ=jump, SubC=sub2, CFlip=2)
+				RandSampleIndex+=1
+				Create(Nx=Nx, Ny=Ny, Folder=Folder, OutOpt=OutOpt, SIN=RandSampleIndex, FixV=[False], Cross=[False], AHTP=10, SubV=sub1, AVTP=10, VJJ=jump, SubC=sub2)
+				Create(Nx=Nx, Ny=Ny, Folder=Folder, OutOpt=OutOpt, SIN=RandSampleIndex, FixV=[False], Cross=[True ], AHTP=10, SubH=sub1, ACTP=10, CIJ=jump, SubC=sub2, CFlip=3)
+				RandSampleIndex+=1
+	RandBreakPoints.append(RandSampleIndex)
+	print('Pore-Network Samples Random Group No.', len(RandBreakPoints)-1, ': ', RandBreakPoints[-1], '---------------------')
+	# FixVBreakPoints.append(FixVSampleIndex)
+	# print('Pore-Network Samples Fixed  Group No.', len(FixVBreakPoints)-1, ': ', FixVBreakPoints[-1], '---------------------')
 
 #============================ Main Program ========================================================
 # CreatePoreNetworkSamples(Nx= 3, Ny= 3, Folder='/home/xu/work/PoreNetwork0303Samples')
