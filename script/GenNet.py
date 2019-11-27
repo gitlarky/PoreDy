@@ -36,9 +36,10 @@ ThroatChoice={0:{1:Throat(1e-6,0), 2:Throat(2e-6,0), 3:Throat(3e-6,0), 4:Throat(
 TT=[15, 25, 35, 45, 55, 65, 75, 85, 95] # --------------------------------------------- Throat Type
 # DToGray={0:0,  1e-6: 25,  2e-6: 50,  3e-6: 75,  4e-6:100,  5e-6:125,  6e-6:150,  7e-6:175,  8e-6:200,  9e-6:225, \
 #               -1e-6: 20, -2e-6: 45, -3e-6: 70, -4e-6: 95, -5e-6:120, -6e-6:125, -7e-6:170, -8e-6:195, -9e-6:220, 255:255}
-DToGray={0:0,  15: 25,  25: 50,  35: 75,  45:100,  55:125,  65:150,  75:175,  85:200,  95:225, \
-              -15: 20, -25: 45, -35: 70, -45: 95, -55:120, -65:125, -75:170, -85:195, -95:220, 255:255}
-
+# DToGray={0:0,  15: 25,  25: 50,  35: 75,  45:100,  55:125,  65:150,  75:175,  85:200,  95:225, \
+#               -15: 20, -25: 45, -35: 70, -45: 95, -55:120, -65:145, -75:170, -85:195, -95:220, 255:255}
+DToGray={0:255,  15:225,  25:200,  35:175,  45:150,  55:125,  65:100,  75: 75,  85: 50,  95: 25, \
+                -15:220, -25:195, -35:170, -45:145, -55:120, -65: 95, -75: 70, -85: 45, -95: 20, 255:0}
 
 
 TToRGB ={}
@@ -280,16 +281,16 @@ class PoreNetwork(object):
 			Dia=np.zeros((2*self.Nx+3, 2*self.Ny+3), dtype=int)
 			if 'E' in self.Open:
 				for j in range(1, 2*self.Ny+2, 1):
-					Dia[j][self.Nx+2]=255
+					Dia[j][2*self.Nx+2]=255
 			if 'W' in self.Open:
 				for j in range(1, 2*self.Ny+2, 1):
-					Dia[j][0        ]=255
+					Dia[j][0          ]=255
 			if 'N' in self.Open:
 				for i in range(1, 2*self.Nx+2, 1):
-					Dia[self.Ny+2][i]=255
+					Dia[2*self.Ny+2][i]=255
 			if 'S' in self.Open:
 				for i in range(1, 2*self.Nx+2, 1):
-					Dia[0        ][i]=255
+					Dia[0          ][i]=255
 			for J in range(self.Ny+1):
 				for I in range(self.Nx+1):
 					Dia[2*J+1][2*I+1]=255
@@ -299,9 +300,10 @@ class PoreNetwork(object):
 			for J in range(self.HTRange[1][0], self.HTRange[1][1], 1):
 				for I in range(self.HTRange[0][0], self.HTRange[0][1], 1):
 					Dia[J*2+1][I*2  ]=DToGray[self.HT[J][I]]
-			for J in range(self.CTRange[1][0], self.CTRange[1][1], 1):
-				for I in range(self.CTRange[0][0], self.CTRange[0][1], 1):
-					Dia[J*2  ][I*2  ]=DToGray[self.CT[J][I]]
+			if self.Cross:
+				for J in range(self.CTRange[1][0], self.CTRange[1][1], 1):
+					for I in range(self.CTRange[0][0], self.CTRange[0][1], 1):
+						Dia[J*2  ][I*2  ]=DToGray[self.CT[J][I]]
 
 			plt.imshow(Dia, cmap="gray", vmin=min(DToGray.values()), vmax=max(DToGray.values()))
 			if Disp: plt.show()
@@ -610,7 +612,8 @@ def Create(Nx=20, Ny=20, Folder='', SIN=0, OutOpt=['Dump', 'Write'], \
 	return True
 # =================================================================================================
 # def CreatePoreNetworkSamples(Nx=20, Ny=20, Folder='', OutOpt=['Dump', 'Write']):
-def CreatePoreNetworkSamples(Nx=20, Ny=20, Folder='', OutOpt=['Gray']):
+# def CreatePoreNetworkSamples(Nx=20, Ny=20, Folder='', OutOpt=['Gray']):
+def CreatePoreNetworkSamples(Nx=20, Ny=20, Folder='', OutOpt=[]):
 	print('Prepare the folders ------------------------------------------------------------------')
 	cmd='mkdir '+Folder
 	subprocess.call(cmd, shell=True)
@@ -671,252 +674,195 @@ def CreatePoreNetworkSamples(Nx=20, Ny=20, Folder='', OutOpt=['Gray']):
 					       AHTP=10, HIS=IS, HIE=hie, HJS=JS, HJE=hje, SplitRangeH=SplitRangeH, \
 					       SubH=sub, HIG=Pick(List=[0, 1]), HIR=r, HJG=Pick(List=[0, 1]), HJR=r, \
 					       ACTP=10, CIS=IS, CIE=cie, CJS=JS, CJE=cje, SplitRangeC=SplitRangeC, \
-					       SubC=sub, CIG=Pick(List=[0, 1]), CIR=r, CJG=Pick(List=[0, 1]), CJR=r)
+					       SubC=sub, CIG=Pick(List=[0, 1]), CIR=r, CJG=Pick(List=[0, 1]), CJR=r, CFlip=Pick(List=[2, 3]))
 					SampleIndex+=1
 
 	RandBreakPoints.append(SampleIndex)
 	FixVBreakPoints.append(SampleIndex)
 	print('Pore-Network Samples Group No.1: ', SampleIndex, '------------------------------------') #3456
 
+	for sub in [[15, 25, 35], [55, 45, 65], [95, 85, 75]]:
+		for r in [1, 2, 3, 4]:
+			for IS in range(1, Nx-5, 3):
+				IE=IS+6
+				for JS in range(1, Ny-5, 3):
+					JE=JS+6
+					
+					Create(Nx=Nx, Ny=Ny, Folder=Folder, OutOpt=OutOpt, SIN=SampleIndex, \
+					       AVTP=10, VIS=IS, VIE=IE, VJS=JS, VJE=JE, SplitRangeV=Pick(List=[False, True]), \
+					       SubV=sub, VIG=Pick(List=[0, 1]), VIR=r,  VJG=Pick(List=[0, 1]), VJR=r, \
+					       AHTP=10, HIS=IS, HIE=IE, HJS=JS, HJE=JE, SplitRangeH=Pick(List=[False, True]), \
+					       SubH=sub, HIG=Pick(List=[0, 1]), HIR=r,  HJG=Pick(List=[0, 1]), HJR=r)
+					SampleIndex+=1
 
+					Create(Nx=Nx, Ny=Ny, Folder=Folder, OutOpt=OutOpt, SIN=SampleIndex, \
+					       AVTP=10, VIS=IS, VIE=IE, VJS=JS, VJE=JE, SplitRangeV=Pick(List=[False, True]), \
+					       SubV=sub, VIG=Pick(List=[0, 1]), VIR=r,  VJG=Pick(List=[0, 1]), VJR=r, \
+					       AHTP=10, HIS=IS, HIE=IE, HJS=JS, HJE=JE, SplitRangeH=Pick(List=[False, True]), \
+					       SubH=sub, HIG=Pick(List=[0, 1]), HIR=r,  HJG=Pick(List=[0, 1]), HJR=r, \
+					       ACTP=10, CIS=IS, CIE=IE, CJS=JS, CJE=JE, SplitRangeC=Pick(List=[False, True]), \
+					       SubC=sub, CIG=Pick(List=[0, 1]), CIR=r,  CJG=Pick(List=[0, 1]), CJR=r, CFlip=Pick(List=[-1, 0 ,1]))
+					SampleIndex+=1
 
+					Create(Nx=Nx, Ny=Ny, Folder=Folder, OutOpt=OutOpt, SIN=SampleIndex, \
+					       AVTP=10, VIS=IS, VIE=IE, VJS=JS, VJE=JE, SplitRangeV=Pick(List=[False, True]), VIB=Pick(List=[0, 1, 2]), VJB=Pick(List=[0, 1, 2]), \
+					       SubV=sub, VIG=Pick(List=[0, 1]), VIR=r,  VJG=Pick(List=[0, 1]), VJR=r, \
+					       AHTP=10, HIS=IS, HIE=IE, HJS=JS, HJE=JE, SplitRangeH=Pick(List=[False, True]), HIB=Pick(List=[0, 1, 2]), HJB=Pick(List=[0, 1, 2]), \
+					       SubH=sub, HIG=Pick(List=[0, 1]), HIR=r,  HJG=Pick(List=[0, 1]), HJR=r)
+					SampleIndex+=1
 
+					Create(Nx=Nx, Ny=Ny, Folder=Folder, OutOpt=OutOpt, SIN=SampleIndex, \
+					       AVTP=10, VIS=IS, VIE=IE, VJS=JS, VJE=JE, SplitRangeV=Pick(List=[False, True]), VIB=Pick(List=[0, 1, 2]), VJB=Pick(List=[0, 1, 2]), \
+					       SubV=sub, VIG=Pick(List=[0, 1]), VIR=r,  VJG=Pick(List=[0, 1]), VJR=r, \
+					       AHTP=10, HIS=IS, HIE=IE, HJS=JS, HJE=JE, SplitRangeH=Pick(List=[False, True]), HIB=Pick(List=[0, 1, 2]), HJB=Pick(List=[0, 1, 2]), \
+					       SubH=sub, HIG=Pick(List=[0, 1]), HIR=r,  HJG=Pick(List=[0, 1]), HJR=r, \
+					       ACTP=10, CIS=IS, CIE=IE, CJS=JS, CJE=JE, SplitRangeC=Pick(List=[False, True]), CIB=Pick(List=[0, 1, 2]), CJB=Pick(List=[0, 1, 2]), \
+					       SubC=sub, CIG=Pick(List=[0, 1]), CIR=r,  CJG=Pick(List=[0, 1]), CJR=r, CFlip=Pick(List=[-1, 0 ,1]))
+					SampleIndex+=1
 
+	RandBreakPoints.append(SampleIndex)
+	FixVBreakPoints.append(SampleIndex)
+	print('Pore-Network Samples Group No.2: ', SampleIndex, '------------------------------------') #1200
 
+	for sub in [[15, 25, 35, 45, 55, 65, 75, 85, 95], [95, 85, 75, 65, 55, 45, 35, 25, 15]]:
+		for r in [1, 2, 3, 4]:
+			for b in range(min(Nx, Ny)//2):
+				for g in [1, 2, 4, 5]:
 
+					Create(Nx=Nx, Ny=Ny, Folder=Folder, OutOpt=OutOpt, SIN=SampleIndex, \
+					       AVTP=10, VIB=Pick(List=[0, b]), VJB=Pick(List=[0, b]), \
+					       SubV=sub, VIG=g, VIR=r,  VJG=Pick(List=[0, g]), VJR=r, \
+					       AHTP=10, HIB=Pick(List=[0, b]), HJB=Pick(List=[0, b]), \
+					       SubH=sub, HIG=Pick(List=[0, g]), HIR=r,  HJG=g, HJR=r, \
+					       ACTP=10, CIB=Pick(List=[0, b]), CJB=Pick(List=[0, b]), \
+					       SubC=sub, CIG=Pick(List=[0, g]), CIR=r,  CJG=Pick(List=[0, g]), CJR=r, CFlip=Pick(List=[-1, 0 ,1, 2, 3]))
+					SampleIndex+=1
 
+					Create(Nx=Nx, Ny=Ny, Folder=Folder, OutOpt=OutOpt, SIN=SampleIndex, \
+					       AVTP=10, VIB=Pick(List=[0, b]), VJB=Pick(List=[0, b]), \
+					       SubV=sub, VIG=Pick(List=[0, g]), VIR=r,  VJG=g, VJR=r, \
+					       AHTP=10, HIB=Pick(List=[0, b]), HJB=Pick(List=[0, b]), \
+					       SubH=sub, HIG=g, HIR=r,  HJG=Pick(List=[0, g]), HJR=r, \
+					       ACTP=10, CIB=Pick(List=[0, b]), CJB=Pick(List=[0, b]), \
+					       SubC=sub, CIG=Pick(List=[0, g]), CIR=r,  CJG=Pick(List=[0, g]), CJR=r, CFlip=Pick(List=[-1, 0 ,1, 2, 3]))
+					SampleIndex+=1
 
+					Create(Nx=Nx, Ny=Ny, Folder=Folder, OutOpt=OutOpt, SIN=SampleIndex, \
+					       AVTP=10, VIB=Pick(List=[0, b]), VJB=Pick(List=[0, b]), \
+					       SubV=sub, VIG=g, VIR=r,  VJG=Pick(List=[0, g]), VJR=r, \
+					       ACTP=10, CIB=Pick(List=[0, b]), CJB=Pick(List=[0, b]), \
+					       SubC=sub, CIG=Pick(List=[0, g]), CIR=r,  CJG=Pick(List=[0, g]), CJR=r, CFlip=Pick(List=[-1, 0 ,1, 2, 3]))
+					SampleIndex+=1
 
+					Create(Nx=Nx, Ny=Ny, Folder=Folder, OutOpt=OutOpt, SIN=SampleIndex, \
+					       AHTP=10, HIB=Pick(List=[0, b]), HJB=Pick(List=[0, b]), \
+					       SubH=sub, HIG=g, HIR=r,  HJG=Pick(List=[0, g]), HJR=r, \
+					       ACTP=10, CIB=Pick(List=[0, b]), CJB=Pick(List=[0, b]), \
+					       SubC=sub, CIG=Pick(List=[0, g]), CIR=r,  CJG=Pick(List=[0, g]), CJR=r, CFlip=Pick(List=[-1, 0 ,1, 2, 3]))
+					SampleIndex+=1
 
+					Create(Nx=Nx, Ny=Ny, Folder=Folder, OutOpt=OutOpt, SIN=SampleIndex, \
+					       AVTP=10, VIB=b, VJB=b, SubV=sub, VRG=g, VRR=r, \
+					       ACTP=10, CIB=b, CJB=b, SubC=sub, CRG=Pick(List=[0, g]), CRR=r, CFlip=Pick(List=[-1, 0 ,1, 2, 3]))
+					SampleIndex+=1
 
+					Create(Nx=Nx, Ny=Ny, Folder=Folder, OutOpt=OutOpt, SIN=SampleIndex, \
+					       AHTP=10, HIB=b, HJB=b, SubH=sub, HRG=g, HRR=r, \
+					       ACTP=10, CIB=b, CJB=b, SubC=sub, CRG=Pick(List=[0, g]), CRR=r, CFlip=Pick(List=[-1, 0 ,1, 2, 3]))
+					SampleIndex+=1
 
+	RandBreakPoints.append(SampleIndex)
+	FixVBreakPoints.append(SampleIndex)
+	print('Pore-Network Samples Group No.3: ', SampleIndex, '------------------------------------') #1920
 
+	for sub in [[45, 35, 25, 15], [65, 75, 85, 95], [15, 25, 65, 75], [95, 85, 45, 35], [55, 65, 45, 35, 75], [55, 25, 85, 95, 15], [65, 55, 45, 35, 25, 15], [45, 55, 65, 75, 85, 95]]:
+		for r in [1, 2, 3, 4]:
+			for IS in range(1, Nx-11, 2):
+				IE=IS+10
+				for JS in range(1, Ny-11, 2):
+					JE=JS+10
+					
+					Create(Nx=Nx, Ny=Ny, Folder=Folder, OutOpt=OutOpt, SIN=SampleIndex, \
+					       AVTP=10, VIS=IS, VIE=IE, VJS=JS, VJE=JE, SplitRangeV=Pick(List=[False, True]), \
+					       SubV=sub, VIG=Pick(List=[0, 1]), VIR=r,  VJG=Pick(List=[0, 1]), VJR=r, \
+					       AHTP=10, HIS=IS, HIE=IE, HJS=JS, HJE=JE, SplitRangeH=Pick(List=[False, True]), \
+					       SubH=sub, HIG=Pick(List=[0, 1]), HIR=r,  HJG=Pick(List=[0, 1]), HJR=r)
+					SampleIndex+=1
 
+					Create(Nx=Nx, Ny=Ny, Folder=Folder, OutOpt=OutOpt, SIN=SampleIndex, \
+					       AVTP=10, VIS=IS, VIE=IE, VJS=JS, VJE=JE, SplitRangeV=Pick(List=[False, True]), \
+					       SubV=sub, VIG=Pick(List=[0, 1]), VIR=r,  VJG=Pick(List=[0, 1]), VJR=r, \
+					       AHTP=10, HIS=IS, HIE=IE, HJS=JS, HJE=JE, SplitRangeH=Pick(List=[False, True]), \
+					       SubH=sub, HIG=Pick(List=[0, 1]), HIR=r,  HJG=Pick(List=[0, 1]), HJR=r, \
+					       ACTP=10, CIS=IS, CIE=IE, CJS=JS, CJE=JE, SplitRangeC=Pick(List=[False, True]), \
+					       SubC=sub, CIG=Pick(List=[0, 1]), CIR=r,  CJG=Pick(List=[0, 1]), CJR=r, CFlip=Pick(List=[2, 3]))
+					SampleIndex+=1
 
+					Create(Nx=Nx, Ny=Ny, Folder=Folder, OutOpt=OutOpt, SIN=SampleIndex, \
+					       AVTP=10, VIS=IS, VIE=IE, VJS=JS, VJE=JE, SplitRangeV=Pick(List=[False, True]), VIB=Pick(List=[0, 4]), VJB=Pick(List=[0, 4]), \
+					       SubV=sub, VIG=Pick(List=[0, 1]), VIR=r,  VJG=Pick(List=[0, 1]), VJR=r, \
+					       AHTP=10, HIS=IS, HIE=IE, HJS=JS, HJE=JE, SplitRangeH=Pick(List=[False, True]), HIB=Pick(List=[0, 4]), HJB=Pick(List=[0, 4]), \
+					       SubH=sub, HIG=Pick(List=[0, 1]), HIR=r,  HJG=Pick(List=[0, 1]), HJR=r)
+					SampleIndex+=1
 
+					Create(Nx=Nx, Ny=Ny, Folder=Folder, OutOpt=OutOpt, SIN=SampleIndex, \
+					       AVTP=10, VIS=IS, VIE=IE, VJS=JS, VJE=JE, SplitRangeV=Pick(List=[False, True]), VIB=Pick(List=[0, 4]), VJB=Pick(List=[0, 4]), \
+					       SubV=sub, VIG=Pick(List=[0, 1]), VIR=r,  VJG=Pick(List=[0, 1]), VJR=r, \
+					       AHTP=10, HIS=IS, HIE=IE, HJS=JS, HJE=JE, SplitRangeH=Pick(List=[False, True]), HIB=Pick(List=[0, 4]), HJB=Pick(List=[0, 4]), \
+					       SubH=sub, HIG=Pick(List=[0, 1]), HIR=r,  HJG=Pick(List=[0, 1]), HJR=r, \
+					       ACTP=10, CIS=IS, CIE=IE, CJS=JS, CJE=JE, SplitRangeC=Pick(List=[False, True]), CIB=Pick(List=[0, 4]), CJB=Pick(List=[0, 4]), \
+					       SubC=sub, CIG=Pick(List=[0, 1]), CIR=r,  CJG=Pick(List=[0, 1]), CJR=r, CFlip=Pick(List=[2, 3]))
+					SampleIndex+=1
 
+	RandBreakPoints.append(SampleIndex)
+	FixVBreakPoints.append(SampleIndex)
+	print('Pore-Network Samples Group No.4: ', SampleIndex, '------------------------------------') #3200
 
+	RandSampleIndex=SampleIndex
+	FixVSampleIndex=SampleIndex
+	for sub1 in [[15], [25], [35], [45], [55], [65], [75], [85], [95]]:
+		for sub2 in [[15], [25], [35], [45], [55], [65], [75], [85], [95]]:
+			for jump in [0, 1, 2, 3, 4]:
+				Create(Nx=Nx, Ny=Ny, Folder=Folder, OutOpt=OutOpt, SIN=RandSampleIndex, FixV=[False], AVTP=10, VIJ=jump, SubV=sub1)
+				RandSampleIndex+=1
+				Create(Nx=Nx, Ny=Ny, Folder=Folder, OutOpt=OutOpt, SIN=RandSampleIndex, FixV=[False], AHTP=10, HJJ=jump, SubH=sub1)
+				RandSampleIndex+=1
+				Create(Nx=Nx, Ny=Ny, Folder=Folder, OutOpt=OutOpt, SIN=RandSampleIndex, FixV=[False], Cross=[False], AVTP=10, VJJ=jump, SubV=sub1, \
+				                                                                                                     AHTP=10, HIJ=Pick(List=[0, 1, 2, 3, 4]), SubH=sub2)
+				Create(Nx=Nx, Ny=Ny, Folder=Folder, OutOpt=OutOpt, SIN=RandSampleIndex, FixV=[False], Cross=[True ], AVTP=10, VIJ=jump, SubV=sub1, \
+				                                                                                                     ACTP=10, CJJ=Pick(List=[0, 1, 2, 3, 4]), SubC=sub2, CFlip=2)
+				RandSampleIndex+=1
+				Create(Nx=Nx, Ny=Ny, Folder=Folder, OutOpt=OutOpt, SIN=RandSampleIndex, FixV=[False], Cross=[False], AHTP=10, HIJ=jump, SubH=sub1, \
+				                                                                                                     AVTP=10, VJJ=Pick(List=[0, 1, 2, 3, 4]), SubV=sub2)
+				Create(Nx=Nx, Ny=Ny, Folder=Folder, OutOpt=OutOpt, SIN=RandSampleIndex, FixV=[False], Cross=[True ], AHTP=10, HJJ=jump, SubH=sub1, \
+				                                                                                                     ACTP=10, CIJ=Pick(List=[0, 1, 2, 3, 4]), SubC=sub2, CFlip=3)
+				RandSampleIndex+=1
+			RandBreakPoints.append(RandSampleIndex)
+			print('Pore-Network Samples Random Group No.5: ', RandBreakPoints[-1], '---------------------') #1620
 
+			jump=5
+			for sub3 in [[15, 25, 35, 45, 55, 65, 75, 85, 95], [95, 85, 75, 65, 55, 45, 35, 25, 15]]:
+				Create(Nx=Nx, Ny=Ny, Folder=Folder, OutOpt=OutOpt, SIN=FixVSampleIndex, FixV=[True ], AVTP=10, VIJ=jump, SubV=sub1, \
+				                                                                                      AHTP=10, SubH=sub3, HIG=Pick(List=[0, 1]),  HJG=Pick(List=[0, 1]))
+				FixVSampleIndex+=1
+				Create(Nx=Nx, Ny=Ny, Folder=Folder, OutOpt=OutOpt, SIN=FixVSampleIndex, FixV=[True ], AHTP=10, HJJ=jump, SubH=sub1, \
+				                                                                                      AVTP=10, SubV=sub3, VIG=Pick(List=[0, 1]),  VJG=Pick(List=[0, 1]))
+				FixVSampleIndex+=1
+				Create(Nx=Nx, Ny=Ny, Folder=Folder, OutOpt=OutOpt, SIN=FixVSampleIndex, FixV=[True ], Cross=[False], AVTP=10, VJJ=jump, SubV=sub1, \
+				                                                                                      AHTP=10, SubC=sub3, HIG=Pick(List=[0, 1]),  HJG=Pick(List=[0, 1]))
+				Create(Nx=Nx, Ny=Ny, Folder=Folder, OutOpt=OutOpt, SIN=FixVSampleIndex, FixV=[True ], Cross=[True ], AVTP=10, VIJ=jump, SubV=sub1, \
+				                                                                                      ACTP=10, SubC=sub3, CIG=Pick(List=[0, 1]),  CJG=Pick(List=[0, 1]), \
+				                                                                                      CFlip=Pick(List=[-1, 0 ,1, 2, 3]))
+				FixVSampleIndex+=1
+				Create(Nx=Nx, Ny=Ny, Folder=Folder, OutOpt=OutOpt, SIN=FixVSampleIndex, FixV=[True ], Cross=[False], AHTP=10, HIJ=jump, SubH=sub1, \
+				                                                                                      AVTP=10, SubC=sub3, VIG=Pick(List=[0, 1]),  VJG=Pick(List=[0, 1]))
+				Create(Nx=Nx, Ny=Ny, Folder=Folder, OutOpt=OutOpt, SIN=FixVSampleIndex, FixV=[True ], Cross=[True ], AHTP=10, HJJ=jump, SubH=sub1, \
+				                                                                                      ACTP=10, SubC=sub3, CIG=Pick(List=[0, 1]),  CJG=Pick(List=[0, 1]), \
+				                                                                                      CFlip=Pick(List=[-1, 0 ,1, 2, 3]))
+				FixVSampleIndex+=1
+			FixVBreakPoints.append(FixVSampleIndex)
+			print('Pore-Network Samples Fixed  Group No.5: ', FixVBreakPoints[-1], '---------------------') #648
 
-
-
-
-
-
-
-
-	# print('Group 1 of Pore-Networks Generated: ', SampleIndex, '---------------------------------')
-	# SampleIndex=3072
-	# 	for sub2 in [[15, 25, 35, 45, 55, 65, 75, 85, 95], [95, 85, 75, 65, 55, 45, 35, 25, 15]]:
-	# print('Generating 2nd Group of Pore-Networks ------------------------------------------------')
-	# for SC in [[15, 25, 35], [55, 45, 65], [95, 85, 75]]:
-	# 	for IS in range(1, Nx-11, 4):
-	# 		IE=IS+12
-	# 		for JG in [0, 1, 2]:
-	# 			for IR in [2, 3, 4]:
-	# 				for JR in [2, 3, 4]:
-	# 					CreateOne(Nx=Nx, Ny=Ny, Folder=Folder, OutOpt=OutOpt, SIN=SampleIndex, IS=IS, IE=IE, SC=SC, JG=JG, IR=IR, JR=JR, AVTP=8)
-	# 					SampleIndex+=1
-	# 					CreateOne(Nx=Nx, Ny=Ny, Folder=Folder, OutOpt=OutOpt, SIN=SampleIndex, IS=IS, IE=IE, SC=SC, JG=JG, IR=IR, JR=JR, AHTP=8)
-	# 					SampleIndex+=1
-	# 					CreateOne(Nx=Nx, Ny=Ny, Folder=Folder, OutOpt=OutOpt, SIN=SampleIndex, IS=IS, IE=IE, SC=SC, JG=JG, IR=IR, JR=JR, AVTP=9, AHTP=9)
-	# 					SampleIndex+=1
-	# 	print('Generated 2.1 Group of Pore-Networks ------------------------------------------------', SampleIndex)
-	# 	for JS in range(1, Ny-11, 4):
-	# 		JE=JS+12
-	# 		for IG in [0, 1, 2]:
-	# 			for IR in [2, 3, 4]:
-	# 				for JR in [2, 3, 4]:
-	# 					CreateOne(Nx=Nx, Ny=Ny, Folder=Folder, OutOpt=OutOpt, SIN=SampleIndex, JS=JS, JE=JE, SC=SC, IG=IG, IR=IR, JR=JR, AVTP=8)
-	# 					SampleIndex+=1
-	# 					CreateOne(Nx=Nx, Ny=Ny, Folder=Folder, OutOpt=OutOpt, SIN=SampleIndex, JS=JS, JE=JE, SC=SC, IG=IG, IR=IR, JR=JR, AHTP=8)
-	# 					SampleIndex+=1
-	# 					CreateOne(Nx=Nx, Ny=Ny, Folder=Folder, OutOpt=OutOpt, SIN=SampleIndex, JS=JS, JE=JE, SC=SC, IG=IG, IR=IR, JR=JR, AVTP=9, AHTP=9)
-	# 					SampleIndex+=1
-	# 	print('Generated 2.2 Group of Pore-Networks ------------------------------------------------', SampleIndex)
-	# 	for IS in range(1, Nx-11, 4):
-	# 		IE=IS+12
-	# 		for JS in range(1, Ny-11, 4):
-	# 			JE=JS+12
-	# 			IG=1
-	# 			JG=1
-	# 			for IR in [2, 3, 4]:
-	# 				for JR in [2, 3, 4]:
-	# 					CreateOne(Nx=Nx, Ny=Ny, Folder=Folder, OutOpt=OutOpt, SIN=SampleIndex, IS=IS, IE=IE, JS=JS, JE=JE, SC=SC, IG=IG, JG=JG, IR=IR, JR=JR, AVTP=8)
-	# 					SampleIndex+=1
-	# 					CreateOne(Nx=Nx, Ny=Ny, Folder=Folder, OutOpt=OutOpt, SIN=SampleIndex, IS=IS, IE=IE, JS=JS, JE=JE, SC=SC, IG=IG, JG=JG, IR=IR, JR=JR, AHTP=8)
-	# 					SampleIndex+=1
-	# 					CreateTwo(Nx=Nx, Ny=Ny, Folder=Folder, OutOpt=OutOpt, SIN=SampleIndex, IS=IS, IE=IE, JS=JS, JE=JE, SC=SC, IG=IG, JG=JG, IR=IR, JR=JR, AVTP=9, AHTP=9)
-	# 					SampleIndex+=1
-	# 	print('Generated 2.3 Group of Pore-Networks ------------------------------------------------', SampleIndex)
-	# 	for IB in [1, 2, 3, 4]:
-	# 		for JG in [0, 1, 2]:
-	# 			for IR in [2, 3, 4]:
-	# 				for JR in [2, 3, 4]:
-	# 					CreateOne(Nx=Nx, Ny=Ny, Folder=Folder, OutOpt=OutOpt, SIN=SampleIndex, IB=IB, SC=SC, JG=JG, IR=IR, JR=JR, AVTP=8)
-	# 					SampleIndex+=1
-	# 					CreateOne(Nx=Nx, Ny=Ny, Folder=Folder, OutOpt=OutOpt, SIN=SampleIndex, IB=IB, SC=SC, JG=JG, IR=IR, JR=JR, AHTP=8)
-	# 					SampleIndex+=1
-	# 					CreateOne(Nx=Nx, Ny=Ny, Folder=Folder, OutOpt=OutOpt, SIN=SampleIndex, IB=IB, SC=SC, JG=JG, IR=IR, JR=JR, AVTP=9, AHTP=9)
-	# 					SampleIndex+=1
-	# 	print('Generated 2.4 Group of Pore-Networks ------------------------------------------------', SampleIndex)
-	# 	for JB in [1, 2, 3, 4]:
-	# 		for IG in [0, 1, 2]:
-	# 			for IR in [2, 3, 4]:
-	# 				for JR in [2, 3, 4]:
-	# 					CreateOne(Nx=Nx, Ny=Ny, Folder=Folder, OutOpt=OutOpt, SIN=SampleIndex, JB=JB, SC=SC, IG=IG, IR=IR, JR=JR, AVTP=8)
-	# 					SampleIndex+=1
-	# 					CreateOne(Nx=Nx, Ny=Ny, Folder=Folder, OutOpt=OutOpt, SIN=SampleIndex, JB=JB, SC=SC, IG=IG, IR=IR, JR=JR, AHTP=8)
-	# 					SampleIndex+=1
-	# 					CreateOne(Nx=Nx, Ny=Ny, Folder=Folder, OutOpt=OutOpt, SIN=SampleIndex, JB=JB, SC=SC, IG=IG, IR=IR, JR=JR, AVTP=9, AHTP=9)
-	# 					SampleIndex+=1
-	# print('Group 2 of Pore-Networks Generated: ', SampleIndex, '---------------------------------')
-	# SampleIndex=6474
-	# print('Generating 3rd Group of Pore-Networks ------------------------------------------------')
-	# for SC in [[45, 35, 25, 15], [65, 75, 85, 95], [15, 25, 65, 75], [95, 85, 45, 35]]:
-	# 	for IS in range(1, Nx-15, 4):
-	# 		IE=IS+16
-	# 		IG=1
-	# 		JG=1
-	# 		for IR in [1, 2, 3, 4]:
-	# 			for JR in [1, 2, 3, 4]:
-	# 				CreateOne(Nx=Nx, Ny=Ny, Folder=Folder, OutOpt=OutOpt, SIN=SampleIndex, IS=IS, IE=IE, SC=SC, IG=IG, JG=JG, IR=IR, JR=JR, AVTP=8)
-	# 				SampleIndex+=1
-	# 				CreateOne(Nx=Nx, Ny=Ny, Folder=Folder, OutOpt=OutOpt, SIN=SampleIndex, IS=IS, IE=IE, SC=SC, IG=IG, JG=JG, IR=IR, JR=JR, AHTP=8)
-	# 				SampleIndex+=1
-	# 				CreateOne(Nx=Nx, Ny=Ny, Folder=Folder, OutOpt=OutOpt, SIN=SampleIndex, IS=IS, IE=IE, SC=SC, IG=IG, JG=JG, IR=IR, JR=JR, AVTP=9, AHTP=9)
-	# 				SampleIndex+=1
-	# 	for JS in range(1, Ny-15, 4):
-	# 		JE=JS+16
-	# 		IG=1
-	# 		JG=1
-	# 		for IR in [1, 2, 3, 4]:
-	# 			for JR in [1, 2, 3, 4]:
-	# 				CreateTwo(Nx=Nx, Ny=Ny, Folder=Folder, OutOpt=OutOpt, SIN=SampleIndex, JS=JS, JE=JE, SC=SC, IG=IG, JG=JG, IR=IR, JR=JR, AVTP=8)
-	# 				SampleIndex+=1
-	# 				CreateTwo(Nx=Nx, Ny=Ny, Folder=Folder, OutOpt=OutOpt, SIN=SampleIndex, JS=JS, JE=JE, SC=SC, IG=IG, JG=JG, IR=IR, JR=JR, AHTP=8)
-	# 				SampleIndex+=1
-	# 				CreateTwo(Nx=Nx, Ny=Ny, Folder=Folder, OutOpt=OutOpt, SIN=SampleIndex, JS=JS, JE=JE, SC=SC, IG=IG, JG=JG, IR=IR, JR=JR, AVTP=9, AHTP=9)
-	# 				SampleIndex+=1
-	# 	for IS in range(1, Nx-15, 4):
-	# 		IE=IS+16
-	# 		for JS in range(1, Ny-15, 4):
-	# 			JE=JS+16
-	# 			for IG in [0, 1, 2, 3]:
-	# 				for IR in [1, 2, 3, 4]:
-	# 					for JR in [1, 2, 3, 4]:
-	# 						CreateTwo(Nx=Nx, Ny=Ny, Folder=Folder, OutOpt=OutOpt, SIN=SampleIndex, IS=IS, IE=IE, JS=JS, JE=JE, SC=SC, IG=IG, IR=IR, JR=JR, AVTP=8)
-	# 						SampleIndex+=1
-	# 						CreateTwo(Nx=Nx, Ny=Ny, Folder=Folder, OutOpt=OutOpt, SIN=SampleIndex, IS=IS, IE=IE, JS=JS, JE=JE, SC=SC, IG=IG, IR=IR, JR=JR, AHTP=8)
-	# 						SampleIndex+=1
-	# 						CreateTwo(Nx=Nx, Ny=Ny, Folder=Folder, OutOpt=OutOpt, SIN=SampleIndex, IS=IS, IE=IE, JS=JS, JE=JE, SC=SC, IG=IG, IR=IR, JR=JR, AVTP=9, AHTP=9)
-	# 						SampleIndex+=1
-	# 	for IS in range(1, Nx-15, 4):
-	# 		IE=IS+16
-	# 		for JS in range(1, Ny-15, 4):
-	# 			JE=JS+16
-	# 			for JG in [0, 1, 2, 3]:
-	# 				for IR in [1, 2, 3, 4]:
-	# 					for JR in [1, 2, 3, 4]:
-	# 						CreateTwo(Nx=Nx, Ny=Ny, Folder=Folder, OutOpt=OutOpt, SIN=SampleIndex, IS=IS, IE=IE, JS=JS, JE=JE, SC=SC, JG=JG, IR=IR, JR=JR, AVTP=8)
-	# 						SampleIndex+=1
-	# 						CreateTwo(Nx=Nx, Ny=Ny, Folder=Folder, OutOpt=OutOpt, SIN=SampleIndex, IS=IS, IE=IE, JS=JS, JE=JE, SC=SC, JG=JG, IR=IR, JR=JR, AHTP=8)
-	# 						SampleIndex+=1
-	# 						CreateTwo(Nx=Nx, Ny=Ny, Folder=Folder, OutOpt=OutOpt, SIN=SampleIndex, IS=IS, IE=IE, JS=JS, JE=JE, SC=SC, JG=JG, IR=IR, JR=JR, AVTP=9, AHTP=9)
-	# 						SampleIndex+=1
-	# 	for B in [1, 2, 3, 4]:
-	# 		IB=B
-	# 		JB=B
-	# 		for RG in [0, 1, 2, 3]:
-	# 			for RR in [1, 2, 3, 4]:
-	# 				CreateOne(Nx=Nx, Ny=Ny, Folder=Folder, OutOpt=OutOpt, SIN=SampleIndex, IB=IB, JB=JB, SC=SC, RG=RG, RR=RR, AVTP=8)
-	# 				SampleIndex+=1
-	# 				CreateOne(Nx=Nx, Ny=Ny, Folder=Folder, OutOpt=OutOpt, SIN=SampleIndex, IB=IB, JB=JB, SC=SC, RG=RG, RR=RR, AHTP=8)
-	# 				SampleIndex+=1
-	# 				CreateOne(Nx=Nx, Ny=Ny, Folder=Folder, OutOpt=OutOpt, SIN=SampleIndex, IB=IB, JB=JB, SC=SC, RG=RG, RR=RR, AVTP=9, AHTP=9)
-	# 				SampleIndex+=1
-	# print('Group 3 of Pore-Networks Generated: ', SampleIndex, '---------------------------------')
-	# SampleIndex=9162
-	# print('Generating 4th Group of Pore-Networks ------------------------------------------------')
-	# for SC in [[55, 65, 45, 35, 75], [55, 25, 85, 95, 15], [65, 55, 45, 35, 25, 15], [45, 55, 65, 75, 85, 95]]:
-	# 	for IS in range(1, Nx-17, 1):
-	# 		IE=IS+18
-	# 		for JS in range(1, Ny-17, 1):
-	# 			JE=JS+18
-	# 			for IG in [0, 1]:
-	# 				for JG in [0, 1]:
-	# 					for IR in [1, 2, 3]:
-	# 						for JR in [1, 2, 3]:
-	# 							CreateTwo(Nx=Nx, Ny=Ny, Folder=Folder, OutOpt=OutOpt, SIN=SampleIndex, IS=IS, IE=IE, JS=JS, JE=JE, SC=SC, IG=IG, JG=JG, IR=IR, JR=JR, AVTP=8)
-	# 							SampleIndex+=1
-	# 							CreateTwo(Nx=Nx, Ny=Ny, Folder=Folder, OutOpt=OutOpt, SIN=SampleIndex, IS=IS, IE=IE, JS=JS, JE=JE, SC=SC, IG=IG, JG=JG, IR=IR, JR=JR, AHTP=8)
-	# 							SampleIndex+=1
-	# 							CreateTwo(Nx=Nx, Ny=Ny, Folder=Folder, OutOpt=OutOpt, SIN=SampleIndex, IS=IS, IE=IE, JS=JS, JE=JE, SC=SC, IG=IG, JG=JG, IR=IR, JR=JR, AVTP=9, AHTP=9)
-	# 							# SampleIndex+=1
-	# print('Group 4 of Pore-Networks Generated: ', SampleIndex, '---------------------------------')
-	# print('Generating 5th Group of Pore-Networks ------------------------------------------------')
-	# # for SC in [[15], [25], [35], [45], [55], [65], [75], [85], [95]]:
-	# for sub1 in [[15], [25], [35], [45], [55], [65], [75], [85], [95]]:
-	# 	for sub2 in [[15], [25], [35], [45], [55], [65], [75], [85], [95]]:
-	# 		for jump in [0, 1, 2, 3, 4]:
-	# 			Create(Nx=Nx, Ny=Ny, Folder=Folder, OutOpt=OutOpt, SIN=RandSampleIndex, FixV=[False], AVTP=10, VIJ=jump, SubV=sub1)
-	# 			RandSampleIndex+=1
-	# 			Create(Nx=Nx, Ny=Ny, Folder=Folder, OutOpt=OutOpt, SIN=RandSampleIndex, FixV=[False], AHTP=10, HJJ=jump, SubH=sub1)
-	# 			RandSampleIndex+=1
-	# 			Create(Nx=Nx, Ny=Ny, Folder=Folder, OutOpt=OutOpt, SIN=RandSampleIndex, FixV=[False], Cross=[False], AVTP=10, SubV=sub1, AHTP=10, HJJ=jump, SubC=sub2)
-	# 			Create(Nx=Nx, Ny=Ny, Folder=Folder, OutOpt=OutOpt, SIN=RandSampleIndex, FixV=[False], Cross=[True ], AVTP=10, SubV=sub1, ACTP=10, CJJ=jump, SubC=sub2, CFlip=2)
-	# 			RandSampleIndex+=1
-	# 			Create(Nx=Nx, Ny=Ny, Folder=Folder, OutOpt=OutOpt, SIN=RandSampleIndex, FixV=[False], Cross=[False], AHTP=10, SubV=sub1, AVTP=10, VJJ=jump, SubC=sub2)
-	# 			Create(Nx=Nx, Ny=Ny, Folder=Folder, OutOpt=OutOpt, SIN=RandSampleIndex, FixV=[False], Cross=[True ], AHTP=10, SubH=sub1, ACTP=10, CIJ=jump, SubC=sub2, CFlip=3)
-	# 			RandSampleIndex+=1
-	# RandBreakPoints.append(RandSampleIndex)
-	# print('Pore-Network Samples Random Group No.', len(RandBreakPoints)-1, ': ', RandBreakPoints[-1], '---------------------')
-	# # FixVBreakPoints.append(FixVSampleIndex)
-	# # print('Pore-Network Samples Fixed  Group No.', len(FixVBreakPoints)-1, ': ', FixVBreakPoints[-1], '---------------------')
-	# 		for IS in range(0, Nx-7, 4):
-	# 			IE=IS+8
-	# 			Create(Nx=Nx, Ny=Ny, Folder=Folder, OutOpt=OutOpt, SIN=SampleIndex, \
-	# 			       AVTP=10, VIS=IS, VIE=IE, SubV=sub, VIG=Pick(List=[-1, 1]), VIR=r)
-	# 			SampleIndex+=1
-	# 			Create(Nx=Nx, Ny=Ny, Folder=Folder, OutOpt=OutOpt, SIN=SampleIndex, \
-	# 			       AVTP=10, VIS=IS, VIE=IE, SubV=sub, VJG=Pick(List=[-1, 1]), VJR=r)
-	# 			SampleIndex+=1
-	# 			Create(Nx=Nx, Ny=Ny, Folder=Folder, OutOpt=OutOpt, SIN=SampleIndex, \
-	# 			       AHTP=10, HIS=IS, HIE=IE, SubH=sub, HIG=Pick(List=[-1, 1]), HIR=r)
-	# 			SampleIndex+=1
-	# 			Create(Nx=Nx, Ny=Ny, Folder=Folder, OutOpt=OutOpt, SIN=SampleIndex, \
-	# 			       AHTP=10, HIS=IS, HIE=IE, SubH=sub, HJG=Pick(List=[-1, 1]), HJR=r)
-	# 			SampleIndex+=1
-	# 			Create(Nx=Nx, Ny=Ny, Folder=Folder, OutOpt=OutOpt, SIN=SampleIndex, \
-	# 			       AVTP=10, VIS=IS, VIE=IE, SubV=sub, VIG=Pick(List=[-1, 1]), VIR=r, \
-	# 			                                          VJG=Pick(List=[-1, 1]), VJR=r, \
-	# 			       AHTP=10, HIS=IS, HIE=IE, SubH=sub, HIG=Pick(List=[-1, 1]), HIR=r, \
-	# 			                                          HJG=Pick(List=[-1, 1]), HJR=r, \
-	# 			       ACTP=10, CIS=IS, CIE=IE, SubC=sub, CIG=Pick(List=[-1, 1, 0]), CIR=r, \
-	# 			                                          CJG=Pick(List=[-1, 1, 0]), CJR=r)
-	# 			SampleIndex+=1
-	# 		for JS in range(0, Ny-7, 4):
-	# 			JE=JS+8
-	# 			Create(Nx=Nx, Ny=Ny, Folder=Folder, OutOpt=OutOpt, SIN=SampleIndex, \
-	# 			       AVTP=10, VJS=IS, VJE=IE, SubV=sub, VIG=Pick(List=[-1, 1]), VIR=r)
-	# 			SampleIndex+=1
-	# 			Create(Nx=Nx, Ny=Ny, Folder=Folder, OutOpt=OutOpt, SIN=SampleIndex, \
-	# 			       AVTP=10, VJS=IS, VJE=IE, SubV=sub, VJG=Pick(List=[-1, 1]), VJR=r)
-	# 			SampleIndex+=1
-	# 			Create(Nx=Nx, Ny=Ny, Folder=Folder, OutOpt=OutOpt, SIN=SampleIndex, \
-	# 			       AHTP=10, HJS=IS, HJE=IE, SubH=sub, HIG=Pick(List=[-1, 1]), HIR=r)
-	# 			SampleIndex+=1
-	# 			Create(Nx=Nx, Ny=Ny, Folder=Folder, OutOpt=OutOpt, SIN=SampleIndex, \
-	# 			       AHTP=10, HJS=IS, HJE=IE, SubH=sub, HJG=Pick(List=[-1, 1]), HJR=r)
-	# 			SampleIndex+=1
-	# 			Create(Nx=Nx, Ny=Ny, Folder=Folder, OutOpt=OutOpt, SIN=SampleIndex, \
-	# 			       AVTP=10, VJS=IS, VJE=IE, SubV=sub, VIG=Pick(List=[-1, 1]), VIR=r, \
-	# 			                                          VJG=Pick(List=[-1, 1]), VJR=r, \
-	# 			       AHTP=10, HJS=IS, HJE=IE, SubH=sub, HIG=Pick(List=[-1, 1]), HIR=r, \
-	# 			                                          HJG=Pick(List=[-1, 1]), HJR=r, \
-	# 			       ACTP=10, CJS=IS, CJE=IE, SubC=sub, CIG=Pick(List=[-1, 1, 0]), CIR=r, \
-	# 			                                          CJG=Pick(List=[-1, 1, 0]), CJR=r)
-	# 			SampleIndex+=1
 #============================ Main Program ========================================================
 # CreatePoreNetworkSamples(Nx= 3, Ny= 3, Folder='/home/xu/work/PoreNetwork0303Samples')
 # CreatePoreNetworkSamples(Nx=10, Ny=10, Folder='/home/xu/work/PoreNetwork1010Samples/')
