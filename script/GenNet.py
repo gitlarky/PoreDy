@@ -305,7 +305,7 @@ class PoreNetwork(object):
 					for I in range(self.CTRange[0][0], self.CTRange[0][1], 1):
 						Dia[J*2  ][I*2  ]=DToGray[self.CT[J][I]]
 
-			plt.imshow(Dia, cmap="gray", vmin=min(DToGray.values()), vmax=max(DToGray.values()))
+			plt.imshow(np.rot90(Dia, Pick(List=[0, 1, 2, 3])), cmap="gray", vmin=min(DToGray.values()), vmax=max(DToGray.values()))
 			if Disp: plt.show()
 			plt.savefig(Folder+self.Name+'.png')
 
@@ -586,7 +586,7 @@ def Create(Nx=20, Ny=20, Folder='', SIN=0, OutOpt=['Dump', 'Write'], \
 					for stnd in STAND:
 						PN.AssignBox(TP='VT', Start=stnd[0], End=stnd[1], Band=[VIB, VJB], Jump=[VIJ, VJJ], \
 						             Sub=SubV, Grad=[VIG, VJG, VRG], Repeat=[VIR, VJR, VRR])
-						print('\t', stnd[0], stnd[1], [VIB, VJB], SubV, [VIG, VJG, VRG], [VIR, VJR, VRR])
+						print('\t', stnd[0], stnd[1], [VIB, VJB], [VIJ, VJJ], SubV, [VIG, VJG, VRG], [VIR, VJR, VRR])
 				if Pick(List=[0, 1, 2, 3, 4, 5, 6, 7, 8, 9])<AHTP:
 					STAND=[[[HIS, HJS], [HIE, HJE]]]
 					if SplitRangeH:
@@ -594,7 +594,7 @@ def Create(Nx=20, Ny=20, Folder='', SIN=0, OutOpt=['Dump', 'Write'], \
 					for stnd in STAND:
 						PN.AssignBox(TP='HT', Start=stnd[0], End=stnd[1], Band=[HIB, HJB], Jump=[HIJ, HJJ], \
 						             Sub=SubH, Grad=[HIG, HJG, HRG], Repeat=[HIR, HJR, HRR])
-						print('\t', stnd[0], stnd[1], [HIB, HJB], SubH, [HIG, HJG, HRG], [HIR, HJR, HRR])
+						print('\t', stnd[0], stnd[1], [HIB, HJB], [HIJ, HJJ], SubH, [HIG, HJG, HRG], [HIR, HJR, HRR])
 				if cross and Pick(List=[0, 1, 2, 3, 4, 5, 6, 7, 8, 9])<ACTP:
 					STAND=[[[CIS, CJS], [CIE, CJE]]]
 					if SplitRangeC:
@@ -603,7 +603,7 @@ def Create(Nx=20, Ny=20, Folder='', SIN=0, OutOpt=['Dump', 'Write'], \
 						PN.AssignBox(TP='CT', Start=stnd[0], End=stnd[1], Band=[CIB, CJB], Jump=[CIJ, CJJ], \
 						             Sub=SubC, Grad=[CIG, CJG, CRG], Repeat=[CIR, CJR, CRR], \
 						             Flip=CFlip)
-						print('\t', stnd[0], stnd[1], [CIB, CJB], SubC, [CIG, CJG, CRG], [CIR, CJR, CRR])
+						print('\t', stnd[0], stnd[1], [CIB, CJB], [CIJ, CJJ], SubC, [CIG, CJG, CRG], [CIR, CJR, CRR])
 				PN.RandomRest()
 				PN.Output(Folder+prefix+'/', Option=OutOpt)
 				PN.Check()
@@ -777,9 +777,9 @@ def CreatePoreNetworkSamples(Nx=20, Ny=20, Folder='', OutOpt=[]):
 
 	for sub in [[45, 35, 25, 15], [65, 75, 85, 95], [15, 25, 65, 75], [95, 85, 45, 35], [55, 65, 45, 35, 75], [55, 25, 85, 95, 15], [65, 55, 45, 35, 25, 15], [45, 55, 65, 75, 85, 95]]:
 		for r in [1, 2, 3, 4]:
-			for IS in range(1, Nx-11, 2):
+			for IS in range(1, Nx-10, 2):
 				IE=IS+10
-				for JS in range(1, Ny-11, 2):
+				for JS in range(1, Ny-10, 2):
 					JE=JS+10
 					
 					Create(Nx=Nx, Ny=Ny, Folder=Folder, OutOpt=OutOpt, SIN=SampleIndex, \
