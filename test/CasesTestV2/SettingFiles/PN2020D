@@ -7,6 +7,6 @@ Point:  0       -0.0005
 Point:  0.0105  -0.0005
 Point:  0        0.0105
 Point:  0.0105   0.0105
-Block:  3  2  0  1  porousmedia  Wall 0 0                  PorousOpen                Wall 0 0                  PorousOpen                 singlePorosity 20 20 1 1     5e-4 0     5 5e-6 1e-12     1     0 1
+Block:  3  2  0  1  porousmedia  Wall 0 0                  PorousOpen                Wall 0 0                  PorousOpen                 assignPorosity 20 20 1 1     5e-4 0     5 5e-6 1e-12     1     0 1
 Block:  1  0  4  5  flowfield    ConstConcentration 0.4796 PorousOpen                ConstConcentration 0.4796 ConstConcentration 0.4796  3 1  1 1 1 1
 Block:  7  6  2  3  flowfield    ConstConcentration 0.4796 ConstConcentration 0.4796 ConstConcentration 0.4796 PorousOpen                 3 1  1 1 1 1
