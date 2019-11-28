@@ -179,7 +179,7 @@ for subdir in SubDirs:
 
 	for i in range(CasesCount):
 		jobname=Name(FolderName+'_', i)
-		cmd='cp '+SettingMatch+' '+jobname
+		cmd='cp -f'+SettingMatch+' '+jobname
 		subprocess.call(cmd, shell=True) # Pay Attention
 		print('executed ', cmd)
 
@@ -188,7 +188,7 @@ for subdir in SubDirs:
 		Runs.append(int(job.pid)+1)
 		print('executing ', cmd, ' Job ID: ', int(job.pid)+1)
 		print(Runs)
-		time.sleep(1)
+		# time.sleep(1)
 
 		while len(Runs)>=TotalThread:
 			for run in Runs:
