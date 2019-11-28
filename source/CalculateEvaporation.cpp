@@ -1021,10 +1021,10 @@ bool frequentOutput(const size_t & sc) {
 	stringstream iss("");
 	iss<<sc;
 	string siss(iss.str());
-	string   osa(caseName+".A"+siss+".vtk"); string   ose(caseName+".E"+siss+".vtk");// string   oss(caseName+".S"+siss);
-	ofstream ofa(osa.c_str())              ; ofstream ofe(ose.c_str())              ;// ofstream ofs(oss.c_str())       ;
-	plotAllField(ofa)                      ; plotExtField(ofe)                      ;// plotSaturation(ofs)             ;
-	ofa.close()                            ; ofe.close()                            ;// ofs.close()                     ;
+	string   osa(caseName+".A"+siss+".vtk"); //string   ose(caseName+".E"+siss+".vtk");// string   oss(caseName+".S"+siss);
+	ofstream ofa(osa.c_str())              ; //ofstream ofe(ose.c_str())              ;// ofstream ofs(oss.c_str())       ;
+	plotAllField(ofa)                      ; //plotExtField(ofe)                      ;// plotSaturation(ofs)             ;
+	ofa.close()                            ; //ofe.close()                            ;// ofs.close()                     ;
 
 	return true;
 }
