@@ -177,11 +177,11 @@ for subdir in SubDirs:
 	for i in range(CasesCount):
 		jobname=Name(FolderName+'_', i)
 		cmd='cp '+SettingMatch+' '+jobname
-		subprocess.call(cmd, shell=True)
+		subprocess.call(cmd, shell=True) # Pay Attention
 		print('executed ', cmd)
 
 		cmd='./PoreDy '+jobname+' 1001 &'
-		job=subprocess.Popen(cmd, shell=True)
+		job=subprocess.Popen(cmd, shell=True) # Pay Attention
 		Runs.append(int(job.pid)+1)
 		print('executing ', cmd, ' Job ID: ', int(job.pid)+1)
 		print(Runs)
@@ -195,16 +195,16 @@ for subdir in SubDirs:
 			time.sleep(CheckInterval)
 
 	cmd='mv '+subdir+'/*.at '+subdir+'/AT'
-	subprocess.call(cmd, shell=True)
+	subprocess.call(cmd, shell=True) # Pay Attention
 	print('executed ', cmd)
 	cmd='mv '+subdir+'/*.eh '+subdir+'/EH'
-	subprocess.call(cmd, shell=True)
+	subprocess.call(cmd, shell=True) # Pay Attention
 	print('executed ', cmd)
 	cmd='mv '+subdir+'/*.vtk '+subdir+'/VTK'
-	subprocess.call(cmd, shell=True)
+	subprocess.call(cmd, shell=True) # Pay Attention
 	print('executed ', cmd)
 	cmd='mv '+subdir+'/*.log '+subdir+'/Log'
-	subprocess.call(cmd, shell=True)
+	subprocess.call(cmd, shell=True) # Pay Attention
 	print('executed ', cmd)
 
 # 	if 
