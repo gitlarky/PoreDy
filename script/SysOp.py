@@ -179,7 +179,7 @@ for subdir in SubDirs:
 
 	for i in range(CasesCount):
 		jobname=Name(FolderName+'_', i)
-		cmd='cp -f'+SettingMatch+' '+jobname
+		cmd='cp -f '+SettingMatch+' '+jobname
 		subprocess.call(cmd, shell=True) # Pay Attention
 		print('executed ', cmd)
 
