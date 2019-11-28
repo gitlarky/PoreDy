@@ -31,16 +31,22 @@ std::vector<  fCell_c> F;
 
 size_t UVsize(0), CPsize(0), ExtPtSize(0), NetworkPtSize(0);
 
+bitset<4> toBits(const string & str);
 /*====================================================================================================
  *
  *                                        main Program
  *
   ====================================================================================================*/
 // int main(char* argc[], bitset<4> argv) {
-int main() {
+int main(int argc, char* argv[]) {
 	cout<<scientific<<setprecision(3)<<setw(10);
 	cout<<"Please enter the name of the case: "<<endl;
-	cin>>caseName;
+	if (argc>1) {
+		caseName=argv[1];
+		cout<<caseName<<endl;
+	} else {
+		cin>>caseName;
+	}
 	string logName(caseName+".log");
 	oflg.open(logName.c_str());
 	oflg<<scientific<<setprecision(3)<<setw(10);
@@ -57,7 +63,12 @@ int main() {
 	cout<<"3rd Digit: 1: Calculate Evaporation; 0: Do Nothing     "<<endl;
 
 	cout<<endl<<"Please choose from the above options (Default=1111): "<<endl;
-	cin>>stage;
+	if (argc>2) {
+		stage=toBits(argv[2]);
+		cout<<stage[3]<<stage[2]<<stage[1]<<stage[0]<<endl;
+	} else {
+		cin>>stage;
+	}
 
 	for(size_t i=0; i<stage.size(); ++i) {
 		cout<<"stage["<<i<<"]="<<stage[i]<<endl;
@@ -115,3 +126,6 @@ bool readCase() {
 	return true;
 }
 
+bitset<4> toBits(const string & str) {
+    return bitset<4>(str);
+}
