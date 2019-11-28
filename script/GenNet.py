@@ -611,8 +611,8 @@ def Create(Nx=20, Ny=20, Folder='', SIN=0, OutOpt=['Dump', 'Write'], \
 				# ---------------------------------------------------------------------------------
 	return True
 # =================================================================================================
-def CreatePoreNetworkSamples(Nx=20, Ny=20, Folder='', OutOpt=['Dump', 'Write', 'Gray']):
-# def CreatePoreNetworkSamples(Nx=20, Ny=20, Folder='', OutOpt=['Dump', 'Write']):
+# def CreatePoreNetworkSamples(Nx=20, Ny=20, Folder='', OutOpt=['Dump', 'Write', 'Gray']):
+def CreatePoreNetworkSamples(Nx=20, Ny=20, Folder='', OutOpt=['Dump', 'Write']):
 # def CreatePoreNetworkSamples(Nx=20, Ny=20, Folder='', OutOpt=['Gray']):
 # def CreatePoreNetworkSamples(Nx=20, Ny=20, Folder='', OutOpt=[]):
 	print('Prepare the folders ------------------------------------------------------------------')
