@@ -203,9 +203,9 @@ for subdir in SubDirs:
 	cmd='mv '+subdir+'/*.eh '+subdir+'/EH'
 	subprocess.call(cmd, shell=True) # Pay Attention
 	print('executed ', cmd)
-	cmd='mv '+subdir+'/*.vtk '+subdir+'/VTK'
-	subprocess.call(cmd, shell=True) # Pay Attention
-	print('executed ', cmd)
+	# cmd='mv '+subdir+'/*.vtk '+subdir+'/VTK'
+	# subprocess.call(cmd, shell=True) # Pay Attention
+	# print('executed ', cmd)
 	cmd='mv '+subdir+'/*.log '+subdir+'/Log'
 	subprocess.call(cmd, shell=True) # Pay Attention
 	print('executed ', cmd)
