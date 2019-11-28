@@ -132,8 +132,8 @@ def GotFreeRAM():
 #==================================================================================================
 
 #============================ Main Program ========================================================
-TotalThread=44
-CheckInterval=5
+TotalThread=42
+CheckInterval=3
 FixVCount=10424
 RandCount=11396
 # -------------------------------------------------------------------------------------------------
@@ -144,6 +144,9 @@ print(SubDirs)
 
 Runs=[]
 for subdir in SubDirs:
+	print(subdir)
+	os.chdir(subdir)
+
 	FolderName  =Segment(subdir, '/')[-1]
 	SettingMatch=Segment(FolderName, '_')[0]
 	NetSummary  =Segment(FolderName, '_')[1]
@@ -185,7 +188,7 @@ for subdir in SubDirs:
 		Runs.append(int(job.pid)+1)
 		print('executing ', cmd, ' Job ID: ', int(job.pid)+1)
 		print(Runs)
-		time.sleep(3)
+		time.sleep(1)
 
 		while len(Runs)>=TotalThread:
 			for run in Runs:
