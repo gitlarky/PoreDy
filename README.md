@@ -37,7 +37,6 @@ PoreDy is written in C++ and Python with OOP technology, which make it easier to
 
 #### Release 2.0 (Dec 31th, 2019)
 - [ ] Release downloadable published
-- [ ] 
 
 #### Release 1.8 (Dec 15th, 2019)
 - [ ] The feature of deep learning designing added
