@@ -183,7 +183,7 @@ for subdir in SubDirs:
 		subprocess.call(cmd, shell=True) # Pay Attention
 		print('executed ', cmd)
 
-		cmd='./PoreDy '+jobname+' 1001 &'
+		cmd='./PoreDy '+jobname+' 1001'
 		job=subprocess.Popen(cmd, shell=True) # Pay Attention
 		Runs.append(int(job.pid)+1)
 		print('executing ', cmd, ' Job ID: ', int(job.pid)+1)
