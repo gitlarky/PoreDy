@@ -36,15 +36,15 @@ ThroatChoice={0:{1:Throat(1e-6,0), 2:Throat(2e-6,0), 3:Throat(3e-6,0), 4:Throat(
 TT=[15, 25, 35, 45, 55, 65, 75, 85, 95] # --------------------------------------------- Throat Type
 # DToGray={0:0,  1e-6: 25,  2e-6: 50,  3e-6: 75,  4e-6:100,  5e-6:125,  6e-6:150,  7e-6:175,  8e-6:200,  9e-6:225, \
 #               -1e-6: 20, -2e-6: 45, -3e-6: 70, -4e-6: 95, -5e-6:120, -6e-6:125, -7e-6:170, -8e-6:195, -9e-6:220, 255:255}
-# DToGray={0:0,  15: 25,  25: 50,  35: 75,  45:100,  55:125,  65:150,  75:175,  85:200,  95:225, \
-#               -15: 20, -25: 45, -35: 70, -45: 95, -55:120, -65:145, -75:170, -85:195, -95:220, 255:255}
-DToGray={0:255,  15:225,  25:200,  35:175,  45:150,  55:125,  65:100,  75: 75,  85: 50,  95: 25, \
-                -15:220, -25:195, -35:170, -45:145, -55:120, -65: 95, -75: 70, -85: 45, -95: 20, 255:0}
+DToGray={0:0,  15: 25,  25: 50,  35: 75,  45:100,  55:125,  65:150,  75:175,  85:200,  95:225, \
+              -15: 20, -25: 45, -35: 70, -45: 95, -55:120, -65:145, -75:170, -85:195, -95:220, 255:255}
+# DToGray={0:255,  15:225,  25:200,  35:175,  45:150,  55:125,  65:100,  75: 75,  85: 50,  95: 25, \
+#                 -15:220, -25:195, -35:170, -45:145, -55:120, -65: 95, -75: 70, -85: 45, -95: 20, 255:0}
 
 
 TToRGB ={}
 MyDPI=144
-OpenMap ={'S':['S'], 'D':['S', 'N'], 'C':['E', 'N'], 'T':['E', 'N', 'W'], 'Q':['E', 'N', 'W', 'S']}
+OpenMap ={'S':['S'], 'D':['S', 'N'], 'C':['W', 'S'], 'T':['E', 'N', 'W'], 'Q':['E', 'N', 'W', 'S']}
 CrossMap={False:'S', True:'C'}
 FixVMap ={False:'R', True:'F'}
 #============================ Basic Functions =====================================================
@@ -204,20 +204,21 @@ class PoreNetwork(object):
 		self.VTRange  =[[0, self.Nx+1], [1, self.Ny+1]]
 		self.HTRange  =[[1, self.Nx+1], [0, self.Ny+1]]
 		self.CTRange  =[[1, self.Nx+1], [1, self.Ny+1]] if self.Cross else [[0, 0], [0, 0]]
-		self.StrTCount=self.Ny*(self.Nx+1)+self.Nx*(self.Ny+1)
-		self.CrsTCount=self.Nx*self.Ny if self.Cross else 0
 		if 'W' in self.Open:
-			self.VTRange[0][0] =1
-			self.StrTCount    -=self.Ny
+			self.VTRange[0][0]=1
+			self.CTRange[0][0]=2 if self.Cross else 0
 		if 'E' in self.Open:
-			self.VTRange[0][1] =self.Nx
-			self.StrTCount    -=self.Ny
+			self.VTRange[0][1]=self.Nx
+			self.CTRange[0][1]=self.Nx if self.Cross else 0
 		if 'S' in self.Open:
-			self.HTRange[1][0] =1
-			self.StrTCount    -=self.Nx
+			self.HTRange[1][0]=1
+			self.CTRange[1][0]=2 if self.Cross else 0
 		if 'N' in self.Open:
-			self.HTRange[1][1] =self.Ny
-			self.StrTCount    -=self.Nx
+			self.HTRange[1][1]=self.Ny
+			self.CTRange[1][1]=self.Ny if self.Cross else 0				
+		self.StrTCount=(self.VTRange[0][1]-self.VTRange[0][0])*(self.VTRange[1][1]-self.VTRange[1][0])+\
+		               (self.HTRange[0][1]-self.HTRange[0][0])*(self.HTRange[1][1]-self.HTRange[1][0])
+		self.CrsTCount=(self.CTRange[0][1]-self.CTRange[0][0])*(self.CTRange[1][1]-self.CTRange[1][0])
 		self.TotTCount=self.StrTCount+self.CrsTCount
 
 		STN=[self.StrTCount for i in range(len(StrTType))]
@@ -264,46 +265,45 @@ class PoreNetwork(object):
 			for J in range(self.CTRange[1][0], self.CTRange[1][1], 1):
 				for I in range(self.CTRange[0][0], self.CTRange[0][1], 1):
 					Matrix[J*2-1][I*2-1]=self.CT[J][I]
-				with open(Folder+self.Name+'.at', 'w') as wat:
-					for j in range(My-1, -1, -1):
-						for i in range(Mx):
-							if Matrix[j][i]==0:
-								wat.write('% 9.6e\t% 9d\t' % (0, 0))
-							else:
-								throattype=Matrix[j][i]
-								flip=throattype/abs(throattype)
-								row =abs(throattype)%10
-								col =abs(throattype)//10
-								wat.write('% 9.6e\t% 9d\t' % (ThroatChoice[row][col].D*flip, ThroatChoice[row][col].S))
-						wat.write('\n')
+			with open(Folder+self.Name+'.at', 'w') as wat:
+				for j in range(My-1, -1, -1):
+					for i in range(Mx):
+						if Matrix[j][i]==0:
+							wat.write('% 9.6e\t% 9d\t' % (0, 0))
+						else:
+							throattype=Matrix[j][i]
+							flip=throattype/abs(throattype)
+							row =abs(throattype)%10
+							col =abs(throattype)//10
+							wat.write('% 9.6e\t% 9d\t' % (ThroatChoice[row][col].D*flip, ThroatChoice[row][col].S))
+					wat.write('\n')
 
 		if 'Gray' in Option:
 			Dia=np.zeros((2*self.Nx+3, 2*self.Ny+3), dtype=int)
 			if 'E' in self.Open:
 				for j in range(1, 2*self.Ny+2, 1):
-					Dia[j][2*self.Nx+2]=255
+					Dia[j][2*self.Nx+2]=DToGray[255]
 			if 'W' in self.Open:
 				for j in range(1, 2*self.Ny+2, 1):
-					Dia[j][0          ]=255
+					Dia[j][0          ]=DToGray[255]
 			if 'N' in self.Open:
 				for i in range(1, 2*self.Nx+2, 1):
-					Dia[2*self.Ny+2][i]=255
+					Dia[2*self.Ny+2][i]=DToGray[255]
 			if 'S' in self.Open:
 				for i in range(1, 2*self.Nx+2, 1):
-					Dia[0          ][i]=255
+					Dia[0          ][i]=DToGray[255]
 			for J in range(self.Ny+1):
 				for I in range(self.Nx+1):
-					Dia[2*J+1][2*I+1]=255
+					Dia[2*J+1 ][2*I+1 ]=DToGray[255]
 			for J in range(self.VTRange[1][0], self.VTRange[1][1], 1):
 				for I in range(self.VTRange[0][0], self.VTRange[0][1], 1):
 					Dia[J*2  ][I*2+1]=DToGray[self.VT[J][I]]
 			for J in range(self.HTRange[1][0], self.HTRange[1][1], 1):
 				for I in range(self.HTRange[0][0], self.HTRange[0][1], 1):
 					Dia[J*2+1][I*2  ]=DToGray[self.HT[J][I]]
-			if self.Cross:
-				for J in range(self.CTRange[1][0], self.CTRange[1][1], 1):
-					for I in range(self.CTRange[0][0], self.CTRange[0][1], 1):
-						Dia[J*2  ][I*2  ]=DToGray[self.CT[J][I]]
+			for J in range(1, self.Ny+1, 1):
+				for I in range(1, self.Nx+1, 1):
+					Dia[J*2  ][I*2  ]=DToGray[self.CT[J][I]]
 
 			plt.imshow(np.rot90(Dia, Pick(List=[0, 1, 2, 3])), cmap="gray", vmin=min(DToGray.values()), vmax=max(DToGray.values()))
 			if Disp: plt.show()
@@ -573,7 +573,7 @@ def Create(Nx=20, Ny=20, Folder='', SIN=0, OutOpt=['Dump', 'Write'], \
 		for cross in Cross:
 			for fixv in FixV:
 				# ---------------------------------------------------------------------------------
-				prefix='PN_'+CrossMap[cross]+FixVMap[fixv]+openkey
+				prefix='PN'+str(Nx)+str(Ny)+openkey+'_'+CrossMap[cross]+FixVMap[fixv]
 				name  =Name(Prefix=prefix+'_', Index=SIN)
 				print('Creating ', name, ':')
 				PN=PoreNetwork(Name=name, \
@@ -611,16 +611,17 @@ def Create(Nx=20, Ny=20, Folder='', SIN=0, OutOpt=['Dump', 'Write'], \
 				# ---------------------------------------------------------------------------------
 	return True
 # =================================================================================================
+def CreatePoreNetworkSamples(Nx=20, Ny=20, Folder='', OutOpt=['Dump', 'Write', 'Gray']):
 # def CreatePoreNetworkSamples(Nx=20, Ny=20, Folder='', OutOpt=['Dump', 'Write']):
 # def CreatePoreNetworkSamples(Nx=20, Ny=20, Folder='', OutOpt=['Gray']):
-def CreatePoreNetworkSamples(Nx=20, Ny=20, Folder='', OutOpt=[]):
+# def CreatePoreNetworkSamples(Nx=20, Ny=20, Folder='', OutOpt=[]):
 	print('Prepare the folders ------------------------------------------------------------------')
 	cmd='mkdir '+Folder
 	subprocess.call(cmd, shell=True)
 	for openkey, openvalue in OpenMap.items():
 		for cross in CrossMap.keys():
 			for fixv in FixVMap.keys():
-				cmd='mkdir '+Folder+'PN_'+CrossMap[cross]+FixVMap[fixv]+openkey+'/'
+				cmd='mkdir '+Folder+'PN'+str(Nx)+str(Ny)+openkey+'_'+CrossMap[cross]+FixVMap[fixv]+'/'
 				subprocess.call(cmd, shell=True)
 
 	print('Initialize Sample Index --------------------------------------------------------------')
@@ -864,7 +865,7 @@ def CreatePoreNetworkSamples(Nx=20, Ny=20, Folder='', OutOpt=[]):
 			print('Pore-Network Samples Fixed  Group No.5: ', FixVBreakPoints[-1], '---------------------') #648
 
 #============================ Main Program ========================================================
-# CreatePoreNetworkSamples(Nx= 3, Ny= 3, Folder='/home/xu/work/PoreNetwork0303Samples')
+# CreatePoreNetworkSamples(Nx= 4, Ny= 4, Folder='/home/xu/work/PoreNetwork44Samples/')
 # CreatePoreNetworkSamples(Nx=10, Ny=10, Folder='/home/xu/work/PoreNetwork1010Samples/')
 CreatePoreNetworkSamples(Nx=20, Ny=20, Folder='/home/xu/work/PoreNetwork2020Samples/')
 # CreatePoreNetworkSamples(Nx=40, Ny=40, Folder='/home/xu/work/PoreNetwork4040Samples/')
