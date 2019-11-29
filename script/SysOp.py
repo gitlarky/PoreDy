@@ -210,6 +210,8 @@ for subdir in SubDirs:
 	subprocess.call(cmd, shell=True) # Pay Attention
 	print('executed ', cmd)
 
+	time.sleep(100)
+
 # 	if 
 # 	os.chdir(Test)
 # 	print('Got in ', Test)
