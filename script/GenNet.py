@@ -881,7 +881,7 @@ def CreatePoreNetworkSamples(Nx=20, Ny=20, Folder='', SelectGen=10, OutOpt=['Dum
 
 CreatePoreNetworkSamples(Nx=10, Ny=10, Folder='/home/xu/work/PoreNetwork1010Samples/', SelectGen=2)
 CreatePoreNetworkSamples(Nx=40, Ny=40, Folder='/home/xu/work/PoreNetwork4040Samples/', SelectGen=2)
-CreatePoreNetworkSamples(Nx=10, Ny=40, Folder='/home/xu/work/PoreNetwork4040Samples/', SelectGen=2)
-CreatePoreNetworkSamples(Nx=40, Ny=10, Folder='/home/xu/work/PoreNetwork4040Samples/', SelectGen=2)
+CreatePoreNetworkSamples(Nx=10, Ny=40, Folder='/home/xu/work/PoreNetwork1040Samples/', SelectGen=2)
+CreatePoreNetworkSamples(Nx=40, Ny=10, Folder='/home/xu/work/PoreNetwork4010Samples/', SelectGen=2)
 
 # NewNet=pickle.load(open('RandStrNet.net', 'rb'))
