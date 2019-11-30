@@ -189,7 +189,7 @@ for subdir in SubDirs:
 		print('executing ', cmd, ' Job ID: ', int(job.pid)+1)
 		print(Runs)
 		if (i+1)%TotalThread==0:
-			time.sleep(5)
+			time.sleep(10)
 
 		while len(Runs)>=TotalThread:
 			for run in Runs:
