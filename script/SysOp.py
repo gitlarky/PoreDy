@@ -134,19 +134,33 @@ def GotFreeRAM():
 #============================ Main Program ========================================================
 TotalThread=42
 CheckInterval=1
-FixVCount=10424
-RandCount=11396
+
 # -------------------------------------------------------------------------------------------------
-WorkDir='/home/xu/work/PoreNetwork2020Samples'
+# WorkDir='/home/xu/work/PoreNetwork2020Samples'
+# FixVCount=10424
+# RandCount=11396
+# WorkDir='/home/xu/work/PoreNetwork1010Samples'
+# FixVCount=1138
+# RandCount=1462
+WorkDir='/home/xu/work/PoreNetwork4040Samples'
+FixVCount=1243
+RandCount=1266
+# WorkDir='/home/xu/work/PoreNetwork1040Samples'
+# FixVCount=1117
+# RandCount=1225
+# WorkDir='/home/xu/work/PoreNetwork4010Samples'
+# FixVCount=1117
+# RandCount=1225
+
+
+
+
 os.chdir(WorkDir)
 SubDirs=DirectSub(WorkDir)
 print(SubDirs)
 
 Runs=[]
 for subdir in SubDirs:
-	print(subdir)
-	os.chdir(subdir)
-
 	FolderName  =Segment(subdir, '/')[-1]
 	SettingMatch=Segment(FolderName, '_')[0]
 	NetSummary  =Segment(FolderName, '_')[1]
@@ -176,8 +190,10 @@ for subdir in SubDirs:
 	# subprocess.call(cmd, shell=True)
 	print('executed ', cmd)
 
-
+	print(subdir)
+	os.chdir(subdir)
 	for i in range(CasesCount):
+	# for i in range(9936,CasesCount, 1):
 		jobname=Name(FolderName+'_', i)
 		cmd='cp -f '+SettingMatch+' '+jobname
 		subprocess.call(cmd, shell=True) # Pay Attention
@@ -188,8 +204,8 @@ for subdir in SubDirs:
 		Runs.append(int(job.pid)+1)
 		print('executing ', cmd, ' Job ID: ', int(job.pid)+1)
 		print(Runs)
-		if (i+1)%TotalThread==0:
-			time.sleep(10)
+		# if (i+1)%TotalThread==0:
+		# 	time.sleep(1)
 
 		while len(Runs)>=TotalThread:
 			for run in Runs:
@@ -198,21 +214,27 @@ for subdir in SubDirs:
 					Runs.remove(run)
 			time.sleep(CheckInterval)
 	
-	time.sleep(100)
-	# cmd='mv '+subdir+'/*.at '+subdir+'/AT'
-	# subprocess.call(cmd, shell=True) # Pay Attention
-	# print('executed ', cmd)
-	# cmd='mv '+subdir+'/*.eh '+subdir+'/EH'
-	# subprocess.call(cmd, shell=True) # Pay Attention
-	# print('executed ', cmd)
-	# cmd='mv '+subdir+'/*.vtk '+subdir+'/VTK'
-	# subprocess.call(cmd, shell=True) # Pay Attention
-	# print('executed ', cmd)
-	# cmd='mv '+subdir+'/*.log '+subdir+'/Log'
-	# subprocess.call(cmd, shell=True) # Pay Attention
-	# print('executed ', cmd)
-
-
+	time.sleep(10)
+	cmd='mv '+subdir+'/*.at '+subdir+'/AT'
+	subprocess.call(cmd, shell=True) # Pay Attention
+	print('executed ', cmd)
+	# time.sleep(20)
+	cmd='mv '+subdir+'/*.eh '+subdir+'/EH'
+	subprocess.call(cmd, shell=True) # Pay Attention
+	print('executed ', cmd)
+	# time.sleep(20)
+	cmd='mv '+subdir+'/*.vtk '+subdir+'/VTK'
+	subprocess.call(cmd, shell=True) # Pay Attention
+	print('executed ', cmd)
+	# time.sleep(20)
+	cmd='mv '+subdir+'/*.log '+subdir+'/Log'
+	subprocess.call(cmd, shell=True) # Pay Attention
+	print('executed ', cmd)
+	# time.sleep(10)
+	cmd='rm '+subdir+'/*.cd'
+	subprocess.call(cmd, shell=True) # Pay Attention
+	print('executed ', cmd)
+	time.sleep(10)
 
 # 	if 
 # 	os.chdir(Test)
