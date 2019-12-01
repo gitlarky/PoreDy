@@ -204,8 +204,8 @@ for subdir in SubDirs:
 		Runs.append(int(job.pid)+1)
 		print('executing ', cmd, ' Job ID: ', int(job.pid)+1)
 		print(Runs)
-		# if (i+1)%TotalThread==0:
-		# 	time.sleep(1)
+		if (i+1)%TotalThread==0:
+			time.sleep(1)
 
 		while len(Runs)>=TotalThread:
 			for run in Runs:
@@ -214,27 +214,27 @@ for subdir in SubDirs:
 					Runs.remove(run)
 			time.sleep(CheckInterval)
 	
-	time.sleep(10)
-	cmd='mv '+subdir+'/*.at '+subdir+'/AT'
-	subprocess.call(cmd, shell=True) # Pay Attention
-	print('executed ', cmd)
-	# time.sleep(20)
-	cmd='mv '+subdir+'/*.eh '+subdir+'/EH'
-	subprocess.call(cmd, shell=True) # Pay Attention
-	print('executed ', cmd)
-	# time.sleep(20)
-	cmd='mv '+subdir+'/*.vtk '+subdir+'/VTK'
-	subprocess.call(cmd, shell=True) # Pay Attention
-	print('executed ', cmd)
-	# time.sleep(20)
-	cmd='mv '+subdir+'/*.log '+subdir+'/Log'
-	subprocess.call(cmd, shell=True) # Pay Attention
-	print('executed ', cmd)
-	# time.sleep(10)
+	time.sleep(5)
 	cmd='rm '+subdir+'/*.cd'
 	subprocess.call(cmd, shell=True) # Pay Attention
 	print('executed ', cmd)
-	time.sleep(10)
+	time.sleep(5)
+	cmd='mv '+subdir+'/*.at '+subdir+'/AT'
+	subprocess.call(cmd, shell=True) # Pay Attention
+	print('executed ', cmd)
+	time.sleep(5)
+	cmd='mv '+subdir+'/*.eh '+subdir+'/EH'
+	subprocess.call(cmd, shell=True) # Pay Attention
+	print('executed ', cmd)
+	time.sleep(5)
+	cmd='mv '+subdir+'/*.vtk '+subdir+'/VTK'
+	subprocess.call(cmd, shell=True) # Pay Attention
+	print('executed ', cmd)
+	time.sleep(5)
+	cmd='mv '+subdir+'/*.log '+subdir+'/Log'
+	subprocess.call(cmd, shell=True) # Pay Attention
+	print('executed ', cmd)
+	time.sleep(5)
 
 # 	if 
 # 	os.chdir(Test)
