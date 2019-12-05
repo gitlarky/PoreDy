@@ -192,8 +192,8 @@ for subdir in SubDirs:
 
 	print(subdir)
 	os.chdir(subdir)
-	for i in range(CasesCount):
-	# for i in range(9936,CasesCount, 1):
+	# for i in range(CasesCount):
+	for i in range(211,CasesCount, 1):
 		jobname=Name(FolderName+'_', i)
 		cmd='cp -f '+SettingMatch+' '+jobname
 		subprocess.call(cmd, shell=True) # Pay Attention
@@ -214,7 +214,7 @@ for subdir in SubDirs:
 					Runs.remove(run)
 			time.sleep(CheckInterval)
 	
-	time.sleep(5)
+	time.sleep(600)
 	cmd='rm '+subdir+'/*.cd'
 	subprocess.call(cmd, shell=True) # Pay Attention
 	print('executed ', cmd)
