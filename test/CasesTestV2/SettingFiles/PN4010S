@@ -1,9 +1,0 @@
-Physics: isothermalEvaporation     1 0     Air 0.02897 1.204 1.813e-5     Water 0.01802 998.2 1.002e-3 2.119e-5 0 7.266e-2 0.9592     0 5e-6     0.01 0 0 0.4796      SIMPLE Hybrid Implicit NonOperatorSplitting Hybrid Implicit 1 1500 1e-3 1e-4 1e-4     3     2000 420    0 0 0     1 3 0
-Point:  0        0
-Point:  0.0205   0
-Point:  0        0.005
-Point:  0.0205   0.005
-Point:  0       -0.0005
-Point:  0.0205  -0.0005
-Block:  3  2  0  1  porousmedia  Wall 0 0                  Wall 0 0                  Wall 0 0                  PorousOpen                 assignPorosity 40 10 1 1     5e-4 0     5 5e-6 1e-10     1     0 1
-Block:  1  0  4  5  flowfield    ConstConcentration 0.4796 PorousOpen                ConstConcentration 0.4796 ConstConcentration 0.4796  3 1  1 1 1 1
